@@ -185,7 +185,7 @@ public class PlayerCam_MLab : MonoBehaviour
         
         Cursor.visible = false;
         
-        SwitchToCamType(camType);
+        
         
         PlayerInput playerInput = GetComponent<PlayerInput>();
         
@@ -212,6 +212,8 @@ public class PlayerCam_MLab : MonoBehaviour
         moveAction = playerInput.actions.FindAction(moveActionName);
         lookAction = playerInput.actions.FindAction(lookActionName);
         
+        
+        SwitchToCamType(camType);
     }
     
     public void OnControlSchemeChanged(PlayerInput playerInput)
