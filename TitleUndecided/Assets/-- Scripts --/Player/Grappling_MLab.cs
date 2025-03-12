@@ -722,8 +722,6 @@ public class Grappling_MLab: MonoBehaviour
     
     private void TrackObject(int grappleIndex)
     {
-        return;
-        
         //implement canceling of grapple if object is destroyed later //TODO: THIS
         if (grappleObjects[grappleIndex] == null) return;
         
