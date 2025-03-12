@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 public class SceneEventManager : MonoBehaviour
 {
@@ -22,51 +24,50 @@ public class SceneEventManager : MonoBehaviour
         }
     }
     
-    public bool EventExists(string eventName)
+    public void CallEvent(SceneEventSO otherSceneEventSO)
     {
-        
-        
-        return Array.Exists(sceneEvents, sceneEvent => sceneEvent.Name == eventName);
-    }
-    
-    public void CallEvent(SceneEvent sceneEvent)
-    {
-        GameStateSO gameStateSO = GameStateManager.Instance.GameStateSO;
-        
-        if (gameStateSO == null)
+        if (otherSceneEventSO == null)
         {
-            Debug.LogError("GameStateSO is not assigned in the inspector of GameStateManager!");
+            Debug.LogError("SceneEventSO passed is null!");
             
             return;
         }
-        
-        EGameState[] availableStates = sceneEvent.AvailableStates;
-        
-        if (availableStates.Length == 0)
+
+        if (GameStateManager.Instance == null)
         {
-            Debug.LogError("No available states for SceneEvent!" + sceneEvent.Name);
+            Debug.LogError("GameStateManager doesn't exist!");
             
             return;
         }
-        
-        if (!Array.Exists(availableStates, state => state == gameStateSO.GameState))
+
+        if (GameStateManager.Instance.GameStateSO == null)
         {
-            Debug.LogError("SceneEvent " + sceneEvent.Name +" cannot be called in the current game state!");
+            Debug.LogError("GameStateSO is not assigned in the GameStateManager!");
             
             return;
         }
-        
-        sceneEvent.OnCalled.Invoke();
+
+        //checking our SceneEvents to see if it has the SceneEvent with corresponding SceneEventSO
+        foreach (var sceneEvent in sceneEvents)
+        {
+            //if our scene exists and is the same as the SceneEventSO we are looking for
+            if (sceneEvent.SceneEventSO != null && sceneEvent.SceneEventSO == otherSceneEventSO)
+            {
+                //if the current game state is part of acceptable states for the SceneEventSO
+                if (sceneEvent.SceneEventSO.AvailableStates.Contains(GameStateManager.Instance.GameStateSO.GameState))
+                {
+                    sceneEvent.OnCalled.Invoke();
+                    
+                    return;
+                }
+            }
+        }
     }
 }
 
 [Serializable]
 public class SceneEvent
 {
-    [field: SerializeField] public String Name { get; private set; }
-    
-    [Tooltip("Game states in which the event can be called.")]
-    [field: SerializeField] public EGameState[] AvailableStates {get; private set;}
-    
+    [field: SerializeField] public SceneEventSO SceneEventSO {get; private set;}
     [field: SerializeField] public UnityEvent OnCalled {get; private set;}
 }
