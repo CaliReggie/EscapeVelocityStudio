@@ -1,7 +1,10 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SceneLoadInfoSO", menuName = "ScriptableObjects/SceneLoadInfoSO")]
-public class SceneLoadInfoSO : ScriptableObject
+/// <summary>
+/// Container for information about what scene to load, and relevant information about the game state to load with.
+/// </summary>
+[CreateAssetMenu(fileName = "GameStateSceneInfo", menuName = "ScriptableObjects/GameStateSceneInfo")]
+public class GameStateSceneInfo : ScriptableObject
 {
     [Tooltip("The name of the scene that this info loads. Ensure the scene is included in the build settings.")]
     [field: SerializeField] public string SceneName { get; private set; }

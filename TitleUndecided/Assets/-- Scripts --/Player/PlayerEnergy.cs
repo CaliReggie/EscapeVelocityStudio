@@ -40,9 +40,9 @@ public class PlayerEnergy : MonoBehaviour
     
     //Energy
     
-    private float potentialEnergy;
+    private float potentialEnergy = 0;
     
-    private float kineticEnergy;
+    private float kineticEnergy = 0;
     
     //State
     
@@ -145,7 +145,7 @@ public class PlayerEnergy : MonoBehaviour
         if (!KineticGainBlocked)
         {
             //logic for kinetic energy
-            if (currentSpeed > kineticSpeedLossThreshold)
+            if (currentSpeed >= kineticSpeedLossThreshold)
             {
                 if (isGainingSpeed)
                 {
