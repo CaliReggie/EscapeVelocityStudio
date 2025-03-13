@@ -54,7 +54,7 @@ public class PlayerAttacks : MonoBehaviour
     //References
     private PlayerEnergy playerEnergy;
 
-    private PlayerMovement_MLab pm;
+    private PlayerMovement pm;
     
     //State
     private float timePotentialEnergyAttackReady;
@@ -69,7 +69,7 @@ public class PlayerAttacks : MonoBehaviour
     {
         playerEnergy = GetComponent<PlayerEnergy>();
         
-        pm = GetComponent<PlayerMovement_MLab>();
+        pm = GetComponent<PlayerMovement>();
         
         PlayerInput playerInput = GetComponent<PlayerInput>();
         

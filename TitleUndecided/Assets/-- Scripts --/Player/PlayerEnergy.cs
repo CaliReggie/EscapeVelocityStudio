@@ -34,7 +34,7 @@ public class PlayerEnergy : MonoBehaviour
     
     //References
 
-    private PlayerMovement_MLab pm;
+    private PlayerMovement pm;
     
     private Rigidbody playerRb;
     
@@ -56,7 +56,7 @@ public class PlayerEnergy : MonoBehaviour
     
     private void Start()
     {
-        pm = GetComponent<PlayerMovement_MLab>();
+        pm = GetComponent<PlayerMovement>();
         
         playerRb = GetComponent<Rigidbody>();
         

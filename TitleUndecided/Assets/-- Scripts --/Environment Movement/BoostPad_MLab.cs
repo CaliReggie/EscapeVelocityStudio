@@ -25,7 +25,7 @@ public class BoostPad_MLab : MonoBehaviour
 
     public float boostDuration = 1f;
 
-    private PlayerMovement_MLab pm = null;
+    private PlayerMovement pm = null;
 
     /// this function is called if your boost pad has a collider set to "trigger" 
     /// and an object (for example the player) moves inside this trigger
@@ -44,10 +44,10 @@ public class BoostPad_MLab : MonoBehaviour
     private void AddForce(Collider other)
     {
         // first check if the other object is the player
-        if (other.GetComponentInParent<PlayerMovement_MLab>() != null)
+        if (other.GetComponentInParent<PlayerMovement>() != null)
         {
             // get a reference to the PlayerMovement script
-            pm = other.GetComponentInParent<PlayerMovement_MLab>();
+            pm = other.GetComponentInParent<PlayerMovement>();
 
             // this causes the PlayerMovement script to enter MovementMode.unlimited -> speed will no longer be limited
             pm.unlimitedSpeed = true;
