@@ -50,6 +50,8 @@ public class PlayerMovement : MonoBehaviour
     // this is an empty gameObject inside the player, it is rotated by the camera
     // -> keeps track of where the player is looking -> orientation.forward is the direction you're looking in
     public Transform orientation;
+    
+    public Transform playerObj; // the player object
 
     [Header("Camera References")]
 
@@ -95,8 +97,10 @@ public class PlayerMovement : MonoBehaviour
     public float jumpCooldown = 0.25f;
     
     [Header("Crouch Behaviour")]
-
-    public float crouchYScale = 0.5f; // how tall your player is while crouching (0.5f -> half as tall as normal)
+    
+    public float crouchColliderHeight = 1f;
+    
+    public float crouchColliderCenterY = -0.5f;
     
     [Header("Air Jumping")]
     
@@ -156,14 +160,17 @@ public class PlayerMovement : MonoBehaviour
     
     //References
     private Rigidbody rb; // the players rigidbody
+    private CapsuleCollider playerCollider;
     
     private PlayerCam playerCamScript;
     private WallRunning wr;
     
     private MomentumExtension momentumExtension;
     private bool momentumExtensionEnabled;
+
+    private float startCollHeight;
     
-    private float startYScale;
+    private float startCollCenterY;
     
     //Detection
     RaycastHit slopeHit; // variable needed for slopeCheck
@@ -228,6 +235,7 @@ public class PlayerMovement : MonoBehaviour
         playerCamScript = GetComponent<PlayerCam>();
         wr = GetComponent<WallRunning>();
         rb = GetComponent<Rigidbody>();
+        playerCollider = GetComponent<CapsuleCollider>();
 
         // freeze all rotation on the rigidbody, otherwise the player falls over
         /// (like you would expect from a capsule with round surface)
@@ -236,8 +244,10 @@ public class PlayerMovement : MonoBehaviour
         // if maxYSpeed is set to -1, the y speed of the player will be unlimited
         /// I only limit it while climbing or wallrunning
         maxYSpeed = -1;
-
-        startYScale = transform.localScale.y;
+        
+        startCollHeight = playerCollider.height;
+        
+        startCollCenterY = playerCollider.center.y;
 
         readyToJump = true;
 
@@ -543,8 +553,10 @@ public class PlayerMovement : MonoBehaviour
         if (!IsStateAllowed(MovementMode.crouching))
             return;
 
-        // shrink the player down
-        transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+        //change collider size
+        playerCollider.height = crouchColliderHeight;
+        
+        playerCollider.center = new Vector3(playerCollider.center.x, crouchColliderCenterY, playerCollider.center.z);
 
         // after shrinking, you'll be a bit in the air, so add downward force to hit the ground again
         /// you don't really notice this while playing
@@ -556,8 +568,10 @@ public class PlayerMovement : MonoBehaviour
     /// called when crouchKey is released
     private void StopCrouch()
     {
-        // make sure your players size is the same as before
-        transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
+        //reverse collider size
+        playerCollider.height = startCollHeight;
+        
+        playerCollider.center = new Vector3(playerCollider.center.x, startCollCenterY, playerCollider.center.z);
 
         crouching = false;
     }

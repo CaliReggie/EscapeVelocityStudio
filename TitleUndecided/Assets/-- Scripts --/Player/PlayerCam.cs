@@ -19,17 +19,17 @@ public class PlayerCamEditor : Editor
 
         if (GUILayout.Button("Switch First Person"))
         {
-            myScript.SwitchToCamType(eCamType.FirstPerson);
+            myScript.SwitchCamType(ECamType.FirstPerson);
         }
 
         if (GUILayout.Button("Switch Third Orbit"))
         {
-            myScript.SwitchToCamType(eCamType.ThirdOrbit);
+            myScript.SwitchCamType(ECamType.ThirdOrbit);
         }
 
         if (GUILayout.Button("Switch Third Fixed"))
         {
-            myScript.SwitchToCamType(eCamType.ThirdFixed);
+            myScript.SwitchCamType(ECamType.ThirdFixed);
         }
         
         DrawDefaultInspector();
@@ -38,7 +38,7 @@ public class PlayerCamEditor : Editor
 
 #endif
 
-public enum eCamType
+public enum ECamType
 {
     FirstPerson,
     ThirdOrbit,
@@ -67,11 +67,11 @@ public class PlayerCam : MonoBehaviour
     
     public Transform orientation;
     
+    public Transform camOrientation;
+    
     public Transform player;
     
     public Transform playerObj;
-    
-    public Transform thirdPersonFixedCamOrientation;
     
     public Transform grappleRig;
     
@@ -87,7 +87,7 @@ public class PlayerCam : MonoBehaviour
     
     [Header("General Cam Settings")]
     
-    public eCamType camType = eCamType.FirstPerson;
+    public ECamType camType = ECamType.FirstPerson;
     
     public LayerMask firstPersonRenderMask = -1;
     
@@ -123,6 +123,8 @@ public class PlayerCam : MonoBehaviour
     public float baseTilt = 0f;
     
     //Dynamic, Non Serialized Below
+
+    public event Action<ECamType> OnSwitchCamType;
     
     //References
     private CinemachineThirdPersonFollow thirdPersonFixedCamFollow;
@@ -170,8 +172,6 @@ public class PlayerCam : MonoBehaviour
         
         Cursor.visible = false;
         
-        
-        
         PlayerInput playerInput = GetComponent<PlayerInput>();
         
         //set the control scheme
@@ -196,29 +196,23 @@ public class PlayerCam : MonoBehaviour
         
         moveAction = playerInput.actions.FindAction(moveActionName);
         lookAction = playerInput.actions.FindAction(lookActionName);
-        
-        
-        SwitchToCamType(camType);
     }
     
-    public void OnControlSchemeChanged(PlayerInput playerInput)
-    {
-        controlScheme = playerInput.currentControlScheme == gamepadControlSchemeName ? 
-            EControlScheme.Gamepad : EControlScheme.KeyboardAndMouse;
-    }
-
     private void Start()
     {
         // get the components
         rb = GetComponent<Rigidbody>();
-
-        // lock the mouse cursor in the middle of the screen
-        Cursor.lockState = CursorLockMode.Locked;
-        // make the mouse coursor invisible
-        Cursor.visible = false;
         
         // get the third person fixed cam follow component
         thirdPersonFixedCamFollow = thirdPersonFixedCam.GetComponent<CinemachineThirdPersonFollow>();
+
+        SwitchCamType(camType);
+    }
+    
+    private void OnControlSchemeChanged(PlayerInput playerInput)
+    {
+        controlScheme = playerInput.currentControlScheme == gamepadControlSchemeName ? 
+            EControlScheme.Gamepad : EControlScheme.KeyboardAndMouse;
     }
     
      private void OnEnable()
@@ -253,7 +247,7 @@ public class PlayerCam : MonoBehaviour
         moveInput = moveAction.ReadValue<Vector2>();
     }
     
-    public void SwitchToCamType(eCamType toCamType)
+    internal void SwitchCamType(ECamType toCamType)
     {
         firstPersonCinCam.gameObject.SetActive( false);
         thirdPersonOrbitCinCam.gameObject.SetActive( false);
@@ -261,21 +255,21 @@ public class PlayerCam : MonoBehaviour
 
         switch (toCamType)
         {
-            case eCamType.FirstPerson:
+            case ECamType.FirstPerson:
                 
-                camType = eCamType.FirstPerson;
+                camType = ECamType.FirstPerson;
                 
                 realCam.cullingMask = firstPersonRenderMask;
                 
-                firstPersonCinCam.transform.position = player.position;
+                firstPersonCinCam.transform.position = camOrientation.position;
                 
                 firstPersonCinCam.gameObject.SetActive( true);
                 
                 break;
             
-            case eCamType.ThirdOrbit:
+            case ECamType.ThirdOrbit:
                 
-                camType = eCamType.ThirdOrbit;
+                camType = ECamType.ThirdOrbit;
                 
                 realCam.cullingMask = thirdPersonRenderMask;
                 
@@ -283,9 +277,9 @@ public class PlayerCam : MonoBehaviour
                 
                 break;
             
-            case eCamType.ThirdFixed:
+            case ECamType.ThirdFixed:
                 
-                camType = eCamType.ThirdFixed;
+                camType = ECamType.ThirdFixed;
                 
                 realCam.cullingMask = thirdPersonRenderMask;
                 
@@ -293,20 +287,21 @@ public class PlayerCam : MonoBehaviour
                 
                 break;
         }
+        
+        OnSwitchCamType?.Invoke(camType);
     }
 
-    public void ManageCamera()
+    private void ManageCamera()
     {
         
         switch (camType)
         {
-            case eCamType.FirstPerson:
+            case ECamType.FirstPerson:
                 
+                //get look input and modify based on control scheme
                 float firstLookSpeedMult = controlScheme == EControlScheme.Gamepad ?
                 gamepadFirstPersonLookSpeedMult : keyAndMouseFirstPersonLookSpeedMult;
                 
-                
-                //set rotation
                 firstPersonYRot += lookInput.x * firstLookSpeedMult;
                 
                 firstPersonXRot = controlScheme == EControlScheme.Gamepad ?
@@ -316,38 +311,43 @@ public class PlayerCam : MonoBehaviour
                 // make sure that you can't look up or down more than 90* degrees
                 firstPersonXRot = Mathf.Clamp(firstPersonXRot, -89f, 89f);
                 
-                firstPersonCinCam.transform.position = player.position;
-                
-                firstPersonCinCam.transform.rotation = Quaternion.Euler(firstPersonXRot, firstPersonYRot, 0);
-                
-                //rotate player object and orientation along the y axis
-                playerObj.rotation = Quaternion.Euler(0, firstPersonYRot, 0);
+                //rotate player object and orientation along only the y axis
                 orientation.rotation = Quaternion.Euler(0, firstPersonYRot, 0);
+                playerObj.rotation = Quaternion.Euler(0, firstPersonYRot, 0);
+                
+                
+                //rotate cam orientation fully
+                camOrientation.rotation = Quaternion.Euler(firstPersonXRot, firstPersonYRot, 0);
+                
+                //apply position and rotation to the CinCamera
+                firstPersonCinCam.transform.rotation = camOrientation.rotation;
+                firstPersonCinCam.transform.position = camOrientation.position; // camOrientation is childed to player
                 
                 break;
             
-            case eCamType.ThirdOrbit:
-                Vector3 orbitViewDir = player.position - new Vector3(thirdPersonOrbitCinCam.transform.position.x,
-                    player.position.y, thirdPersonOrbitCinCam.transform.position.z);
+            case ECamType.ThirdOrbit:
                 
-                orbitViewDir.y = 0;
-
-                orientation.forward = orbitViewDir.normalized;
-
-                Vector3 orbitInputDir = orientation.forward * moveInput.y + orientation.right * moveInput.x;
+                //rotate cam orientation fully to direction from cam to player
+                camOrientation.rotation = Quaternion.LookRotation(player.position - new Vector3(thirdPersonOrbitCinCam.transform.position.x,
+                    realCam.transform.position.y, thirdPersonOrbitCinCam.transform.position.z));
                 
-                orbitInputDir = new Vector3(orbitInputDir.x, 0, orbitInputDir.z).normalized;
+                //rotate player orientation along only the y axis of cam orientation
+                orientation.rotation = Quaternion.Euler(0, camOrientation.rotation.eulerAngles.y, 0);
 
-                if (orbitInputDir != Vector3.zero)
+                //use relative input direction to rotate player object relative to player orientation
+                Vector3 relativeInputDir = orientation.forward * moveInput.y + orientation.right * moveInput.x;
+                
+                if (relativeInputDir != Vector3.zero)
                 {
-                    playerObj.forward = Vector3.Slerp(playerObj.forward, orbitInputDir, Time.deltaTime *
+                    playerObj.forward = Vector3.Slerp(playerObj.forward, relativeInputDir, Time.deltaTime *
                         playerRotSpeed);
                 }
                 
                 break;
             
-            case eCamType.ThirdFixed:
+            case ECamType.ThirdFixed:
                 
+                //similar to first person, just not managing the camera position or rotation
                 float thirdLookSpeedMult = controlScheme == EControlScheme.Gamepad ?
                     gamepadThirdPersonFixedLookSpeedMult : keyAndMouseThirdPersonFixedLookSpeedMult;
                 
@@ -359,28 +359,27 @@ public class PlayerCam : MonoBehaviour
                 
                 thirdFixedXRot = Mathf.Clamp(thirdFixedXRot, -89, 89);
                 
-                thirdPersonFixedCamOrientation.transform.rotation = Quaternion.Euler(thirdFixedXRot, thirdFixedYRot, 0);
-                
-                playerObj.rotation = Quaternion.Euler(0, thirdFixedYRot, 0);
+                camOrientation.transform.rotation = Quaternion.Euler(thirdFixedXRot, thirdFixedYRot, 0);
                 
                 orientation.rotation = Quaternion.Euler(0, thirdFixedYRot, 0);
+                playerObj.rotation = Quaternion.Euler(0, thirdFixedYRot, 0);
                 
                 break;
                 
         }
     }
     
-    public void ManageGrappleGear()
+    private void ManageGrappleGear()
     {
         switch(camType)
         {
-            case eCamType.FirstPerson:
+            case ECamType.FirstPerson:
                 
                 grappleRig.rotation = Quaternion.Euler(firstPersonXRot, firstPersonYRot, 0);
                 
                 break;
             
-            case eCamType.ThirdOrbit:
+            case ECamType.ThirdOrbit:
                 
                 Vector3 orbitViewDir = player.position - thirdPersonOrbitCinCam.transform.position;
                 
@@ -388,7 +387,7 @@ public class PlayerCam : MonoBehaviour
                 
                 break;
             
-            case eCamType.ThirdFixed:
+            case ECamType.ThirdFixed:
                 
                 grappleRig.rotation = Quaternion.Euler(thirdFixedXRot, thirdFixedYRot, 0);
                 
@@ -429,13 +428,13 @@ public class PlayerCam : MonoBehaviour
         //Can simply get cam and set fov to fov
         switch (camType)
         {
-            case eCamType.FirstPerson:
+            case ECamType.FirstPerson:
                 firstPersonCinCam.Lens.FieldOfView = fov;
                 break;
-            case eCamType.ThirdOrbit:
+            case ECamType.ThirdOrbit:
                 thirdPersonOrbitCinCam.Lens.FieldOfView = fov;
                 break;
-            case eCamType.ThirdFixed:
+            case ECamType.ThirdFixed:
                 thirdPersonFixedCam.Lens.FieldOfView = fov;
                 break;
         }
@@ -447,13 +446,13 @@ public class PlayerCam : MonoBehaviour
         
         switch (camType)
         {
-            case eCamType.FirstPerson:
+            case ECamType.FirstPerson:
                 cam = firstPersonCinCam;
                 break;
-            case eCamType.ThirdOrbit:
+            case ECamType.ThirdOrbit:
                 cam = thirdPersonOrbitCinCam;
                 break;
-            case eCamType.ThirdFixed:
+            case ECamType.ThirdFixed:
                 cam = thirdPersonFixedCam;
                 break;
             default:
@@ -497,13 +496,13 @@ public class PlayerCam : MonoBehaviour
 
         switch (camType)
         {
-            case eCamType.FirstPerson:
+            case ECamType.FirstPerson:
                 firstPersonCinCam.Lens.Dutch = tilt;
                 break;
-            case eCamType.ThirdOrbit:
+            case ECamType.ThirdOrbit:
                 thirdPersonOrbitCinCam.Lens.Dutch = tilt;
                 break;
-            case eCamType.ThirdFixed:
+            case ECamType.ThirdFixed:
                 
                 thirdPersonFixedCam.Lens.Dutch = tilt;
                 
@@ -524,13 +523,13 @@ public class PlayerCam : MonoBehaviour
         
         switch (camType)
         {
-            case eCamType.FirstPerson:
+            case ECamType.FirstPerson:
                 cam = firstPersonCinCam;
                 break;
-            case eCamType.ThirdOrbit:
+            case ECamType.ThirdOrbit:
                 cam = thirdPersonOrbitCinCam;
                 break;
-            case eCamType.ThirdFixed:
+            case ECamType.ThirdFixed:
                 
                 cam = thirdPersonFixedCam;
                 
@@ -559,7 +558,7 @@ public class PlayerCam : MonoBehaviour
         {
             cam.Lens.Dutch += tiltIncrement * Time.deltaTime;
             
-            if (camType == eCamType.ThirdFixed)
+            if (camType == ECamType.ThirdFixed)
             {
                 thirdPersonFixedCamFollow.CameraSide += sideIncrement * Time.deltaTime;
             }

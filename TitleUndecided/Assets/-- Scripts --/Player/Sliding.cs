@@ -43,17 +43,26 @@ public class Sliding : MonoBehaviour
     
     public float nonDynamicSlideForce = 200f;
     
+    [FormerlySerializedAs("crouchColliderHeight")]
     [Header("Behaviour Settings")]
     
-    public float slideYScale = 0.5f; // how tall the playerObj is while sliding
+    public float slideColliderHeight = 1f;
+    
+    [FormerlySerializedAs("playerColliderCenterY")]
+    [FormerlySerializedAs("crouchColliderCenterY")]
+    public float slideColliderCenterY = -0.5f;
     
     public bool reverseCoyoteTime = true; //held in air triggers when grounded
      
     private Vector3 startInputDirection;
     //Dynamic, Non-Serialized Below
     
-    //Player Scale
-    private float startYScale;
+    //Player Collider
+    private CapsuleCollider playerCollider;
+    
+    private float startCollHeight;
+    
+    private float startCollCenterY;
     
     //Timing
     private float slideTimer;
@@ -76,9 +85,12 @@ public class Sliding : MonoBehaviour
         // get references
         rb = GetComponent<Rigidbody>();
         pm = GetComponent<PlayerMovement>();
-
-        // save the normal scale of the player
-        startYScale = transform.localScale.y;
+        playerCollider = GetComponent<CapsuleCollider>();
+        
+        //store start collider settings
+        startCollHeight = playerCollider.height;
+        
+        startCollCenterY = playerCollider.center.y;
 
         readyToSlide = true;
         
@@ -155,8 +167,10 @@ public class Sliding : MonoBehaviour
         pm.sliding = true;
         readyToSlide = false;
 
-        // shrink the player down
-        transform.localScale = new Vector3(transform.localScale.x, slideYScale, transform.localScale.z);
+        // change player collider size
+        playerCollider.height = slideColliderHeight;
+        
+        playerCollider.center = new Vector3(playerCollider.center.x, slideColliderCenterY, playerCollider.center.z);
         
         // store the start dynamic force
         dynamicStartForce = rb.linearVelocity.magnitude;
@@ -210,8 +224,10 @@ public class Sliding : MonoBehaviour
     {
         pm.sliding = false;
 
-        // reset the player scale back to normal again
-        transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
+        // reset player collider size
+        playerCollider.height = startCollHeight;
+        
+        playerCollider.center = new Vector3(playerCollider.center.x, startCollCenterY, playerCollider.center.z);
 
         Invoke(nameof(ResetSlide), slideCooldown);
     }
