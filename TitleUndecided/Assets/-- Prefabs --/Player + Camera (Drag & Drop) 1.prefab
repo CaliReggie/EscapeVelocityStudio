@@ -1394,8 +1394,80 @@ MonoBehaviour:
   momentumDecreaseFactorOnGround: 2.5
   momentumDecreaseFactorInAir: 0.5
   <MinimalMomentum>k__BackingField: 3
-  movementStates: []
-  hardcodedMovementStates: []
+  movementStates:
+  - <StateName>k__BackingField: Walking
+    <MovementMode>k__BackingField: 7
+    <SpeedBuildupFactor>k__BackingField: 1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Sprinting
+    <MovementMode>k__BackingField: 6
+    <SpeedBuildupFactor>k__BackingField: 1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Crouching
+    <MovementMode>k__BackingField: 5
+    <SpeedBuildupFactor>k__BackingField: 1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Swinging
+    <MovementMode>k__BackingField: 11
+    <SpeedBuildupFactor>k__BackingField: 1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Sliding
+    <MovementMode>k__BackingField: 4
+    <SpeedBuildupFactor>k__BackingField: 2
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Wallrunning
+    <MovementMode>k__BackingField: 8
+    <SpeedBuildupFactor>k__BackingField: 1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Walljumping
+    <MovementMode>k__BackingField: 9
+    <SpeedBuildupFactor>k__BackingField: 1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Climbing
+    <MovementMode>k__BackingField: 10
+    <SpeedBuildupFactor>k__BackingField: 1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Dashing
+    <MovementMode>k__BackingField: 3
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: 10
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  hardcodedMovementStates:
+  - <StateName>k__BackingField: Unlimited
+    <MovementMode>k__BackingField: 0
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: -1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Limited
+    <MovementMode>k__BackingField: 1
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: 1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Freeze
+    <MovementMode>k__BackingField: 2
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: -1
+    <MinNeededMomentum>k__BackingField: 0
+    <MaxAllowedMomentum>k__BackingField: 100
 --- !u!114 &6203304368605208337
 MonoBehaviour:
   m_ObjectHideFlags: 0
