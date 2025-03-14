@@ -9,10 +9,10 @@ using UnityEngine.Serialization;
 // Dave MovementLab - Sliding
 ///
 // Content:
-/// - sliding ability
+/// - Sliding ability
 /// 
 // Note:
-/// Sliding is basically crouching while moving
+/// Sliding is basically Crouching while moving
 /// Crouching is handled by the PlayerMovement script
 
 
@@ -20,7 +20,7 @@ public class Sliding : MonoBehaviour
 {
     [Header("Player References")]
     
-    public Transform orientation; // orientation object inside the player
+    public Transform orientation; // Orientation object inside the PlayerParent
     private Rigidbody rb;
     private PlayerMovement pm; // script reference to the PlayerMovement script
     
@@ -28,7 +28,7 @@ public class Sliding : MonoBehaviour
     
     public string slideActionName = "Crouch";
     
-    public InputAction slideAction; // the input action for sliding
+    public InputAction slideAction; // the input action for Sliding
 
     [Header("Timings")]
     
@@ -39,7 +39,7 @@ public class Sliding : MonoBehaviour
     
     [Header("Force Settings")]
     
-    public bool useDynamicSlideForce = true; //if true, player momentum on slide equal to that of when pressed
+    public bool useDynamicSlideForce = true; //if true, PlayerParent momentum on slide equal to that of when pressed
     
     public float nonDynamicSlideForce = 200f;
     
@@ -52,7 +52,7 @@ public class Sliding : MonoBehaviour
     [FormerlySerializedAs("crouchColliderCenterY")]
     public float slideColliderCenterY = -0.5f;
     
-    public bool reverseCoyoteTime = true; //held in air triggers when grounded
+    public bool reverseCoyoteTime = true; //held in air triggers when Grounded
      
     private Vector3 startInputDirection;
     //Dynamic, Non-Serialized Below
@@ -120,19 +120,19 @@ public class Sliding : MonoBehaviour
         if (slideAction.triggered && (horizontalInput != 0 || verticalInput != 0))
         {
             if (reverseCoyoteTime) bufferSlide = true;
-            else if (pm.grounded && readyToSlide) bufferSlide = true;
+            else if (pm.Grounded && readyToSlide) bufferSlide = true;
         }
 
-        // if you release the slide key while sliding -> StopSlide
-        if (!slideAction.IsPressed() && pm.sliding)
+        // if you release the slide key while Sliding -> StopSlide
+        if (!slideAction.IsPressed() && pm.Sliding)
         {
             if (reverseCoyoteTime) bufferSlide = false;
 
-            if (pm.sliding) stopSlideAsap = true;
+            if (pm.Sliding) stopSlideAsap = true;
         }
 
         // slide buffering
-        if (bufferSlide && pm.grounded && readyToSlide)
+        if (bufferSlide && pm.Grounded && readyToSlide)
         {
             StartSlide();
             bufferSlide = false;
@@ -145,15 +145,15 @@ public class Sliding : MonoBehaviour
             StopSlide();
         }
 
-        // unsliding if no longer grounded
-        if (pm.sliding && !pm.grounded)
+        // unsliding if no longer Grounded
+        if (pm.Sliding && !pm.Grounded)
             StopSlide();
     }
 
     private void FixedUpdate()
     {
-        // make sure that sliding movement is continuously called while sliding
-        if (pm.sliding) SlidingMovement();
+        // make sure that Sliding movement is continuously called while Sliding
+        if (pm.Sliding) SlidingMovement();
     }
     
     public void StartSlide()
@@ -161,13 +161,13 @@ public class Sliding : MonoBehaviour
         if (!pm.IsStateAllowed(PlayerMovement.MovementMode.sliding))
             return;
 
-        if (!pm.grounded) return;
+        if (!pm.Grounded) return;
 
-        // this causes the player to change to MovementMode.sliding
-        pm.sliding = true;
+        // this causes the PlayerParent to change to MovementMode.Sliding
+        pm.Sliding = true;
         readyToSlide = false;
 
-        // change player collider size
+        // change PlayerParent collider size
         playerCollider.height = slideColliderHeight;
         
         playerCollider.center = new Vector3(playerCollider.center.x, slideColliderCenterY, playerCollider.center.z);
@@ -183,12 +183,12 @@ public class Sliding : MonoBehaviour
         slideTimer = maxSlideTime;
 
         // idk, feels weird but the idea would be ok I guess
-        // startInputDirection = orientation.forward * pm.verticalInput + orientation.right * pm.horizontalInput;
+        // startInputDirection = Orientation.forward * pm.verticalInput + Orientation.right * pm.horizontalInput;
     }
 
     private void SlidingMovement()
     {
-        // calculate the direction of your keyboard input relative to the players orientation (where the player is looking)
+        // calculate the direction of your keyboard input relative to the players Orientation (where the PlayerParent is looking)
         Vector3 inputDirection = Vector3.Normalize(orientation.forward * verticalInput + orientation.right * horizontalInput);
         
         //altering slide force before sending in if desired
@@ -216,15 +216,15 @@ public class Sliding : MonoBehaviour
             rb.AddForce(pm.GetSlopeMoveDirection(inputDirection) * nonDynamicSlideForce, ForceMode.Force);
         }
 
-        // stop sliding again if the timer runs out
+        // stop Sliding again if the timer runs out
         if (slideTimer <= 0) StopSlide();
     }
 
     public void StopSlide()
     {
-        pm.sliding = false;
+        pm.Sliding = false;
 
-        // reset player collider size
+        // reset PlayerParent collider size
         playerCollider.height = startCollHeight;
         
         playerCollider.center = new Vector3(playerCollider.center.x, startCollCenterY, playerCollider.center.z);

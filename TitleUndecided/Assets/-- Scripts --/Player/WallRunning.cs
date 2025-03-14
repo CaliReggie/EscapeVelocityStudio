@@ -10,14 +10,14 @@ using UnityEngine.Serialization;
 // Dave MovementLab - WallRunning
 ///
 // Content:
-/// - wallrunning ability
-/// - walljumping
-/// - climbing ability
+/// - Wallrunning ability
+/// - Walljumping
+/// - Climbing ability
 /// - climb-jumping
 /// - other wallhandling stuff
 /// 
 // Note:
-/// This is probably the longest and most complex script of my player controller,
+/// This is probably the longest and most complex script of my PlayerParent controller,
 /// since it handles all wallmovement including jumping etc.
 /// 
 /// Similar to the PlayerMovement script it has it's own StateMachine for different wall states
@@ -81,20 +81,20 @@ public class WallRunning : MonoBehaviour
     
     [Header("Wall Run Forces")]
     
-    public float wallRunForce = 200f; // forward wallRunForce, Note: maxSpeed while wallrunning is defined in PlayerMovement
+    public float wallRunForce = 200f; // forward wallRunForce, Note: maxSpeed while Wallrunning is defined in PlayerMovement
     public float wallJumpSideForce = 15f; // sidewards force of your wall jump (pushes you away from the wall when jumping)
     
     [Space]
     
     public bool useGravity;
     
-    public float gravityCounterForce = 25f; // the higher the value, the lower the effect of gravity while wallrunning
+    public float gravityCounterForce = 25f; // the higher the value, the lower the effect of gravity while Wallrunning
     
     public float wallJumpUpForce = 10f; // upward force of your wall jump
     
     [Space]
     
-    public float wallrunClimbSpeed = 4f; // how fast you can move on the y axis when wallrunning diagonally
+    public float wallrunClimbSpeed = 4f; // how fast you can move on the y axis when Wallrunning diagonally
     
     [Header("Wall Run Behaviour")]
     
@@ -107,8 +107,8 @@ public class WallRunning : MonoBehaviour
     public bool doJumpOnEndOfTimer; // when active, wall jump happens automatically when timer runs out
     
     [Space]
-    public bool resetJumpsOnNewWall = true; // when active, double jumps get resetted when player hits a new wall
-    public bool resetJumpsOnEveryWall = false; // when active, double jumps get resetted when player hits a wall (always!)
+    public bool resetJumpsOnNewWall = true; // when active, double jumps get resetted when PlayerParent hits a new wall
+    public bool resetJumpsOnEveryWall = false; // when active, double jumps get resetted when PlayerParent hits a wall (always!)
     
     [Space]
     
@@ -121,7 +121,7 @@ public class WallRunning : MonoBehaviour
     
     [Space]
     
-    public float maxClimbYSpeed = 10f; // max upward speed while climbing
+    public float maxClimbYSpeed = 10f; // max upward speed while Climbing
     
     [Space]
     
@@ -159,13 +159,13 @@ public class WallRunning : MonoBehaviour
     
     [Header("Camera Effects")]
     
-    public float wallRunFOV = 110f; // the fov of the camera while wallrunning
-    public float wallRunFOVChangeSpeed = 0.2f; // how fast the fov changes while wallrunning
+    public float wallRunFOV = 110f; // the fov of the camera while Wallrunning
+    public float wallRunFOVChangeSpeed = 0.2f; // how fast the fov changes while Wallrunning
     
     [Space]
     
-    public float wallRunTilt = 5f; // the tilt of the camera while wallrunning
-    public float wallRunTiltChangeSpeed = 0.2f; // how fast the tilt changes while wallrunning
+    public float wallRunTilt = 5f; // the tilt of the camera while Wallrunning
+    public float wallRunTiltChangeSpeed = 0.2f; // how fast the tilt changes while Wallrunning
     
     [Header("State")]
     
@@ -185,7 +185,7 @@ public class WallRunning : MonoBehaviour
     private float wallDistanceFront = 1f;
     private float wallDistanceBack = 1f;
 
-    private float minJumpHeight = 2f; // the minimal height the player needs to have in order to wallRun
+    private float minJumpHeight = 2f; // the minimal height the PlayerParent needs to have in order to wallRun
 
     private float exitWallTime = 0.2f; // just a variable needed to exit walls correctly
     private float exitWallTimer;
@@ -197,17 +197,17 @@ public class WallRunning : MonoBehaviour
     private bool feetCheck;
     
     //IDK if needed, these weren't used in the script - Sid
-    // public float climbForce = 200f; // upward force while climbing
+    // public float climbForce = 200f; // upward force while Climbing
 
     // public float pushToWallForce = 100f; // the force that keeps you on the wall
 
-    // private bool readyToClimb; // is true if player hits a new wall or has sucessfully exited the old one
+    // private bool readyToClimb; // is true if PlayerParent hits a new wall or has sucessfully exited the old one
 
     // public float vaultJumpForwardForce;
     // public float vaultJumpUpForce;
     // public float vaultCooldown;
     
-    // public float customGravity; // apply custom gravity while wallrunning
+    // public float customGravity; // apply custom gravity while Wallrunning
     
     //Player References
     private Rigidbody rb;
@@ -226,13 +226,13 @@ public class WallRunning : MonoBehaviour
     private float wallLookAngle;
     private float frontWallAngle;
     
-    private Transform lastWall; // the transform of the wall the player previously touched
+    private Transform lastWall; // the transform of the wall the PlayerParent previously touched
     private Vector3 lastWallNormal; // the normal of the wall the prlayer previously touched
     
     //State
     private State state; // this variable stores the current State
     
-    //bools that signal state of the player input
+    //bools that signal state of the PlayerParent input
     private bool upwardsRunning;
     private bool downwardsRunning;
     private float horizontalInput;
@@ -307,8 +307,8 @@ public class WallRunning : MonoBehaviour
         StateMachine();
         MyInput();
 
-        // if grounded, next wall should be considered a new one
-        if (pm.grounded && lastWall != null && !pm.climbing)
+        // if Grounded, next wall should be considered a new one
+        if (pm.Grounded && lastWall != null && !pm.Climbing)
             lastWall = null; // by setting the lastWall to null -> next wall will definitely be seen as a new one
 
         // just setting the Ui text, ignore
@@ -318,12 +318,12 @@ public class WallRunning : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // if wallrunning has started continously call WallRunningMovement()
-        if (pm.wallrunning && !exitingWall)
+        // if Wallrunning has started continously call WallRunningMovement()
+        if (pm.Wallrunning && !exitingWall)
             WallRunningMovement();
 
-        // if climbing has started continuously call ClimbingMovment()
-        if (pm.climbing && !exitingWall)
+        // if Climbing has started continuously call ClimbingMovment()
+        if (pm.Climbing && !exitingWall)
             ClimbingMovement();
     }
 
@@ -339,17 +339,17 @@ public class WallRunning : MonoBehaviour
         // upwardsRunning   = upwardsRunAction.IsPressed();
         // downwardsRunning = downwardsRunAction.IsPressed();
 
-        // if you're pressing the jump key while wallrunning, or if there's a wall in front or back of you
-        if (wallJumpAction.triggered && (pm.wallrunning || wallFront || wallBack) && !lg.exitingLedge)
+        // if you're pressing the jump key while Wallrunning, or if there's a wall in front or back of you
+        if (wallJumpAction.triggered && (pm.Wallrunning || wallFront || wallBack) && !lg.exitingLedge)
         {
-            pm.maxYSpeed = -1; // make sure the players Y speed is unlimited
+            pm.MaxYSpeed = -1; // make sure the players Y speed is unlimited
             WallJump(); // perform a wall jump
         }
 
-        // when climbing, then stopping before the climbTimer runs out, then reentering
-        // -> Start climbing again
-        /// Note: This is just for reentering, the main way to start climbing is executed by the StateHandler
-        if (!pm.climbing && verticalInput > 1 && wallFront && climbTimer > 0 && !exitingWall)
+        // when Climbing, then stopping before the climbTimer runs out, then reentering
+        // -> Start Climbing again
+        /// Note: This is just for reentering, the main way to start Climbing is executed by the StateHandler
+        if (!pm.Climbing && verticalInput > 1 && wallFront && climbTimer > 0 && !exitingWall)
             StartClimbing();
     }
 
@@ -366,13 +366,13 @@ public class WallRunning : MonoBehaviour
         wallRight = Physics.Raycast(transform.position - differenceV, orientation.right, out rightWallHit, wallDistanceSide, whatIsWall);
         wallRight2 = Physics.Raycast(transform.position + differenceV, orientation.right, out rightWallHit2, wallDistanceSide, whatIsWall);
 
-        // wallFront = Physics.Raycast(transform.position, orientation.forward, out frontWallHit, wallDistanceFront, whatIsWall);
+        // wallFront = Physics.Raycast(transform.position, Orientation.forward, out frontWallHit, wallDistanceFront, whatIsWall);
         wallFront = Physics.SphereCast(transform.position, 0.25f, orientation.forward, out frontWallHit, wallDistanceFront, whatIsWall);
         wallBack = Physics.Raycast(transform.position, -orientation.forward, out backWallHit, wallDistanceBack, whatIsWall);
 
         wallLookAngle = Vector3.Angle(orientation.forward, -frontWallHit.normal);
 
-        // reset readyToClimb and wallJumps whenever player hits a new wall
+        // reset readyToClimb and wallJumps whenever PlayerParent hits a new wall
         if (wallLeft || wallRight || wallFront || wallBack)
         {
             if (NewWallHit())
@@ -399,12 +399,12 @@ public class WallRunning : MonoBehaviour
 
         frontWallAngle = Vector3.Angle(orientation.up, feetHit.normal); // calculate how steep the wall is
 
-        // feetCheck = Physics.SphereCast(transform.position + new Vector3(0, -0.9f, 0), 0.1f, orientation.forward, out feetHit, vaultDetectionLength, whatIsWall);
+        // feetCheck = Physics.SphereCast(transform.position + new Vector3(0, -0.9f, 0), 0.1f, Orientation.forward, out feetHit, vaultDetectionLength, whatIsWall);
 
         topReached = feetCheck && !midCheck;
     }
 
-    /// a bool called to check if player has hit a new wall
+    /// a bool called to check if PlayerParent has hit a new wall
     private bool NewWallHit()
     {
         // if lastWall is null, next one is definitely a new wall -> return true
@@ -462,7 +462,7 @@ public class WallRunning : MonoBehaviour
     private bool CanWallRun()
     {
         // cast a ray down using the minJumpHeight as distance
-        // if this ray hits something, the player is not high enough in the air to wallrun
+        // if this ray hits something, the PlayerParent is not high enough in the air to wallrun
         return !Physics.Raycast(transform.position, Vector3.down, minJumpHeight, whatIsGround);
     }
 
@@ -475,11 +475,11 @@ public class WallRunning : MonoBehaviour
         if (!pm.IsStateAllowed(PlayerMovement.MovementMode.wallrunning))
             return;
 
-        // this will cause the PlayerMovement script to enter the MovementState.wallrunning
-        pm.wallrunning = true;
+        // this will cause the PlayerMovement script to enter the MovementState.Wallrunning
+        pm.Wallrunning = true;
 
-        // limit the y speed while wallrunning
-        pm.maxYSpeed = maxClimbYSpeed;
+        // limit the y speed while Wallrunning
+        pm.MaxYSpeed = maxClimbYSpeed;
 
         wallRemembered = false;
 
@@ -495,7 +495,7 @@ public class WallRunning : MonoBehaviour
 
     private void WallRunningMovement()
     {
-        // make sure normal gravity is turned off while wallrunning
+        // make sure normal gravity is turned off while Wallrunning
         rb.useGravity = useGravity;
 
         // choose the correct wall normal (direction away from the wall)
@@ -535,17 +535,17 @@ public class WallRunning : MonoBehaviour
         }
     }
 
-    /// called when wallRunTimer runs out, player performs a walljump or player exits the wall on another way
+    /// called when wallRunTimer runs out, PlayerParent performs a walljump or PlayerParent exits the wall on another way
     private void StopWallRun()
     {
         // activate gravity again
         rb.useGravity = true;
 
-        // leave the MovementMove.wallrunning
-        pm.wallrunning = false;
+        // leave the MovementMove.Wallrunning
+        pm.Wallrunning = false;
 
-        // this will make sure that the y speed of the player is unlimited again
-        pm.maxYSpeed = -1;
+        // this will make sure that the y speed of the PlayerParent is unlimited again
+        pm.MaxYSpeed = -1;
 
         // reset camera fov and tilt
         playerCamScript.DoFov(-360, wallRunFOVChangeSpeed);
@@ -561,12 +561,12 @@ public class WallRunning : MonoBehaviour
         if (!pm.IsStateAllowed(PlayerMovement.MovementMode.climbing))
             return;
 
-        // this will cause the PlayerMovement script to enter MovementState.climbing
-        pm.climbing = true;
+        // this will cause the PlayerMovement script to enter MovementState.Climbing
+        pm.Climbing = true;
 
         // limit the players y speed to your maxClimbSpeed, or vaultClimbSpeed
-        // pm.maxYSpeed = topReached ? maxVaultClimbYSpeed : maxClimbYSpeed;
-        // pm.maxYSpeed = maxClimbYSpeed;
+        // pm.MaxYSpeed = topReached ? maxVaultClimbYSpeed : maxClimbYSpeed;
+        // pm.MaxYSpeed = maxClimbYSpeed;
 
         if (topReached) vaultClimbStarted = true;
 
@@ -595,13 +595,13 @@ public class WallRunning : MonoBehaviour
 
         Vector3 upwardsDirection = Vector3.up;
 
-        // calculate the direction from the player to the wall
-        Vector3 againstWallDirection = (frontWallHit.point - orientation.position).normalized;
+        // calculate the direction from the PlayerParent to the wall
+        Vector3 againstWallDirection = (frontWallHit.point - Orientation.position).normalized;
 
         // add upwards force
         rb.AddForce(upwardsDirection * climbForce, ForceMode.Force);
 
-        // push player to wall
+        // push PlayerParent to wall
         // rb.AddForce(againstWallDirection * pushToWallForce, ForceMode.Force);
 
         // remember the last wall
@@ -618,29 +618,29 @@ public class WallRunning : MonoBehaviour
         // activate the gravity again
         rb.useGravity = true;
 
-        // exit MovementMode.climbing
-        pm.climbing = false;
+        // exit MovementMode.Climbing
+        pm.Climbing = false;
 
         // make sure the players y speed is no longer limited
-        pm.maxYSpeed = -1;
+        pm.MaxYSpeed = -1;
 
         // no longer readyToClimb until the wall is sucessfully exited
         // readyToClimb = false;
 
         //CHANGE TODO: THIS
-        // reset realCam shake
+        // reset RealCam shake
         // playerCamScript.ResetShake();
 
         //CHANGE
-        // reset realCam fov and tilt
+        // reset RealCam fov and tilt
         // playerCamScript.ResetFov();
         // playerCamScript.ResetTilt();
 
         vaultClimbStarted = false;
     }
 
-    /// called when the player has sucessfully exited a wall
-    /// makes climbing possible again
+    /// called when the PlayerParent has sucessfully exited a wall
+    /// makes Climbing possible again
     // private void ResetReadyToClimb()
     // {
     //     readyToClimb = true;
@@ -742,7 +742,7 @@ public class WallRunning : MonoBehaviour
             delayedForceToApply = forceToApply;
             Invoke(nameof(DelayedForce), 0.05f);
 
-            pm.walljumping = true;
+            pm.Walljumping = true;
             Invoke(nameof(ResetWallJumpingState), wallJumpDuration);
         }
 
@@ -760,7 +760,7 @@ public class WallRunning : MonoBehaviour
             rb.AddForce(noUpwardForce, ForceMode.Impulse);
         }
 
-        // stop wallRun and climbing immediately
+        // stop wallRun and Climbing immediately
         StopWallRun();
         StopClimbing();
     }
@@ -773,10 +773,10 @@ public class WallRunning : MonoBehaviour
 
     private void ResetWallJumpingState()
     {
-        pm.walljumping = false;
+        pm.Walljumping = false;
     }
 
-    /// called whenever player hits a new wall
+    /// called whenever PlayerParent hits a new wall
     private void ResetWallJumpsDone()
     {
         wallJumpsDone = 0;
@@ -794,21 +794,21 @@ public class WallRunning : MonoBehaviour
         Vector3 midPoint = orientation.position;
 
         float markerSphereRelativeYPos = dt.markerSphere.position.y - midPoint.y;
-        float highestPointOfArc = markerSphereRelativeYPos + pm.maxJumpHeight;
+        float highestPointOfArc = markerSphereRelativeYPos + pm.MaxJumpHeight;
 
-        // no upwards force when point is below player
+        // no upwards force when point is below PlayerParent
         if (markerSphereRelativeYPos < 0) highestPointOfArc = 1;
 
         // print("predicted wall jump " + markerSphereRelativeYPos + " " + highestPointOfArc);
 
         pm.JumpToPosition(dt.markerSphere.position, highestPointOfArc, midPoint);
 
-        // rb.AddForce(PhysicsExtension.CalculateJumpVelocity(lowestPoint, jumpTarget.position, maxJumpHeight), ForceMode.Impulse);
+        // rb.AddForce(PhysicsExtension.CalculateJumpVelocity(lowestPoint, jumpTarget.position, MaxJumpHeight), ForceMode.Impulse);
         /// rb.velocity = PhysicsExtension.CalculateJumpVelocity(midPoint, dt.markerSphere.position, highestPointOfArc);
 
         wallJumpsDone++;
 
-        // stop wallRun and climbing immediately
+        // stop wallRun and Climbing immediately
         StopWallRun();
         StopClimbing();
     }
@@ -837,7 +837,7 @@ public class WallRunning : MonoBehaviour
 
             // everything else in this state gets handled by the LedgeGrabbing script
 
-            if (pm.climbing) StopClimbing();
+            if (pm.Climbing) StopClimbing();
         }
 
         // State 1 - Climbing
@@ -846,21 +846,21 @@ public class WallRunning : MonoBehaviour
         /// also the wall needs to be steep enough
         else if ((wallFront || topReached) && verticalInput > 0 && wallLookAngle < maxWallLookAngle && !exitingWall && frontWallAngle > minFrontWallAngle)
         {
-            // print("climbing...");
+            // print("Climbing...");
 
             state = State.climbing;
 
-            // start climbing if not already started
-            if (!pm.climbing && climbTimer > 0) StartClimbing();
+            // start Climbing if not already started
+            if (!pm.Climbing && climbTimer > 0) StartClimbing();
 
-            // restart climbing if top has been reached (changes climbspeed)
+            // restart Climbing if top has been reached (changes climbspeed)
             if (!vaultClimbStarted && topReached) StartClimbing();
 
             // count down climbTimer
             if (climbTimer > 0) climbTimer -= Time.deltaTime;
 
             // exit wall once the timer runs out
-            if ((climbTimer < 0) && pm.climbing)
+            if ((climbTimer < 0) && pm.Climbing)
             {
                 climbTimer = -1;
 
@@ -880,13 +880,13 @@ public class WallRunning : MonoBehaviour
             state = State.wallrunning;
 
             // startwallrun
-            if (!pm.wallrunning) StartWallRun();
+            if (!pm.Wallrunning) StartWallRun();
 
             // count down the wallRunTimer
             wallRunTimer -= Time.deltaTime;
 
             // what happens when the wallRunTimer runs out
-            if (wallRunTimer < 0 && pm.wallrunning)
+            if (wallRunTimer < 0 && pm.Wallrunning)
             {
                 wallRunTimer = 0;
 
@@ -906,13 +906,13 @@ public class WallRunning : MonoBehaviour
 
         // State 3 - Sliding
         /// Enter state when: wall back + S Input, sidewalls with A/D but no W input,
-        /// or climbing but the climbTimer ran out
+        /// or Climbing but the climbTimer ran out
         else if ((wallBack && verticalInput < 0) || (((leftWall && horizontalInput < 0) || (rightWall && horizontalInput > 0)) && verticalInput <= 0) || (climbing && climbTimer <= 0))
         {
             state = State.sliding;
 
             // bug fix
-            if (pm.wallrunning)
+            if (pm.Wallrunning)
                 StopWallRun();
         }
 
@@ -923,14 +923,14 @@ public class WallRunning : MonoBehaviour
         {
             state = State.exiting;
 
-            // make sure the player can't move for a quick time
-            pm.restricted = true;
+            // make sure the PlayerParent can't move for a quick time
+            pm.Restricted = true;
 
             // exit out of wall run or climb when active
-            if (pm.wallrunning)
+            if (pm.Wallrunning)
                 StopWallRun();
 
-            if (pm.climbing)
+            if (pm.Climbing)
                 StopClimbing();
 
             // handle wall-exiting
@@ -943,7 +943,7 @@ public class WallRunning : MonoBehaviour
                 // set extiWall to false again -> state will now change to Stat.none
                 exitingWall = false;
 
-                // // reset readyToClimb when player has sucessfully exited the wall
+                // // reset readyToClimb when PlayerParent has sucessfully exited the wall
                 // ResetReadyToClimb();
             }
         }
@@ -955,16 +955,16 @@ public class WallRunning : MonoBehaviour
             state = State.none;
 
             // exit out of wall run or climb when active
-            if (pm.wallrunning)
+            if (pm.Wallrunning)
                 StopWallRun();
 
-            if (pm.climbing)
+            if (pm.Climbing)
                 StopClimbing();
         }
 
-        // when no longer exiting the wall, allow normal player movement again
-        if (state != State.exiting && pm.restricted)
-            pm.restricted = false;
+        // when no longer exiting the wall, allow normal PlayerParent movement again
+        if (state != State.exiting && pm.Restricted)
+            pm.Restricted = false;
     }
 
     #endregion

@@ -26873,6 +26873,16 @@ PrefabInstance:
       propertyPath: potentialEnergyAttackPrediction
       value: 
       objectReference: {fileID: 485329725}
+    - target: {fileID: 4978725435959519586, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.0000004
+      objectReference: {fileID: 0}
+    - target: {fileID: 4978725435959519586, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.9580002
+      objectReference: {fileID: 0}
     - target: {fileID: 6203304367237142539, guid: 20dd83c54b1592a4db36441848eafc5d,
         type: 3}
       propertyPath: m_Name
@@ -26953,6 +26963,16 @@ PrefabInstance:
       propertyPath: textMoveState
       value: 
       objectReference: {fileID: 2106461194}
+    - target: {fileID: 6203304368605208344, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: placeholderButton
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6203304368605208345, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: <RealCam>k__BackingField
+      value: 
+      objectReference: {fileID: 6203304366998809347}
     - target: {fileID: 6203304368605208346, guid: 20dd83c54b1592a4db36441848eafc5d,
         type: 3}
       propertyPath: text_wallState
@@ -26978,11 +26998,22 @@ PrefabInstance:
       propertyPath: textPredictionState
       value: 
       objectReference: {fileID: 1976438054}
+    - target: {fileID: 6203304368605208357, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: m_Name
+      value: PlayerParent
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 20dd83c54b1592a4db36441848eafc5d, type: 3}
+--- !u!20 &6203304366998809347 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 6203304367693416331, guid: 20dd83c54b1592a4db36441848eafc5d,
+    type: 3}
+  m_PrefabInstance: {fileID: 6203304366998809336}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

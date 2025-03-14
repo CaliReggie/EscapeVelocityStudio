@@ -30,14 +30,14 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Adds this object as a potential lock on target if the player is within range of the target.
+        ///     Adds this object as a potential lock on target if the PlayerParent is within range of the target.
         /// </summary>
         /// <param name="otherCollider">The collider to check.</param>
         private void OnTriggerEnter(Collider otherCollider)
         {
             SamplePlayerAnimationController playerAnimationController = otherCollider.GetComponent<SamplePlayerAnimationController>();
 
-            // Only interested in player collisions if they have the controller script.
+            // Only interested in PlayerParent collisions if they have the controller script.
             if (playerAnimationController != null)
             {
                 playerAnimationController.AddTargetCandidate(gameObject);
@@ -45,14 +45,14 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Removes this object as a potential lock on target if the player is within range of the target.
+        ///     Removes this object as a potential lock on target if the PlayerParent is within range of the target.
         /// </summary>
         /// <param name="otherCollider">The collider to check.</param>
         private void OnTriggerExit(Collider otherCollider)
         {
             SamplePlayerAnimationController playerAnimationController = otherCollider.GetComponent<SamplePlayerAnimationController>();
 
-            // Only interested in player collisions if they have the controller script.
+            // Only interested in PlayerParent collisions if they have the controller script.
             if (playerAnimationController != null)
             {
                 playerAnimationController.RemoveTarget(gameObject);

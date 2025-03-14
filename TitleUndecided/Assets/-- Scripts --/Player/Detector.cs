@@ -69,14 +69,14 @@ public class Detector : MonoBehaviour
             renderMarkerSphere.enabled = precisionTargetFound;
     }
 
-    /// This function tries to predict where the player wants to jump next.
+    /// This function tries to predict where the PlayerParent wants to jump next.
     /// Needed for precise ground and wall jumping.
     private void JumpPrediction()
     {
         RaycastHit viewRayHit;
         string predictionState;
 
-        if (Physics.Raycast(orientation.position, orientation.forward, out viewRayHit, pm.maxJumpRange, whatIsGround))
+        if (Physics.Raycast(orientation.position, orientation.forward, out viewRayHit, pm.MaxJumpRange, whatIsGround))
         {
             // Case 1 - raycast hits (in maxDistance)
             markerSphere.position = viewRayHit.point;
@@ -91,7 +91,7 @@ public class Detector : MonoBehaviour
             // Case 2 - raycast hits (out of maxDistance)
 
             // calculate nearest possible point
-            Vector3 maxRangePoint = orientation.position + orientation.forward * pm.maxJumpRange;
+            Vector3 maxRangePoint = orientation.position + orientation.forward * pm.MaxJumpRange;
 
             RaycastHit wallHit;
             if (Physics.Raycast(maxRangePoint, -viewRayHit.normal, out wallHit, 4f, whatIsGround))
@@ -105,7 +105,7 @@ public class Detector : MonoBehaviour
             {
                 someSecondSphere.position = viewRayHit.point;
 
-                if (Vector3.Distance(orientation.position, viewRayHit.point) <= pm.maxJumpRange)
+                if (Vector3.Distance(orientation.position, viewRayHit.point) <= pm.MaxJumpRange)
                 {
                     predictionState = "out of distance, hitPoint";
                     markerSphere.position = viewRayHit.point;
@@ -115,7 +115,7 @@ public class Detector : MonoBehaviour
                 else
                 {
                     predictionState = "out of distance, can't predict point..."; // -> same as case 3
-                    markerSphere.position = orientation.position + orientation.forward * pm.maxJumpRange;
+                    markerSphere.position = orientation.position + orientation.forward * pm.MaxJumpRange;
 
                     precisionTargetFound = false;
                 }
@@ -126,8 +126,8 @@ public class Detector : MonoBehaviour
         {
             // Case 3 - raycast completely misses
             // -> Normal Jump
-            // Gizmos.DrawWireSphere(realCam.transform.position + camHolder.forward * maxJumpRange, .5f);
-            markerSphere.position = orientation.position + orientation.forward * pm.maxJumpRange;
+            // Gizmos.DrawWireSphere(RealCam.transform.position + camHolder.forward * MaxJumpRange, .5f);
+            markerSphere.position = orientation.position + orientation.forward * pm.MaxJumpRange;
             predictionState = "complete miss";
 
             precisionTargetFound = false;

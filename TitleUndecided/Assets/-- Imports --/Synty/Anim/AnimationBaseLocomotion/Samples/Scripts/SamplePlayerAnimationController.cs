@@ -85,13 +85,13 @@ namespace Synty.AnimationBaseLocomotion.Samples
         [Tooltip("Script controlling camera behavior")]
         [SerializeField]
         private SampleCameraController _cameraController;
-        [Tooltip("InputReader handles player input")]
+        [Tooltip("InputReader handles PlayerParent input")]
         [SerializeField]
         private InputReader _inputReader;
-        [Tooltip("Animator component for controlling player animations")]
+        [Tooltip("Animator component for controlling PlayerParent animations")]
         [SerializeField]
         private Animator _animator;
-        [Tooltip("Character Controller component for controlling player movement")]
+        [Tooltip("Character Controller component for controlling PlayerParent movement")]
         [SerializeField]
         private CharacterController _controller;
 
@@ -104,13 +104,13 @@ namespace Synty.AnimationBaseLocomotion.Samples
         [Tooltip("Whether the character always faces the camera facing direction")]
         [SerializeField]
         private bool _alwaysStrafe = true;
-        [Tooltip("Slowest movement speed of the player when set to a walk state or half press tick")]
+        [Tooltip("Slowest movement speed of the PlayerParent when set to a walk state or half press tick")]
         [SerializeField]
         private float _walkSpeed = 1.4f;
-        [Tooltip("Default movement speed of the player")]
+        [Tooltip("Default movement speed of the PlayerParent")]
         [SerializeField]
         private float _runSpeed = 2.5f;
-        [Tooltip("Top movement speed of the player")]
+        [Tooltip("Top movement speed of the PlayerParent")]
         [SerializeField]
         private float _sprintSpeed = 7f;
         [Tooltip("Damping factor for changing speed")]
@@ -143,16 +143,16 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region Capsule Settings
 
         [Header("Capsule Values")]
-        [Tooltip("Standing height of the player capsule.")]
+        [Tooltip("Standing height of the PlayerParent capsule.")]
         [SerializeField]
         private float _capsuleStandingHeight = 1.8f;
-        [Tooltip("Standing center of the player capsule.")]
+        [Tooltip("Standing center of the PlayerParent capsule.")]
         [SerializeField]
         private float _capsuleStandingCentre = 0.93f;
-        [Tooltip("Crouching height of the player capsule.")]
+        [Tooltip("Crouching height of the PlayerParent capsule.")]
         [SerializeField]
         private float _capsuleCrouchingHeight = 1.2f;
-        [Tooltip("Crouching center of the player capsule.")]
+        [Tooltip("Crouching center of the PlayerParent capsule.")]
         [SerializeField]
         private float _capsuleCrouchingCentre = 0.6f;
 
@@ -176,10 +176,10 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region Grounded Settings
 
         [Header("Grounded Angle")]
-        [Tooltip("Position of the rear ray for grounded angle check.")]
+        [Tooltip("Position of the rear ray for Grounded angle check.")]
         [SerializeField]
         private Transform _rearRayPos;
-        [Tooltip("Position of the front ray for grounded angle check.")]
+        [Tooltip("Position of the front ray for Grounded angle check.")]
         [SerializeField]
         private Transform _frontRayPos;
         [Tooltip("Layer mask for checking ground.")]
@@ -197,7 +197,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region In-Air Settings
 
         [Header("Player In-Air")]
-        [Tooltip("Force applied when the player jumps.")]
+        [Tooltip("Force applied when the PlayerParent jumps.")]
         [SerializeField]
         private float _jumpForce = 10f;
         [Tooltip("Multiplier for gravity when in the air.")]
@@ -358,7 +358,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region Aim and Lock-on
 
         /// <summary>
-        ///     Activates the aim action of the player.
+        ///     Activates the aim action of the PlayerParent.
         /// </summary>
         private void ActivateAim()
         {
@@ -368,7 +368,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Deactivates the aim action of the player.
+        ///     Deactivates the aim action of the PlayerParent.
         /// </summary>
         private void DeactivateAim()
         {
@@ -453,7 +453,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region Sprinting State
 
         /// <summary>
-        ///     Activates sprinting behaviour.
+        ///     Activates Sprinting behaviour.
         /// </summary>
         private void ActivateSprint()
         {
@@ -466,7 +466,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Deactivates sprinting behaviour.
+        ///     Deactivates Sprinting behaviour.
         /// </summary>
         private void DeactivateSprint()
         {
@@ -483,7 +483,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region Crouching State
 
         /// <summary>
-        ///     Activates crouching behaviour
+        ///     Activates Crouching behaviour
         /// </summary>
         private void ActivateCrouch()
         {
@@ -498,7 +498,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Deactivates crouching behaviour.
+        ///     Deactivates Crouching behaviour.
         /// </summary>
         private void DeactivateCrouch()
         {
@@ -512,7 +512,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Activates sliding behaviour.
+        ///     Activates Sliding behaviour.
         /// </summary>
         public void ActivateSliding()
         {
@@ -520,7 +520,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Deactivates sliding behaviour
+        ///     Deactivates Sliding behaviour
         /// </summary>
         public void DeactivateSliding()
         {
@@ -528,9 +528,9 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Adjusts the capsule size for the player, depending on the passed in boolean value.
+        ///     Adjusts the capsule size for the PlayerParent, depending on the passed in boolean value.
         /// </summary>
-        /// <param name="crouching">Whether the player is crouching or not.</param>
+        /// <param name="crouching">Whether the PlayerParent is Crouching or not.</param>
         private void CapsuleCrouchingSize(bool crouching)
         {
             if (crouching)
@@ -733,7 +733,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region Movement
 
         /// <summary>
-        ///     Performs the movement of the player
+        ///     Performs the movement of the PlayerParent
         /// </summary>
         private void Move()
         {
@@ -749,7 +749,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Applies gravity to the player.
+        ///     Applies gravity to the PlayerParent.
         /// </summary>
         private void ApplyGravity()
         {
@@ -760,7 +760,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Calculates the movement direction of the player, and sets the relevant flags.
+        ///     Calculates the movement direction of the PlayerParent, and sets the relevant flags.
         /// </summary>
         private void CalculateMoveDirection()
         {
@@ -932,7 +932,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Checks if the player has stopped moving.
+        ///     Checks if the PlayerParent has stopped moving.
         /// </summary>
         private void CheckIfStopped()
         {
@@ -940,7 +940,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Checks if the player has started moving.
+        ///     Checks if the PlayerParent has started moving.
         /// </summary>
         private void CheckIfStarting()
         {
@@ -998,7 +998,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         #region Ground Checks
 
         /// <summary>
-        ///     Checks if the character is grounded.
+        ///     Checks if the character is Grounded.
         /// </summary>
         private void GroundedCheck()
         {
@@ -1040,7 +1040,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         }
 
         /// <summary>
-        ///     Checks the height of the ceiling above the player to make sure there is room to stand up if crouching.
+        ///     Checks the height of the ceiling above the PlayerParent to make sure there is room to stand up if Crouching.
         /// </summary>
         private void CeilingHeightCheck()
         {

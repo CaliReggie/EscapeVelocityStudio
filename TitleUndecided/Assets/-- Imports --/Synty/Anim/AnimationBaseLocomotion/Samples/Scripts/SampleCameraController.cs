@@ -17,7 +17,7 @@ namespace Synty.AnimationBaseLocomotion.Samples
         [Tooltip("The character game object")]
         [SerializeField]
         private GameObject _syntyCharacter;
-        [Tooltip("Main camera used for player perspective")]
+        [Tooltip("Main camera used for PlayerParent perspective")]
         [SerializeField]
         private Camera _mainCamera;
 

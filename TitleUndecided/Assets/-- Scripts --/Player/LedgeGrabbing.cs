@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 // Dave MovementLab - LedgeGrabbing
 ///
@@ -20,7 +21,7 @@ public class LedgeGrabbing : MonoBehaviour
 {
     [Header("Player References")]
     
-    private WallRunning main; // this script is an extension of the main wallrunning script
+    private WallRunning main; // this script is an extension of the main Wallrunning script
     
     private PlayerMovement pm;
     
@@ -28,10 +29,9 @@ public class LedgeGrabbing : MonoBehaviour
     
     private Rigidbody rb;
     
-    
     [Header("Camera References")]
     
-    public Transform cam;
+    public Transform realCamTrans;
     
     [Header("Input References")]
     
@@ -155,7 +155,7 @@ public class LedgeGrabbing : MonoBehaviour
 
     private void LedgeDetection()
     {
-        bool ledgeDetected = Physics.SphereCast(transform.position, ledgeSphereCastRadius, cam.forward, out ledgeHit, ledgeDetectionLength, whatIsLedge);
+        bool ledgeDetected = Physics.SphereCast(transform.position, ledgeSphereCastRadius, realCamTrans.forward, out ledgeHit, ledgeDetectionLength, whatIsLedge);
 
         if (ledgeHit.transform == null) return;
 
@@ -178,7 +178,7 @@ public class LedgeGrabbing : MonoBehaviour
 
     private void DelayedForce()
     {
-        Vector3 forceToAdd = cam.forward * ledgeJumpForwardForce + orientation.up * ledgeJumpUpForce;
+        Vector3 forceToAdd = realCamTrans.forward * ledgeJumpForwardForce + orientation.up * ledgeJumpUpForce;
         rb.linearVelocity = Vector3.zero;
         rb.AddForce(forceToAdd, ForceMode.Impulse);
     }
@@ -192,10 +192,10 @@ public class LedgeGrabbing : MonoBehaviour
         main.ledgegrabbing = true;
         holding = true;
 
-        pm.restricted = true;
+        pm.Restricted = true;
         
         //USED TO BE IN, I UNCOMMENTED BC MAX SPEED STAYED UNLIMITED, IDK WHY - Sid
-        // pm.unlimitedSpeed = true;
+        // pm.UnlimitedSpeed = true;
 
         currLedge = ledgeHit.transform;
         lastLedge = ledgeHit.transform;
@@ -214,7 +214,7 @@ public class LedgeGrabbing : MonoBehaviour
 
         if (directionToLedge.magnitude > maxLedgeGrabDistance && holding) ExitLedgeHold();
 
-        // Move player towards ledge
+        // Move PlayerParent towards ledge
         if (directionToLedge.magnitude > 1f)
         {
             // Vector3 directionToLedge = ledgeHit.transform.position - transform.position;
@@ -232,8 +232,8 @@ public class LedgeGrabbing : MonoBehaviour
         // Hold onto ledge
         else
         {
-            if (pm.unlimitedSpeed) pm.unlimitedSpeed = false;
-            if (!pm.freeze) pm.freeze = true;
+            if (pm.UnlimitedSpeed) pm.UnlimitedSpeed = false;
+            if (!pm.Freeze) pm.Freeze = true;
             //rb.velocity = Vector3.zero;
             // print("hanging on ledge");
         }
@@ -248,9 +248,9 @@ public class LedgeGrabbing : MonoBehaviour
         holding = false;
         timeOnLedge = 0;
 
-        pm.freeze = false;
-        pm.unlimitedSpeed = false;
-        pm.restricted = false;
+        pm.Freeze = false;
+        pm.UnlimitedSpeed = false;
+        pm.Restricted = false;
 
         rb.useGravity = true;
 

@@ -6,21 +6,19 @@ using UnityEngine;
 
 public class MomentumExtension : MonoBehaviour
 {
-    private PlayerMovement playerMovement;
-
     [Header("Increase/Decrease")]
     
-    [Range(0f,10f)] public float momentumIncreaseFactor = 1;
-    [Range(0f, 10f)] public float momentumDecreaseFactorOnGround = 2;
-    [Range(0f, 10f)] public float momentumDecreaseFactorInAir = 0.5f;
+    [Range(0f,10f)] [SerializeField] private float momentumIncreaseFactor = 1;
+    [Range(0f, 10f)] [SerializeField] private float momentumDecreaseFactorOnGround = 2;
+    [Range(0f, 10f)] [SerializeField] private float momentumDecreaseFactorInAir = 0.5f;
 
     [Header("Boundaries")]
     
-    [Range(0f, 10f)] public float minimalMomentum = 3f;
+    [Range(0f, 10f)] [SerializeField] private float minimalMomentum = 3f;
 
     [Header("State Settings")]
     
-    public List<MovementState> movementStates = new List<MovementState>()
+    [SerializeField] private List<MovementState> movementStates = new List<MovementState>()
     {
         new MovementState("Walking", PlayerMovement.MovementMode.walking, 1, 1),
         new MovementState("Sprinting",PlayerMovement.MovementMode.sprinting, 1, 1),
@@ -33,20 +31,14 @@ public class MomentumExtension : MonoBehaviour
         new MovementState("Dashing", PlayerMovement.MovementMode.dashing, -1, 10),
     };
 
-    public List<MovementState> hardcodedMovementStates = new List<MovementState>()
+    [SerializeField] private List<MovementState> hardcodedMovementStates = new List<MovementState>()
     {
         new MovementState("Unlimited", PlayerMovement.MovementMode.unlimited, -1, -1),
         new MovementState("Limited", PlayerMovement.MovementMode.limited, -1, 1),
         new MovementState("Freeze", PlayerMovement.MovementMode.freeze, -1, -1),
     };
 
-
-    private void Start()
-    {
-        playerMovement = GetComponent<PlayerMovement>();
-    }
-
-    public MovementState GetMovementState(PlayerMovement.MovementMode movementMode)
+    private MovementState GetMovementState(PlayerMovement.MovementMode movementMode)
     {
         foreach (MovementState state in movementStates)
         {

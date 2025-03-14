@@ -23,7 +23,7 @@ namespace Synty.Tools.SyntyPropBoneTool
         [Tooltip("The name of the additional transform created to attach props under.")]
         public string socketName;
 
-        [Tooltip("Rotation offset used to compensate for differences in orientation of the parent bone between the source rig and the target rig.")]
+        [Tooltip("Rotation offset used to compensate for differences in Orientation of the parent bone between the source rig and the target rig.")]
         public Vector3 rotationOffset;
         [Tooltip("Scalar used to compensate for differences in size between the source rig and the target rig. 1 = target rig is the same scale as the reference rig, 2 = target rig is twice the size as the reference rig.")]
         public float scale;

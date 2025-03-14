@@ -9,27 +9,27 @@ using UnityEngine.Serialization;
 // Dave MovementLab - Grappling
 ///
 // Content:
-/// - swinging ability
+/// - Swinging ability
 /// - grappling ability
 /// 
 // Note:
-/// This script handles starting and stopping the swinging and grappling ability, as well as moving the player
+/// This script handles starting and stopping the Swinging and grappling ability, as well as moving the PlayerParent
 /// The grappling rope is drawn and animated by the GrapplingRope script
 /// 
-/// If you don't understand the difference between swinging and grappling, please read the documentation
+/// If you don't understand the difference between Swinging and grappling, please read the documentation
 /// 
-// Also, the swinging ability is based on Danis tutorial
+// Also, the Swinging ability is based on Danis tutorial
 // Credits: https://youtu.be/Xgh4v1w5DxU
 
 
 
-/// single, or dual swinging
+/// single, or dual Swinging
 /// 
 /// grappling left or right -> cancels any active swings and grapples
 /// no grappling left/right twice in a row
-/// swinging -> cancels any active grapples, exit limited state!
+/// Swinging -> cancels any active grapples, exit limited state!
 /// 
-/// This implies that swinging and grappling can never be active at the same time, neither can there be 2 active grapples
+/// This implies that Swinging and grappling can never be active at the same time, neither can there be 2 active grapples
 
 
 public class Grappling: MonoBehaviour
@@ -46,7 +46,7 @@ public class Grappling: MonoBehaviour
     
     [Header("Camera References")]
     
-    public Transform cam;
+    public Transform realCamTrans;
     
     [Header("Hook Rig References")]
     
@@ -101,7 +101,7 @@ public class Grappling: MonoBehaviour
     
     [Space]
     
-    public float grappleDelayTime = 0.15f; // the time you freeze in the air before grappling
+    public float grappleDelayTime = 0.15f; // the time you Freeze in the air before grappling
     public float grapplingCd = .25f; // cooldown of your grappling ability
     
     [Space]
@@ -111,7 +111,7 @@ public class Grappling: MonoBehaviour
     [Space]
     
     [Tooltip("Only applied when grappleMode is set to Precise")]
-    public float overshootYAxis = 2f; // adjust the trajectory hight of the player when grappling
+    public float overshootYAxis = 2f; // adjust the trajectory hight of the PlayerParent when grappling
     
     [Space]
     
@@ -131,7 +131,7 @@ public class Grappling: MonoBehaviour
     
     [Header("Swing Settings")]
     
-    public float maxSwingDistance = 20f; // max distance you're able hit objects for swinging ability
+    public float maxSwingDistance = 20f; // max distance you're able hit objects for Swinging ability
     
     [Space]
     
@@ -161,13 +161,13 @@ public class Grappling: MonoBehaviour
     
     private List<RaycastHit> predictionHits;
     
-    private List<Vector3> grapplePoints; // the point you're grappling to / swinging on
+    private List<Vector3> grapplePoints; // the point you're grappling to / Swinging on
     
     private List<Transform> grappleObjects; // the object transform you're grappling to
     
     private List<Vector3> grappleLocalPoints; //local position of hit point on object
     
-    private Vector3 pullPoint; // point in space to pull player towards
+    private Vector3 pullPoint; // point in space to pull PlayerParent towards
     
     //General References
     
@@ -336,7 +336,7 @@ public class Grappling: MonoBehaviour
 
                 // check if direct hit is available
                 RaycastHit directHit;
-                Physics.Raycast(orientation.position, cam.forward, out directHit, maxSwingDistance, whatIsGrappleable);
+                Physics.Raycast(orientation.position, realCamTrans.forward, out directHit, maxSwingDistance, whatIsGrappleable);
 
                 Vector3 realHitPoint = Vector3.zero;
 
@@ -376,14 +376,14 @@ public class Grappling: MonoBehaviour
         if (!pm.IsStateAllowed(PlayerMovement.MovementMode.swinging))
             return;
         
-        // no swinging point can be found
+        // no Swinging point can be found
         if (!TargetPointFound(swingIndex))
         {
             if (useChargeOnHookNotHit)
             {
                 // the grapple point is now just a point in the air
                 /// calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                grapplePoints[swingIndex] = cam.position + cam.forward * maxGrappleDistance;
+                grapplePoints[swingIndex] = realCamTrans.position + realCamTrans.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
                 swingsActive[swingIndex] = true;
@@ -408,8 +408,8 @@ public class Grappling: MonoBehaviour
         //if Stopfailedswing is running, stop it
         StopCoroutine(nameof(StopFailedSwing));
         
-        // this will cause the PlayerMovement script to enter MovementMode.swinging
-        pm.swinging = true;
+        // this will cause the PlayerMovement script to enter MovementMode.Swinging
+        pm.Swinging = true;
 
         //corresponding grappleObjects is the object the raycast hit
         grappleObjects[swingIndex] = predictionHits[swingIndex].transform;
@@ -421,7 +421,7 @@ public class Grappling: MonoBehaviour
         // the exact point where you swing on
         grapplePoints[swingIndex] = predictionHits[swingIndex].point;
 
-        // add a springJoint component to your player
+        // add a springJoint component to your PlayerParent
         joints[swingIndex] = gameObject.AddComponent<SpringJoint>();
         joints[swingIndex].autoConfigureConnectedAnchor = false;
 
@@ -449,12 +449,12 @@ public class Grappling: MonoBehaviour
 
     public void StopSwing(int swingIndex)
     {
-        pm.swinging = false;
+        pm.Swinging = false;
         swingsActive[swingIndex] = false;
 
         UpdateHooksActive();
 
-        // destroy the SpringJoint again after you stopped swinging 
+        // destroy the SpringJoint again after you stopped Swinging 
         Destroy(joints[swingIndex]);
     }
     
@@ -487,7 +487,7 @@ public class Grappling: MonoBehaviour
         // forward
         if (moveInput.y > 0) rb.AddForce(orientation.forward * lateralThrustForce * Time.deltaTime);
         // backward
-        /// if (moveInput.y < 0) rb.AddForce(-orientation.forward * lateralThrustForce * Time.deltaTime);
+        /// if (RawMoveInput.y < 0) rb.AddForce(-Orientation.forward * lateralThrustForce * Time.deltaTime);
         // shorten cable
         if (jumpAction.IsPressed())
         {
@@ -545,9 +545,9 @@ public class Grappling: MonoBehaviour
             // set cooldown
             grapplingCdTimer = grapplingCd;
 
-            // this will cause the PlayerMovement script to change to MovemementMode.freeze
-            /// -> therefore the player will freeze mid-air for some time before grappling
-            pm.freeze = true;
+            // this will cause the PlayerMovement script to change to MovemementMode.Freeze
+            /// -> therefore the PlayerParent will Freeze mid-air for some time before grappling
+            pm.Freeze = true;
 
             // same stuff as in StartSwing() function
             grappleObjects[grappleIndex] = predictionHits[grappleIndex].transform;
@@ -565,18 +565,18 @@ public class Grappling: MonoBehaviour
             // call the ExecuteGrapple() function after the grappleDelayTime is over
             StartCoroutine(ExecuteGrapple(grappleIndex));
         }
-        // Case 2 - target point not found, preferential freeze and show grapple point
+        // Case 2 - target point not found, preferential Freeze and show grapple point
         else
         {
             // print("grapple: target missed");
 
             if (freezeOnGrappleNotHit)
             {
-                // we still want to freeze the player for a bit
-                pm.freeze = true;
+                // we still want to Freeze the PlayerParent for a bit
+                pm.Freeze = true;
             }
             
-            //if using a charge, we want to use the charge and show like the player is attempting to grapple air
+            //if using a charge, we want to use the charge and show like the PlayerParent is attempting to grapple air
             if (useChargeOnHookNotHit)
             {
                 // set cooldown
@@ -584,7 +584,7 @@ public class Grappling: MonoBehaviour
 
                 // the grapple point is now just a point in the air
                 /// calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                grapplePoints[grappleIndex] = cam.position + cam.forward * maxGrappleDistance;
+                grapplePoints[grappleIndex] = realCamTrans.position + realCamTrans.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
                 grapplesActive[grappleIndex] = true;
@@ -606,18 +606,18 @@ public class Grappling: MonoBehaviour
     {
         yield return new WaitForSeconds(grappleDelayTime);
 
-        // make sure that the player can move again
-        pm.freeze = false;
+        // make sure that the PlayerParent can move again
+        pm.Freeze = false;
 
         if(grappleMode == GrappleMode.Precise)
         {
-            // find the lowest point of the player
+            // find the lowest point of the PlayerParent
             Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - (playerHeight / 2), transform.position.z);
 
-            // calculate how much higher the grapple point is relative to the player
+            // calculate how much higher the grapple point is relative to the PlayerParent
             float grapplePointRelativeYPos = grapplePoints[grappleIndex].y - lowestPoint.y;
             
-            //if relative y offset is above relative player height, add all needed height, otherwise add less
+            //if relative y offset is above relative PlayerParent height, add all needed height, otherwise add less
             float highestPointOfArc = grapplePointRelativeYPos >= playerHeight ?
                 grapplePointRelativeYPos + overshootYAxis : overshootYAxis / 2;
 
@@ -628,7 +628,7 @@ public class Grappling: MonoBehaviour
 
         if(grappleMode == GrappleMode.Basic)
         {
-            // calculate the direction from the player to the grapplePoint
+            // calculate the direction from the PlayerParent to the grapplePoint
             Vector3 direction = (grapplePoints[grappleIndex] - transform.position).normalized;
 
             // reset the y velocity of your rigidbody
@@ -662,8 +662,8 @@ public class Grappling: MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
-        // make sure player can move
-        if(pm.freeze) pm.freeze = false;
+        // make sure PlayerParent can move
+        if(pm.Freeze) pm.Freeze = false;
 
         pm.ResetRestrictions();
 
@@ -746,7 +746,7 @@ public class Grappling: MonoBehaviour
         return predictionHits[index].point != Vector3.zero;
     }
 
-    // a bool to check if we're currently swinging or grappling
+    // a bool to check if we're currently Swinging or grappling
     /// function needed and called from the GrapplingRope script
     public bool IsHooking(int index)
     {

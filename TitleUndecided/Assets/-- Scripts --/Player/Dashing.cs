@@ -9,10 +9,10 @@ using UnityEngine.Serialization;
 // Dave MovementLab - Dashing
 ///
 // Content:
-/// - dashing ability
+/// - Dashing ability
 /// 
 // Note:
-/// The script looks a bit complex because you can decide wheter the player is allowed to dash forward, sideways or backwards,
+/// The script looks a bit complex because you can decide wheter the PlayerParent is allowed to dash forward, sideways or backwards,
 /// but actually the script is quite simple, just read through it and you'll probably get it
 
 
@@ -20,7 +20,7 @@ public class Dashing : MonoBehaviour
 {
     [Header("Player References")]
     
-    public Transform orientation; // the players orientation (where he's looking)
+    public Transform orientation; // the players Orientation (where he's looking)
     
     private Rigidbody rb;
     
@@ -30,7 +30,7 @@ public class Dashing : MonoBehaviour
     
     private PlayerCam playerCamScript;
     
-    public Transform playerCamPos;
+    public Transform realCamTrans;
     
     [Header("Input References")]
     
@@ -41,10 +41,10 @@ public class Dashing : MonoBehaviour
 
     [Header("Dash Forces")]
     
-    // how much force is added when dashing forward
-    /// Note: the actual maxSpeed you can reach while dashing is defined in the PlayerMovement script
+    // how much force is added when Dashing forward
+    /// Note: the actual maxSpeed you can reach while Dashing is defined in the PlayerMovement script
     public float dashForce = 25f;
-    public float dashUpwardForce; // how much upward force is added when dashing
+    public float dashUpwardForce; // how much upward force is added when Dashing
     
     [Space]
     
@@ -58,22 +58,22 @@ public class Dashing : MonoBehaviour
 
     [Header("Dash Behaviour")]
 
-    public bool useCameraForward = true;  // when active, the player dashes in the forward direction of the camera (upwards if you look up)
+    public bool useCameraForward = true;  // when active, the PlayerParent dashes in the forward direction of the camera (upwards if you look up)
     
     [Space]
     
-    public bool allowForwardDirection = true; // defines if the player is allowed to dash forwards
-    public bool allowBackDirection = true; // defines if the player is allowed to dash backwards
-    public bool allowSidewaysDirection = true; // defines if the player is allowed to dash sideways
+    public bool allowForwardDirection = true; // defines if the PlayerParent is allowed to dash forwards
+    public bool allowBackDirection = true; // defines if the PlayerParent is allowed to dash backwards
+    public bool allowSidewaysDirection = true; // defines if the PlayerParent is allowed to dash sideways
     
     [Space]
     
-    public bool disableGravity = false; // when active, gravity is disabled while dashing
+    public bool disableGravity = false; // when active, gravity is disabled while Dashing
     
     [Space]
     
-    public bool resetYVel = true; // when active, y velocity is resetted before dashing
-    public bool resetVel = true; // when active, full velocity reset before dashing
+    public bool resetYVel = true; // when active, y velocity is resetted before Dashing
+    public bool resetVel = true; // when active, full velocity reset before Dashing
 
     [Header("Camera Effects")]
     public float dashFov = 95f;
@@ -88,8 +88,8 @@ public class Dashing : MonoBehaviour
     {
         // get all references
 
-        if(playerCamPos == null)
-            playerCamPos = Camera.main.transform;
+        if(realCamTrans == null)
+            realCamTrans = Camera.main.transform;
 
         rb = GetComponent<Rigidbody>();
         pm = GetComponent<PlayerMovement>();
@@ -134,22 +134,22 @@ public class Dashing : MonoBehaviour
 
         // if maxUpwardVel set to default (-1), don't limit the players upward velocity
         if (maxUpwardVel == -1)
-            pm.maxYSpeed = -1;
+            pm.MaxYSpeed = -1;
 
         else
-            pm.maxYSpeed = maxUpwardVel;
+            pm.MaxYSpeed = maxUpwardVel;
 
-        // this will cause the PlayerMovement script to change to MovementMode.dashing
-        pm.dashing = true;
+        // this will cause the PlayerMovement script to change to MovementMode.Dashing
+        pm.Dashing = true;
 
         // increase the fov of the camera (graphical effect)
         playerCamScript.DoFov(dashFov, dashFOVChangeSpeed);
 
         Transform forwardT;
 
-        // decide wheter you want to use the playerCamPos or the playersOrientation as forward direction
+        // decide wheter you want to use the RealCamTrans or the playersOrientation as forward direction
         if (useCameraForward)
-            forwardT = playerCamPos;
+            forwardT = realCamTrans;
         else
             forwardT = orientation;
 
@@ -185,10 +185,10 @@ public class Dashing : MonoBehaviour
 
     private void ResetDash()
     {
-        pm.dashing = false;
+        pm.Dashing = false;
 
-        // make sure players maxYSpeed is no longer limited
-        pm.maxYSpeed = -1;
+        // make sure players MaxYSpeed is no longer limited
+        pm.MaxYSpeed = -1;
 
         // reset the fov of your camera
         playerCamScript.DoFov(-360, dashFOVChangeSpeed);
@@ -229,7 +229,7 @@ public class Dashing : MonoBehaviour
             rightV = -forwardT.right;
 
         // no input (forward)
-        /// If there's no input but dashing forward is allowed, activate the forwardVelocity
+        /// If there's no input but Dashing forward is allowed, activate the forwardVelocity
         if (x == 0 && z == 0 && allowForwardDirection)
              forwardV = forwardT.forward;
 
@@ -239,7 +239,7 @@ public class Dashing : MonoBehaviour
             forwardV = forwardT.forward;
 
         // return the forward and right velocity
-        /// if for example both have been activated, the player will now dash forward and to the right -> diagonally
+        /// if for example both have been activated, the PlayerParent will now dash forward and to the right -> diagonally
         /// this works for all 8 directions
         return (forwardV + rightV).normalized;
     }
