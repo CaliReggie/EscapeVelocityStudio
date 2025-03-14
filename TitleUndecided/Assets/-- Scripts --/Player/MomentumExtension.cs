@@ -136,19 +136,19 @@ public class MomentumExtension : MonoBehaviour
 [Serializable]
 public class MovementState
 {
-    public string StateName { get; private set; }
+    [field: SerializeField] public string StateName { get; private set; }
 
-    public PlayerMovement.MovementMode MovementMode { get; private set; }
+    [field: SerializeField] public PlayerMovement.MovementMode MovementMode { get; private set; }
 
     [Tooltip("-1 means instant speed change")]
-    public float SpeedBuildupFactor { get; private set; } = -1;
+    [field: SerializeField] public float SpeedBuildupFactor { get; private set; } = -1;
     
     [Tooltip("-1 means instant speed change")]
-    public float SpeedBuilddownFactor { get; private set; } = -1;
+    [field: SerializeField] public float SpeedBuilddownFactor { get; private set; } = -1;
 
-    [Range(0f, 100f)] public float MinNeededMomentum { get; private set; } = 0f;
+    [field: SerializeField] [Range(0f, 100f)] public float MinNeededMomentum { get; private set; } = 0f;
     
-    [Range(0f, 100f)] public float MaxAllowedMomentum { get; private set; } = 100f;
+    [field: SerializeField] [Range(0f, 100f)] public float MaxAllowedMomentum { get; private set; } = 100f;
 
     public MovementState(string stateName, PlayerMovement.MovementMode movementMode, float speedBuildupFactor, float speedBuilddownFactor)
     {

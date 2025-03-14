@@ -26786,6 +26786,56 @@ PrefabInstance:
       propertyPath: potentialEnergyAttackPrediction
       value: 
       objectReference: {fileID: 485329725}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[0].<StateName>k__BackingField
+      value: Unlimited
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[1].<StateName>k__BackingField
+      value: Limited
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[2].<StateName>k__BackingField
+      value: Freeze
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[0].<SpeedBuildupFactor>k__BackingField
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[1].<SpeedBuildupFactor>k__BackingField
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[2].<SpeedBuildupFactor>k__BackingField
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[0].<SpeedBuilddownFactor>k__BackingField
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[1].<SpeedBuilddownFactor>k__BackingField
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5965718284427126071, guid: 20dd83c54b1592a4db36441848eafc5d,
+        type: 3}
+      propertyPath: hardcodedMovementStates.Array.data[2].<SpeedBuilddownFactor>k__BackingField
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 6203304367237142539, guid: 20dd83c54b1592a4db36441848eafc5d,
         type: 3}
       propertyPath: m_Name
