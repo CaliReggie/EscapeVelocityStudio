@@ -840,7 +840,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6203304367237142540
 Transform:
   m_ObjectHideFlags: 0
@@ -964,7 +964,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1109505
+    m_Bits: 3206657
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1417,7 +1417,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6203304368357292904
 Transform:
   m_ObjectHideFlags: 0
@@ -1599,7 +1599,7 @@ MonoBehaviour:
   thirdPersonRenderMask:
     serializedVersion: 2
     m_Bits: 3206657
-  <CurrentCamType>k__BackingField: 0
+  <CurrentCamType>k__BackingField: 2
   keyAndMouseFirstPersonLookSpeedMult: 0.5
   gamepadFirstPersonLookSpeedMult: 1.25
   gamepadFirstPersonVerticalModifier: 0.5
@@ -2448,7 +2448,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4978725435959519586
 Transform:
   m_ObjectHideFlags: 0
