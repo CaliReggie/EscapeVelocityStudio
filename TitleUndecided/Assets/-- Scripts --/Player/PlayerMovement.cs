@@ -1,12 +1,22 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using PhysicsExtensions;
-using UnityEditor;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
+
+[RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(PlayerCam))]
+[RequireComponent(typeof(PlayerAnimator))]
+[RequireComponent(typeof(MomentumExtension))]
+[RequireComponent(typeof(Sliding))]
+[RequireComponent(typeof(WallRunning))]
+[RequireComponent(typeof(Dashing))]
+[RequireComponent(typeof(Grappling))]
+[RequireComponent(typeof(LedgeGrabbing))]
+[RequireComponent(typeof(Detector))]
+[RequireComponent(typeof(PlayerEnergy))]
+[RequireComponent(typeof(PlayerAttacks))]
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -143,32 +153,9 @@ public class PlayerMovement : MonoBehaviour
     //Detection
     private RaycastHit _slopeHit; // variable needed for slopeCheck
     
-    //State Handling
+    // State
     
-    // these bools are activated from different scripts
-    // if for example the Wallrunning bool is set to true, the movement mode will change to MovementMode.Wallrunning#
-    
-    [field: SerializeField] public bool Grounded { get; private set; }
-    
-    public MovementMode MoveMode { get; private set; } // this variable stores the current movement mode of the PlayerParent
-
-    public bool Freeze { get; set; }
-    public bool UnlimitedSpeed { get; set; }
-    public bool Restricted { get; set; }
-    public bool InternallyRestricted { get; private set; }
-    public bool Sprinting { get; set; }
-    public bool Climbing { get; set; }
-    public bool Sliding { get; set; }
-    public bool Dashing { get; set; }
-    public bool Crouching { get; set; }
-    public bool Swinging { get; set; }
-    public bool Wallrunning { get; set; }
-    public bool Walljumping { get; set; }
-    
-    // this bool is changed using specific functions
     private bool _speedLimited;
-    
-    private float _currentLimitedSpeed = 20f; // changes based on how fast the PlayerParent needs to go
     
     private int _doubleJumpsLeft;
     
@@ -177,16 +164,10 @@ public class PlayerMovement : MonoBehaviour
     private bool _crouchStarted;
     
     //Speeds
-    
-    public float MaxYSpeed { get; set; }
+    private float _currentLimitedSpeed = 20f; // changes based on how fast the PlayerParent needs to go
     
     private float _desiredMaxSpeed; // needed to smoothly change between speed limitations
     private float _maxSpeed; // this variable changes depending on which movement mode you are in
-    
-    //Input and Movement
-    public Vector2 RawMoveInput { get; private set; }
-    
-    public Vector3 OrientedMoveInput { get; private set; }
     
     //IDK if needed, wasn't used in script - Sid
     //private float _desiredMaxSpeedLastFrame; // the previous desired max speed
@@ -194,36 +175,19 @@ public class PlayerMovement : MonoBehaviour
     //IDK if needed, wasn't used in script - Sid
     // public Transform groundCheck;
     //public float groundCheckRadius;
-    
-    /// how fast your PlayerParent can maximally move on the y axis
-    /// if set to -1, y speed will not be limited
 
-    private void Start()
+    // how fast your PlayerParent can maximally move on the y axis
+    // if set to -1, y speed will not be limited
+    //
+    private void Awake()
     {
-        // if the PlayerParent has not yet assigned a groundMask, just set it to "Default"
-        if (WhatIsGround.value == 0)
-            WhatIsGround = LayerMask.GetMask("Default");
-
-        // assign references
+        // get references
+        
         _playerCamScript = GetComponent<PlayerCam>();
         _wallRunning = GetComponent<WallRunning>();
         _rb = GetComponent<Rigidbody>();
         _playerColl = GetComponent<CapsuleCollider>();
-
-        // Freeze all rotation on the rigidbody, otherwise the PlayerParent falls over
-        /// (like you would expect from a capsule with round surface)
-        _rb.freezeRotation = true;
-
-        // if MaxYSpeed is set to -1, the y speed of the PlayerParent will be unlimited
-        /// I only limit it while Climbing or Wallrunning
-        MaxYSpeed = -1;
         
-        _startCollHeight = _playerColl.height;
-        
-        _startCollCenterY = _playerColl.center.y;
-
-        _readyToJump = true;
-
         if (GetComponent<MomentumExtension>() != null)
         {
             _momentumExtension = GetComponent<MomentumExtension>();
@@ -237,6 +201,28 @@ public class PlayerMovement : MonoBehaviour
         _sprintAction = playerInput.actions.FindAction(sprintActionName);
         _crouchAction = playerInput.actions.FindAction(crouchActionName);
         
+        // Set Important Fields
+        
+        // if the PlayerParent has not yet assigned a groundMask, just set it to "Default"
+        if (WhatIsGround.value == 0)
+            WhatIsGround = LayerMask.GetMask("Default");
+    }
+
+    private void Start()
+    {
+        // Freeze all rotation on the rigidbody, otherwise the PlayerParent falls over
+        // (like you would expect from a capsule with round surface)
+        _rb.freezeRotation = true;
+
+        // if MaxYSpeed is set to -1, the y speed of the PlayerParent will be unlimited
+        // I only limit it while Climbing or Wallrunning
+        MaxYSpeed = -1;
+        
+        _startCollHeight = _playerColl.height;
+        
+        _startCollCenterY = _playerColl.center.y;
+
+        _readyToJump = true;
     }
 
     private void OnEnable()
@@ -281,7 +267,7 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         // if you're walking, Sprinting, Crouching or in the air, the MovePlayer function, which takes care of all basic movement, should be active
-        /// this also makes sure that you can't move left or right while Dashing for example
+        // this also makes sure that you can't move left or right while Dashing for example
         if (MoveMode == MovementMode.walking || MoveMode == MovementMode.sprinting || MoveMode == MovementMode.crouching || MoveMode == MovementMode.air)
             MovePlayer();
 
@@ -397,7 +383,7 @@ public class PlayerMovement : MonoBehaviour
     #region Jump Abilities
 
     /// called when jumpKeyPressed, _readyToJump and Grounded
-    public void Jump()
+    private void Jump()
     {
         // while Dashing you shouldn't be able to jump
         if (Dashing) return;
@@ -406,17 +392,17 @@ public class PlayerMovement : MonoBehaviour
         _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
         // add upward force to your rigidbody
-        /// make sure to use ForceMode.Impulse, since you're only adding force once
+        // make sure to use ForceMode.Impulse, since you're only adding force once
         _rb.AddForce(Orientation.up * jumpForce, ForceMode.Impulse);
     }
 
     /// called when in air and jumpKey is pressed
-    public void DoubleJump()
+    private void DoubleJump()
     {
         // if you don't have any double jumps left, stop the function
         if (_doubleJumpsLeft <= 0) return;
 
-        /// this is just for bug-fixing
+        // this is just for bug-fixing
         if (MoveMode == MovementMode.wallrunning || MoveMode == MovementMode.climbing) return;
 
         // get _rb velocity without y axis
@@ -427,13 +413,13 @@ public class PlayerMovement : MonoBehaviour
         Vector3 inputDirection = Orientation.forward * RawMoveInput.y + Orientation.right * RawMoveInput.x;
 
         // reset _rb velocity in the correct direction while maintaing speed
-        /// for example, you're jumping forward, then in the air, you turn around and quickly jump back
-        /// you now want to take the speed you had in the forward direction and apply it to the backward direction
-        /// otherwise you would try to jump against your old forward speed
+        // for example, you're jumping forward, then in the air, you turn around and quickly jump back
+        // you now want to take the speed you had in the forward direction and apply it to the backward direction
+        // otherwise you would try to jump against your old forward speed
         _rb.linearVelocity = inputDirection.normalized * flatVelMag;
 
         // add jump force
-        /// make sure to use ForceMode.Impulse, since you're only adding force once
+        // make sure to use ForceMode.Impulse, since you're only adding force once
         _rb.AddForce(Orientation.up * jumpForce, ForceMode.Impulse);
 
         _doubleJumpsLeft--;
@@ -532,7 +518,7 @@ public class PlayerMovement : MonoBehaviour
         _playerColl.center = new Vector3(_playerColl.center.x, crouchColliderCenterY, _playerColl.center.z);
 
         // after shrinking, you'll be a bit in the air, so add downward force to hit the ground again
-        /// you don't really notice this while playing
+        // you don't really notice this while playing
         _rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
 
         Crouching = true;
@@ -668,8 +654,8 @@ public class PlayerMovement : MonoBehaviour
         }
         
         // minimum momentum
-        if (_momentumExtensionEnabled && _maxSpeed < _momentumExtension.minimalMomentum && MoveMode != MovementMode.freeze)
-            _maxSpeed = _momentumExtension.minimalMomentum;
+        if (_momentumExtensionEnabled && _maxSpeed < _momentumExtension.MinimalMomentum && MoveMode != MovementMode.freeze)
+            _maxSpeed = _momentumExtension.MinimalMomentum;
 
         if (_momentumExtensionEnabled)
             UpdateMomentumBasedMaxSpeed();
@@ -753,12 +739,12 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void EnableLimitedState(float speedLimit)
+    private void EnableLimitedState(float speedLimit)
     {
         _currentLimitedSpeed = speedLimit;
         _speedLimited = true;
     }
-    public void DisableLimitedState()
+    private void DisableLimitedState()
     {
         _speedLimited = false;
     }
@@ -770,14 +756,14 @@ public class PlayerMovement : MonoBehaviour
     public bool OnSlope()
     {
         // shoot a raycast down to check if you hit something
-        /// the "out _slopeHit" bit makes sure that you store the information of the object you hit
+        // the "out _slopeHit" bit makes sure that you store the information of the object you hit
         if (Physics.Raycast(transform.position, Vector3.down, out _slopeHit, BasePlayerHeight * 0.5f + 0.5f))
         {
             // calculate the angle of the ground you're standing on (how steep it is)
             float angle = Vector3.Angle(Vector3.up, _slopeHit.normal);
 
             // check if the angle is smaller than your maxSlopeAngle
-            /// -> that means you're standing on a slope -> return true
+            // -> that means you're standing on a slope -> return true
             return angle < maxSlopeAngle && angle != 0;
         }
 
@@ -813,18 +799,22 @@ public class PlayerMovement : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         bool touch = false;
-        // print("Contact count" + collision.contactCount);
-        // Note: What is ground layer means Layer 7!
-        // print("Contact Layer " + collision.collider.gameObject.layer + " / " + WhatIsGround.value);
-        for (int i = 0; i < collision.contactCount; i++)
+
+        // for (int i = 0; i < collision.contactCount; i++)
+        // {
+        //     if (collision.collider.gameObject.layer == 9 || collision.collider.gameObject.layer == 10)
+        //         touch = true;
+        // }
+        
+        //touch true if layer is ground, not using layer numbers but comparing to WhatIsGround
+        foreach (ContactPoint contact in collision.contacts)
         {
-            if (collision.collider.gameObject.layer == 9 || collision.collider.gameObject.layer == 10)
+            if (WhatIsGround == (WhatIsGround | (1 << contact.otherCollider.gameObject.layer)))
+            {
                 touch = true;
+                break;
+            }
         }
-
-        // if (touch) print("GroundObjectTouched");
-
-        // print("event sucessfully called");
 
         if (enableMovementOnNextTouch && touch)
         {
@@ -838,7 +828,7 @@ public class PlayerMovement : MonoBehaviour
 
     #endregion
 
-    #region Getters
+    #region Getters and Setters
 
     public bool IsStateAllowed(MovementMode movementMode)
     {
@@ -847,6 +837,34 @@ public class PlayerMovement : MonoBehaviour
 
         return _momentumExtension.IsStateAllowed(movementMode, _maxSpeed);
     }
+    
+    //State Handling
+    
+    // these bools are activated from different scripts
+    // if for example the Wallrunning bool is set to true, the movement mode will change to MovementMode.Wallrunning#
+    
+    public bool Grounded { get; private set; }
+    
+    public MovementMode MoveMode { get; private set; } // this variable stores the current movement mode of the PlayerParent
+
+    public bool Freeze { get; set; }
+    public bool UnlimitedSpeed { get; set; }
+    public bool Restricted { get; set; }
+    public bool InternallyRestricted { get; private set; }
+    public bool Sprinting { get; set; }
+    public bool Climbing { get; set; }
+    public bool Sliding { get; set; }
+    public bool Dashing { get; set; }
+    public bool Crouching { get; set; }
+    public bool Swinging { get; set; }
+    public bool Wallrunning { get; set; }
+    public bool Walljumping { get; set; }
+    
+    public Vector2 RawMoveInput { get; private set; }
+    
+    public Vector3 OrientedMoveInput { get; private set; }
+    
+    public float MaxYSpeed { get; set; }
 
     #endregion
 

@@ -6,15 +6,13 @@ using UnityEngine;
 
 public class MomentumExtension : MonoBehaviour
 {
-    [Header("Increase/Decrease")]
+    [Header("Momentum General Settings")]
     
     [Range(0f,10f)] [SerializeField] private float momentumIncreaseFactor = 1;
     [Range(0f, 10f)] [SerializeField] private float momentumDecreaseFactorOnGround = 2;
     [Range(0f, 10f)] [SerializeField] private float momentumDecreaseFactorInAir = 0.5f;
-
-    [Header("Boundaries")]
     
-    [Range(0f, 10f)] [SerializeField] private float minimalMomentum = 3f;
+    [Range(0f, 10f)] [field: SerializeField] public float MinimalMomentum { get; private set; } = 3f;
 
     [Header("State Settings")]
     
@@ -42,7 +40,7 @@ public class MomentumExtension : MonoBehaviour
     {
         foreach (MovementState state in movementStates)
         {
-            if (state.movementMode == movementMode)
+            if (state.MovementMode == movementMode)
             {
                 return state;
             }
@@ -50,7 +48,7 @@ public class MomentumExtension : MonoBehaviour
         
         foreach (MovementState state in hardcodedMovementStates)
         {
-            if (state.movementMode == movementMode)
+            if (state.MovementMode == movementMode)
             {
                 return state;
             }
@@ -67,14 +65,14 @@ public class MomentumExtension : MonoBehaviour
         
         if (movementState != null)
         {
-            if (movementState.speedBuildupFactor == -1)
+            if (movementState.SpeedBuildupFactor == -1)
             {
                 speedChangeFactor = -1;
             }
                 
             else
             {
-                speedChangeFactor = momentumIncreaseFactor * movementState.speedBuildupFactor;
+                speedChangeFactor = momentumIncreaseFactor * movementState.SpeedBuildupFactor;
             }
         }
         else
@@ -95,14 +93,14 @@ public class MomentumExtension : MonoBehaviour
         
         if (movementState != null)
         {
-            if (movementState.speedBuilddownFactor == -1)
+            if (movementState.SpeedBuilddownFactor == -1)
             {
                 speedChangeFactor = -1;
             }
                 
             else
             {
-                speedChangeFactor = momentumIncreaseFactor * movementState.speedBuilddownFactor;
+                speedChangeFactor = momentumIncreaseFactor * movementState.SpeedBuilddownFactor;
             }
         }
         else
@@ -123,13 +121,13 @@ public class MomentumExtension : MonoBehaviour
         MovementState movementState = GetMovementState(movementMode);
         bool stateAllowed = true;
 
-        if(currMomentum < movementState.minNeededMomentum)
+        if(currMomentum < movementState.MinNeededMomentum)
             stateAllowed = false;
-        else if (currMomentum > movementState.maxAllowedMomentum)
+        else if (currMomentum > movementState.MaxAllowedMomentum)
             stateAllowed = false;
 
-        // Debug.Log($"CurrMomentum {currMomentum}, MinMomentum {movementState.minNeededMomentum},
-        // MaxMomentum {movementState.maxAllowedMomentum} -> State {movementState.stateName} allowed -> {stateAllowed}");
+        // Debug.Log($"CurrMomentum {currMomentum}, MinMomentum {movementState.MinNeededMomentum},
+        // MaxMomentum {movementState.MaxAllowedMomentum} -> State {movementState.StateName} allowed -> {stateAllowed}");
 
         return stateAllowed;
     }
@@ -138,30 +136,30 @@ public class MomentumExtension : MonoBehaviour
 [Serializable]
 public class MovementState
 {
-    public string stateName;
+    public string StateName { get; private set; }
 
-    public PlayerMovement.MovementMode movementMode;
+    public PlayerMovement.MovementMode MovementMode { get; private set; }
 
     [Tooltip("-1 means instant speed change")]
-    public float speedBuildupFactor = -1;
+    public float SpeedBuildupFactor { get; private set; } = -1;
+    
     [Tooltip("-1 means instant speed change")]
-    public float speedBuilddownFactor = -1;
+    public float SpeedBuilddownFactor { get; private set; } = -1;
 
-    [Range(0f, 100f)]
-    public float minNeededMomentum = 0f;
-    [Range(0f, 100f)]
-    public float maxAllowedMomentum = 100f;
+    [Range(0f, 100f)] public float MinNeededMomentum { get; private set; } = 0f;
+    
+    [Range(0f, 100f)] public float MaxAllowedMomentum { get; private set; } = 100f;
 
     public MovementState(string stateName, PlayerMovement.MovementMode movementMode, float speedBuildupFactor, float speedBuilddownFactor)
     {
-        this.stateName = stateName;
-        this.movementMode = movementMode;
-        this.speedBuildupFactor = speedBuildupFactor;
-        this.speedBuilddownFactor = speedBuilddownFactor;
+        this.StateName = stateName;
+        this.MovementMode = movementMode;
+        this.SpeedBuildupFactor = speedBuildupFactor;
+        this.SpeedBuilddownFactor = speedBuilddownFactor;
     }
 
     public MovementState(PlayerMovement.MovementMode movementMode)
     {
-        this.movementMode = movementMode;
+        this.MovementMode = movementMode;
     }
 }

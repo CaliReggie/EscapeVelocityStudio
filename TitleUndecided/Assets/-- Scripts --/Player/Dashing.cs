@@ -1,167 +1,152 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 
-// Dave MovementLab - Dashing
-///
-// Content:
-/// - Dashing ability
-/// 
-// Note:
-/// The script looks a bit complex because you can decide wheter the PlayerParent is allowed to dash forward, sideways or backwards,
-/// but actually the script is quite simple, just read through it and you'll probably get it
-
-
+[RequireComponent(typeof(PlayerMovement))]
 public class Dashing : MonoBehaviour
 {
-    [Header("Player References")]
-    
-    public Transform orientation; // the players Orientation (where he's looking)
-    
-    private Rigidbody rb;
-    
-    private PlayerMovement pm;
-    
-    [Header("Camera References")]
-    
-    private PlayerCam playerCamScript;
-    
-    public Transform realCamTrans;
-    
     [Header("Input References")]
     
-    public string dashActionName = "Dash";
+    [SerializeField] private string dashActionName = "Dash";
     
-    public InputAction dashAction;
-    
-
     [Header("Dash Forces")]
     
-    // how much force is added when Dashing forward
-    /// Note: the actual maxSpeed you can reach while Dashing is defined in the PlayerMovement script
-    public float dashForce = 25f;
-    public float dashUpwardForce; // how much upward force is added when Dashing
+    [SerializeField] private float dashForce = 25f; //Max speed still limited by PlayerMovement script
+    
+    [SerializeField] private float dashUpwardForce; // how much upward force is added when Dashing
     
     [Space]
     
-    public float maxUpwardVel = -1; // limit the upwardVelocity if needed (if you keep it on -1, the upwardsVelocity is unlimited)
+    [SerializeField] private float maxUpwardVel = -1; // limit the upwardVelocity if needed
+                                                      // (if you keep it on -1, the upwardsVelocity is unlimited)
     
     [Header("Dash Timings")]
     
-    public float dashDuration = 0.25f;
+    [SerializeField] private float dashDuration = 0.25f;
     
-    public float dashCd = 1.5f; // cooldown of your dash ability
+    [SerializeField] private float dashCd = 1.5f; // cooldown of your dash ability
 
     [Header("Dash Behaviour")]
 
-    public bool useCameraForward = true;  // when active, the PlayerParent dashes in the forward direction of the camera (upwards if you look up)
+    [SerializeField] private bool useCameraForward = true;  // when active, the PlayerParent dashes in the forward direction of the camera (upwards if you look up)
     
     [Space]
     
-    public bool allowForwardDirection = true; // defines if the PlayerParent is allowed to dash forwards
-    public bool allowBackDirection = true; // defines if the PlayerParent is allowed to dash backwards
-    public bool allowSidewaysDirection = true; // defines if the PlayerParent is allowed to dash sideways
+    [SerializeField] private bool allowForwardDirection = true; // defines if the PlayerParent is allowed to dash forwards
+    [SerializeField] private bool allowBackDirection = true; // defines if the PlayerParent is allowed to dash backwards
+    [SerializeField] private bool allowSidewaysDirection = true; // defines if the PlayerParent is allowed to dash sideways
     
     [Space]
     
-    public bool disableGravity = false; // when active, gravity is disabled while Dashing
+    [SerializeField] private bool disableGravity = true; // when active, gravity is disabled while Dashing
     
     [Space]
     
-    public bool resetYVel = true; // when active, y velocity is resetted before Dashing
-    public bool resetVel = true; // when active, full velocity reset before Dashing
+    [SerializeField] private bool resetYVel = true; // when active, y velocity is resetted before Dashing
+    [SerializeField] private bool resetVel = true; // when active, full velocity reset before Dashing
 
     [Header("Camera Effects")]
-    public float dashFov = 95f;
-    public float dashFOVChangeSpeed = 0.2f;
+    [SerializeField] private float dashFov = 125f;
+    [SerializeField] private float dashFOVChangeSpeed = 0.2f;
     
     //Dynamic, Non Serialized Below
     
-    private float dashCdTimer;
+    //References
+    
+    //Player
+    private Transform _orientation;
+    
+    private Rigidbody _rb;
+    
+    private PlayerMovement _pm;
+    
+    private InputAction _dashAction;
+    
+    //Camera
+    private PlayerCam _playerCamScript;
+    
+    private Transform _realCamTrans;
+    
+    //Timing
+    private float _dashCdTimer;
 
-
-    private void Start()
+    private void Awake()
     {
-        // get all references
-
-        if(realCamTrans == null)
-            realCamTrans = Camera.main.transform;
-
-        rb = GetComponent<Rigidbody>();
-        pm = GetComponent<PlayerMovement>();
-        playerCamScript = GetComponent<PlayerCam>();
+        //get references
+        _rb = GetComponent<Rigidbody>();
+        _pm = GetComponent<PlayerMovement>();
+        _orientation = _pm.Orientation;
+        _playerCamScript = GetComponent<PlayerCam>();
+        _realCamTrans = _playerCamScript.RealCam.gameObject.transform;
         
         PlayerInput playerInput = GetComponent<PlayerInput>();
         
-        dashAction = playerInput.actions.FindAction(dashActionName);
+        _dashAction = playerInput.actions.FindAction(dashActionName);
     }
 
     private void OnEnable()
     {
-        dashAction.Enable();
+        _dashAction.Enable();
     }
     
     private void OnDisable()
     {
-        dashAction.Disable();
+        _dashAction.Disable();
     }
 
     private void Update()
     {
         // if you press the dash key -> call Dash() function
-        if (dashAction.triggered)
+        if (_dashAction.triggered)
             Dash();
 
         // cooldown timer
-        if (dashCdTimer > 0)
-            dashCdTimer -= Time.deltaTime;
+        if (_dashCdTimer > 0)
+            _dashCdTimer -= Time.deltaTime;
     }
 
     private void Dash()
     {
-        if (!pm.IsStateAllowed(PlayerMovement.MovementMode.dashing))
+        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.dashing))
             return;
 
         // cooldown implementation
-        if (dashCdTimer > 0) return;
-        else dashCdTimer = dashCd;
+        if (_dashCdTimer > 0) return;
+        else _dashCdTimer = dashCd;
 
-        pm.ResetRestrictions();
+        _pm.ResetRestrictions();
 
         // if maxUpwardVel set to default (-1), don't limit the players upward velocity
         if (maxUpwardVel == -1)
-            pm.MaxYSpeed = -1;
+            _pm.MaxYSpeed = -1;
 
         else
-            pm.MaxYSpeed = maxUpwardVel;
+            _pm.MaxYSpeed = maxUpwardVel;
 
         // this will cause the PlayerMovement script to change to MovementMode.Dashing
-        pm.Dashing = true;
+        _pm.Dashing = true;
 
         // increase the fov of the camera (graphical effect)
-        playerCamScript.DoFov(dashFov, dashFOVChangeSpeed);
+        _playerCamScript.DoFov(dashFov, dashFOVChangeSpeed);
 
         Transform forwardT;
 
         // decide wheter you want to use the RealCamTrans or the playersOrientation as forward direction
         if (useCameraForward)
-            forwardT = realCamTrans;
+            forwardT = _realCamTrans;
         else
-            forwardT = orientation;
+            forwardT = _orientation;
 
         // call the GetDirection() function below to calculate the direction
         Vector3 direction = GetDirection(forwardT);
 
         // calculate the forward and upward force
-        Vector3 force = direction * dashForce + orientation.up * dashUpwardForce;
+        Vector3 force = direction * dashForce + _orientation.up * dashUpwardForce;
 
         // disable gravity of the players rigidbody if needed
         if (disableGravity)
-            rb.useGravity = false;
+            _rb.useGravity = false;
 
         // add the dash force (deayed)
         delayedForceToApply = force;
@@ -176,26 +161,26 @@ public class Dashing : MonoBehaviour
     {
         // reset velocity based on settings
         if (resetVel)
-            rb.linearVelocity = Vector3.zero;
+            _rb.linearVelocity = Vector3.zero;
         else if (resetYVel)
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.y);
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.y);
 
-        rb.AddForce(delayedForceToApply, ForceMode.Impulse);
+        _rb.AddForce(delayedForceToApply, ForceMode.Impulse);
     }
 
     private void ResetDash()
     {
-        pm.Dashing = false;
+        _pm.Dashing = false;
 
         // make sure players MaxYSpeed is no longer limited
-        pm.MaxYSpeed = -1;
+        _pm.MaxYSpeed = -1;
 
         // reset the fov of your camera
-        playerCamScript.DoFov(-360, dashFOVChangeSpeed);
+        _playerCamScript.DoFov(-360, dashFOVChangeSpeed);
 
         // if you disabled it before, activate the gravity of the rigidbody again
         if (disableGravity)
-            rb.useGravity = true;
+            _rb.useGravity = true;
     }
 
     private Vector3 GetDirection(Transform forwardT)
@@ -209,38 +194,38 @@ public class Dashing : MonoBehaviour
         Vector3 rightV = Vector3.zero;
 
         // forward
-        /// if W is pressed and you're allowed to dash forwards, activate the forwardVelocity
+        // if W is pressed and you're allowed to dash forwards, activate the forwardVelocity
         if (z > 0 && allowForwardDirection)
             forwardV = forwardT.forward;
 
         // back
-        /// if S is pressed and you're allowed to dash backwards, activate the backwardVelocity
+        // if S is pressed and you're allowed to dash backwards, activate the backwardVelocity
         if (z < 0 && allowBackDirection)
             forwardV = -forwardT.forward;
 
         // right
-        /// if D is pressed and you're allowed to dash sideways, activate the right velocity
+        // if D is pressed and you're allowed to dash sideways, activate the right velocity
         if (x > 0 && allowSidewaysDirection)
             rightV = forwardT.right;
 
         // left
-        /// if A is pressed and you're allowed to dash sideways, activate the left velocity
+        // if A is pressed and you're allowed to dash sideways, activate the left velocity
         if (x < 0 && allowSidewaysDirection)
             rightV = -forwardT.right;
 
         // no input (forward)
-        /// If there's no input but Dashing forward is allowed, activate the forwardVelocity
+        // If there's no input but Dashing forward is allowed, activate the forwardVelocity
         if (x == 0 && z == 0 && allowForwardDirection)
              forwardV = forwardT.forward;
 
         // forward only allowed direction
-        /// if forward is the only allowed direction, activate the forwardVelocity
+        // if forward is the only allowed direction, activate the forwardVelocity
         if (allowForwardDirection && !allowBackDirection && !allowSidewaysDirection)
             forwardV = forwardT.forward;
 
         // return the forward and right velocity
-        /// if for example both have been activated, the PlayerParent will now dash forward and to the right -> diagonally
-        /// this works for all 8 directions
+        // if for example both have been activated, the PlayerParent will now dash forward and to the right -> diagonally
+        // this works for all 8 directions
         return (forwardV + rightV).normalized;
     }
 }

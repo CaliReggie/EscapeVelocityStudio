@@ -83,8 +83,8 @@ public class GrapplingRope : MonoBehaviour
             lr.positionCount = quality + 1;
 
             // set the material of the line renderer
-            if (grappling.grapplesActive[ropeIndex]) lr.material = grapplingRopeMaterial;
-            else if (grappling.swingsActive[ropeIndex]) lr.material = swingingRopeMaterial;
+            if (grappling.GrapplesActive[ropeIndex]) lr.material = grapplingRopeMaterial;
+            else if (grappling.SwingsActive[ropeIndex]) lr.material = swingingRopeMaterial;
         }
 
         // set the spring simulation

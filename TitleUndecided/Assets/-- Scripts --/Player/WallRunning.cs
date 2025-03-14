@@ -1,33 +1,8 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
-
-// Dave MovementLab - WallRunning
-///
-// Content:
-/// - Wallrunning ability
-/// - Walljumping
-/// - Climbing ability
-/// - climb-jumping
-/// - other wallhandling stuff
-/// 
-// Note:
-/// This is probably the longest and most complex script of my PlayerParent controller,
-/// since it handles all wallmovement including jumping etc.
-/// 
-/// Similar to the PlayerMovement script it has it's own StateMachine for different wall states
-/// 
-/// I would highly recommend you to open my MovementLab documentation (-> 10 Day Learning Plan) to follow along and
-/// understand all of these functions in the correct order. If you do that, it won't be complicated.
-/// 
-/// -> In the 10 Day Learning Plan you'll also find an explanation of how my wallmovement generally works (highly recommended!)
-
-
+[RequireComponent(typeof(PlayerMovement))]
 public class WallRunning : MonoBehaviour
 {
     private enum State
@@ -42,159 +17,137 @@ public class WallRunning : MonoBehaviour
     
     [Header("Toggle Abilites")]
     
-    public bool enablePrecisionMode = true;
-    
-    [Header("Player References")]
-    
-    private PlayerMovement pm;
-    
-    private LedgeGrabbing lg;
-    
-    private Detector dt;
-    
-    private PlayerCam playerCamScript;
-    
-    public Transform orientation;
+    [SerializeField] private bool enablePrecisionMode = true;
     
     [Header("Input References")]
     
-    public string wallJumpActionName = "Jump";
+    [SerializeField] private string wallJumpActionName = "Jump";
     
     //not enough keybinds, rip
-    // public string upwardsRunActionName = "AltRunUp";
+    // [SerializeField] private string upwardsRunActionName = "AltRunUp";
     //
-    // public string downwardsRunActionName = "AltRunDown";
-    
-    public InputAction wallJumpAction;
-    
-    // public InputAction upwardsRunAction;
-    //
-    // public InputAction downwardsRunAction;
+    // [SerializeField] private string downwardsRunActionName = "AltRunDown";
     
     [Header("Detection")]
-    public LayerMask whatIsWall;
-    public LayerMask whatIsGround;
+    
+    [SerializeField] private LayerMask whatIsWall;
     
     [Space]
     
-    public float minWallNormalAngleChange = 15f; // the minimum angle change that is needed to count a surface as a new wall
+    [SerializeField] private float minWallNormalAngleChange = 15f; // the minimum angle change that is needed to count a surface as a new wall
     
     [Header("Wall Run Forces")]
     
-    public float wallRunForce = 200f; // forward wallRunForce, Note: maxSpeed while Wallrunning is defined in PlayerMovement
-    public float wallJumpSideForce = 15f; // sidewards force of your wall jump (pushes you away from the wall when jumping)
+    [SerializeField] private float wallRunForce = 200f; // forward wallRunForce, Note: maxSpeed while Wallrunning is defined in PlayerMovement
+    [SerializeField] private float wallJumpSideForce = 10f; // sidewards force of your wall jump (pushes you away from the wall when jumping)
     
     [Space]
     
-    public bool useGravity;
+    [SerializeField] private bool useGravity;
     
-    public float gravityCounterForce = 25f; // the higher the value, the lower the effect of gravity while Wallrunning
+    [SerializeField] private float gravityCounterForce = 28f; // the higher the value, the lower the effect of gravity while Wallrunning
     
-    public float wallJumpUpForce = 10f; // upward force of your wall jump
+    [SerializeField] private float wallJumpUpForce = 10f; // upward force of your wall jump
     
     [Space]
     
-    public float wallrunClimbSpeed = 4f; // how fast you can move on the y axis when Wallrunning diagonally
+    [SerializeField] private float wallrunClimbSpeed = 4f; // how fast you can move on the y axis when Wallrunning diagonally
     
     [Header("Wall Run Behaviour")]
     
-    public float maxWallRunTime = 1f;
+    [SerializeField] private float maxWallRunTime = 1f;
     
-    public float wallJumpDuration = 0.5f; // the duration of the wallJump, afterwards speed gained decreases quickly back to 
-    
-    [Space]
-    
-    public bool doJumpOnEndOfTimer; // when active, wall jump happens automatically when timer runs out
-    
-    [Space]
-    public bool resetJumpsOnNewWall = true; // when active, double jumps get resetted when PlayerParent hits a new wall
-    public bool resetJumpsOnEveryWall = false; // when active, double jumps get resetted when PlayerParent hits a wall (always!)
+    [SerializeField] private float wallJumpDuration = 0.5f; // the duration of the wallJump, afterwards speed gained decreases quickly back to 
     
     [Space]
     
-    public int allowedWallJumps = 1; // wall jumps allowed (resets on new wall)
+    [SerializeField] private bool doJumpOnEndOfTimer; // when active, wall jump happens automatically when timer runs out
+    
+    [Space]
+    [SerializeField] private bool resetJumpsOnNewWall = true; // when active, double jumps get resetted when PlayerParent hits a new wall
+    [SerializeField] private bool resetJumpsOnEveryWall = false; // when active, double jumps get resetted when PlayerParent hits a wall (always!)
+    
+    [Space]
+    
+    [SerializeField] private int allowedWallJumps = 1; // wall jumps allowed (resets on new wall)
 
     [Header("Climbing Forces")]
     
-    public float climbJumpUpForce = 10f; // upward force of your climb jump
-    public float climbJumpBackForce = 5f; // backwards force of your climb jump (pushes you away from the wall)
+    [SerializeField] private float climbJumpUpForce = 10f; // upward force of your climb jump
+    [SerializeField] private float climbJumpBackForce = 5f; // backwards force of your climb jump (pushes you away from the wall)
     
     [Space]
     
-    public float maxClimbYSpeed = 10f; // max upward speed while Climbing
+    [SerializeField] private float maxClimbYSpeed = 10f; // max upward speed while Climbing
     
     [Space]
     
-    public float backWallJumpUpForce = 5f;
-    public float backWallJumpForwardForce = 12f;
+    [SerializeField] private float backWallJumpUpForce = 5f;
+    [SerializeField] private float backWallJumpForwardForce = 12f;
     
     
     [Header("Climbing Behaviour")]
     
-    public float maxClimbTime = 0.75f;
+    [SerializeField] private float maxClimbTime = 0.75f;
     
     [Space]
     
-    public float minFrontWallAngle = 80; // how steep the wall needs to be
+    [SerializeField] private float minFrontWallAngle = 80; // how steep the wall needs to be
     
     [Space]
     
-    public float maxWallLookAngle = 30f; // if you look at the wall with an angle of let's say 45 degrees, you can't climb
+    [SerializeField] private float maxWallLookAngle = 30f; // if you look at the wall with an angle of let's say 45 degrees, you can't climb
     
     [Space]
     
-    public int allowedClimbJumps = 1; // climb jumps allowed (resets on new wall)
+    [SerializeField] private int allowedClimbJumps = 1; // climb jumps allowed (resets on new wall)
     
     [Header("Vaulting")]
     
-    public float vaultDetectionLength = 1.2f;
+    [SerializeField] private float vaultDetectionLength = 1.2f;
     
     [Space]
     
-    public float maxVaultClimbYSpeed = 10f;
+    [SerializeField] private float maxVaultClimbYSpeed = 10f;
     
     [Space]
     
-    public bool topReached;
+    [SerializeField] private bool topReached;
     
     [Header("Camera Effects")]
     
-    public float wallRunFOV = 110f; // the fov of the camera while Wallrunning
-    public float wallRunFOVChangeSpeed = 0.2f; // how fast the fov changes while Wallrunning
+    [SerializeField] private float wallRunFOV = 110f; // the fov of the camera while Wallrunning
+    [SerializeField] private float wallRunFOVChangeSpeed = 0.2f; // how fast the fov changes while Wallrunning
     
     [Space]
     
-    public float wallRunTilt = 5f; // the tilt of the camera while Wallrunning
-    public float wallRunTiltChangeSpeed = 0.2f; // how fast the tilt changes while Wallrunning
-    
-    [Header("State")]
-    
-    public bool ledgegrabbing;
+    [SerializeField] private float wallRunTilt = 5f; // the tilt of the camera while Wallrunning
+    [SerializeField] private float wallRunTiltChangeSpeed = 0.2f; // how fast the tilt changes while Wallrunning
     
     [Header("Debugging")]
 
-    public TextMeshProUGUI text_wallState; // displaying text ingame
+    [SerializeField] private TextMeshProUGUI text_wallState; // displaying text ingame
     
     //Dynamic, Non-Serialized Below
     
     // this entire section is for defining how long the raycasts forward, sideways and backwards are
     /// these values should work just fine for your game, but if you still want to change them
     /// just set them to public and change them inside of Unity
-    private float doubleRayCheckDistance = 0.1f;
-    private float wallDistanceSide = 0.7f;
-    private float wallDistanceFront = 1f;
-    private float wallDistanceBack = 1f;
+    private float _doubleRayCheckDistance = 0.1f;
+    private float _wallDistanceSide = 0.7f;
+    private float _wallDistanceFront = 1f;
+    private float _wallDistanceBack = 1f;
 
-    private float minJumpHeight = 2f; // the minimal height the PlayerParent needs to have in order to wallRun
+    private float _minJumpHeight = 2f; // the minimal height the PlayerParent needs to have in order to wallRun
 
-    private float exitWallTime = 0.2f; // just a variable needed to exit walls correctly
-    private float exitWallTimer;
+    private float _exitWallTime = 0.2f; // just a variable needed to exit walls correctly
+    private float _exitWallTimer;
 
-    private bool vaultClimbStarted;
-    private bool readyToVault;
-    private bool vaultPerformed;
-    private bool midCheck;
-    private bool feetCheck;
+    private bool _vaultClimbStarted;
+    private bool _readyToVault;
+    private bool _vaultPerformed;
+    private bool _midCheck;
+    private bool _feetCheck;
     
     //IDK if needed, these weren't used in the script - Sid
     // public float climbForce = 200f; // upward force while Climbing
@@ -210,92 +163,117 @@ public class WallRunning : MonoBehaviour
     // public float customGravity; // apply custom gravity while Wallrunning
     
     //Player References
-    private Rigidbody rb;
+    
+    private PlayerMovement _pm;
+    
+    private LedgeGrabbing _lg;
+    
+    private Detector _dt;
+    
+    private PlayerCam _playerCamScript;
+    
+    private Rigidbody _rb;
+    
+    private Transform _orientation;
+    
+    private InputAction _wallJumpAction;
+    
+    // private InputAction _upwardsRunAction;
+    //
+    // private InputAction _downwardsRunAction;
+    
+    private LayerMask _whatIsGround;
     
     //Timing
-    private float wallRunTimer;
+    private float _wallRunTimer;
     
-    private float climbTimer;
+    private float _climbTimer;
     
     //Detection
     
-    [HideInInspector] public bool wallFront;
-    [HideInInspector] public bool wallBack;
+    private bool _wallFront;
+    private bool _wallBack;
     
     
-    private float wallLookAngle;
-    private float frontWallAngle;
+    private float _wallLookAngle;
+    private float _frontWallAngle;
     
-    private Transform lastWall; // the transform of the wall the PlayerParent previously touched
-    private Vector3 lastWallNormal; // the normal of the wall the prlayer previously touched
+    private Transform _lastWall; // the transform of the wall the PlayerParent previously touched
+    private Vector3 _lastWallNormal; // the normal of the wall the prlayer previously touched
     
     //State
-    private State state; // this variable stores the current State
+    private State _state; // this variable stores the current State
     
-    //bools that signal state of the PlayerParent input
-    private bool upwardsRunning;
-    private bool downwardsRunning;
-    private float horizontalInput;
-    private float verticalInput;
+    //bools that signal _state of the PlayerParent input
+    private bool _upwardsRunning;
+    private bool _downwardsRunning;
+    private float _horizontalInput;
+    private float _verticalInput;
     
     // booleans that get activated when the raycasts hit something
-    private bool wallLeft;
-    private bool wallLeft2;
-    private bool wallRight;
-    private bool wallRight2;
+    private bool _wallLeft;
+    private bool _wallLeft2;
+    private bool _wallRight;
+    private bool _wallRight2;
     
-    private bool exitingWall; // needed to exit walls correctly
+    private bool _exitingWall; // needed to exit walls correctly
 
-    private bool wallRemembered;
+    private bool _wallRemembered;
 
     // RaycastHit variables for all of the raycasts that get performed
     /// These variables store the information of where objects were hit
-    private RaycastHit leftWallHit;
-    private RaycastHit leftWallHit2;
-    private RaycastHit rightWallHit;
-    private RaycastHit rightWallHit2;
+    private RaycastHit _leftWallHit;
+    private RaycastHit _leftWallHit2;
+    private RaycastHit _rightWallHit;
+    private RaycastHit _rightWallHit2;
 
-    private RaycastHit frontWallHit;
-    private RaycastHit backWallHit;
+    private RaycastHit _frontWallHit;
+    private RaycastHit _backWallHit;
 
     // jump counters
-    private int wallJumpsDone;
-    private int climbJumpsDone;
+    private int _wallJumpsDone;
+    private int _climbJumpsDone;
+
+    private void Awake()
+    {
+        //get references
+        _rb = GetComponent<Rigidbody>();
+        _pm = GetComponent<PlayerMovement>();
+        _orientation = _pm.Orientation;
+        _playerCamScript = GetComponent<PlayerCam>();
+        _lg = GetComponent<LedgeGrabbing>();
+        _dt = GetComponent<Detector>();
+        
+        PlayerInput playerInput = GetComponent<PlayerInput>();
+        
+        _wallJumpAction = playerInput.actions.FindAction(wallJumpActionName);
+        // upwardsRunAction = playerInput.actions.FindAction(upwardsRunActionName);
+        // downwardsRunAction = playerInput.actions.FindAction(downwardsRunActionName);
+    }
 
     private void Start()
     {
         // if the layermasks are not set to anything, set them to "Default"
         if (whatIsWall.value == 0)
             whatIsWall = LayerMask.GetMask("Default");
+        
+        //wait on this for pm to have initialized
+        _whatIsGround = _pm.WhatIsGround;
 
-        if (whatIsGround.value == 0)
-            whatIsGround = LayerMask.GetMask("Default");
-
-        // get the references
-        rb = GetComponent<Rigidbody>();
-        pm = GetComponent<PlayerMovement>();
-        playerCamScript = GetComponent<PlayerCam>();
-        lg = GetComponent<LedgeGrabbing>();
-        dt = GetComponent<Detector>();
-        
-        PlayerInput playerInput = GetComponent<PlayerInput>();
-        
-        wallJumpAction = playerInput.actions.FindAction(wallJumpActionName);
-        // upwardsRunAction = playerInput.actions.FindAction(upwardsRunActionName);
-        // downwardsRunAction = playerInput.actions.FindAction(downwardsRunActionName);
-        
+        if (_whatIsGround.value == 0)
+            _whatIsGround = LayerMask.GetMask("Default");
     }
 
     private void OnEnable()
     {
-        wallJumpAction.Enable();
+        _wallJumpAction.Enable();
         // upwardsRunAction.Enable();
         // downwardsRunAction.Enable();
     }
     
     private void OnDisable()
     {
-        wallJumpAction.Disable();
+        _wallJumpAction.Disable();
         // upwardsRunAction.Disable();
         // downwardsRunAction.Disable();
     }
@@ -308,22 +286,22 @@ public class WallRunning : MonoBehaviour
         MyInput();
 
         // if Grounded, next wall should be considered a new one
-        if (pm.Grounded && lastWall != null && !pm.Climbing)
-            lastWall = null; // by setting the lastWall to null -> next wall will definitely be seen as a new one
+        if (_pm.Grounded && _lastWall != null && !_pm.Climbing)
+            _lastWall = null; // by setting the _lastWall to null -> next wall will definitely be seen as a new one
 
         // just setting the Ui text, ignore
         if(text_wallState != null)
-            text_wallState.SetText(state.ToString());
+            text_wallState.SetText(_state.ToString());
     }
 
     private void FixedUpdate()
     {
         // if Wallrunning has started continously call WallRunningMovement()
-        if (pm.Wallrunning && !exitingWall)
+        if (_pm.Wallrunning && !_exitingWall)
             WallRunningMovement();
 
         // if Climbing has started continuously call ClimbingMovment()
-        if (pm.Climbing && !exitingWall)
+        if (_pm.Climbing && !_exitingWall)
             ClimbingMovement();
     }
 
@@ -332,24 +310,24 @@ public class WallRunning : MonoBehaviour
     private void MyInput()
     {
         // get W,A,S,D input
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
+        _horizontalInput = Input.GetAxisRaw("Horizontal");
+        _verticalInput = Input.GetAxisRaw("Vertical");
 
         // // upwards and downwards running
-        // upwardsRunning   = upwardsRunAction.IsPressed();
-        // downwardsRunning = downwardsRunAction.IsPressed();
+        // _upwardsRunning   = upwardsRunAction.IsPressed();
+        // _downwardsRunning = downwardsRunAction.IsPressed();
 
         // if you're pressing the jump key while Wallrunning, or if there's a wall in front or back of you
-        if (wallJumpAction.triggered && (pm.Wallrunning || wallFront || wallBack) && !lg.exitingLedge)
+        if (_wallJumpAction.triggered && (_pm.Wallrunning || _wallFront || _wallBack) && !_lg.ExitingLedge)
         {
-            pm.MaxYSpeed = -1; // make sure the players Y speed is unlimited
+            _pm.MaxYSpeed = -1; // make sure the players Y speed is unlimited
             WallJump(); // perform a wall jump
         }
 
-        // when Climbing, then stopping before the climbTimer runs out, then reentering
+        // when Climbing, then stopping before the _climbTimer runs out, then reentering
         // -> Start Climbing again
-        /// Note: This is just for reentering, the main way to start Climbing is executed by the StateHandler
-        if (!pm.Climbing && verticalInput > 1 && wallFront && climbTimer > 0 && !exitingWall)
+        // Note: This is just for reentering, the main way to start Climbing is executed by the StateHandler
+        if (!_pm.Climbing && _verticalInput > 1 && _wallFront && _climbTimer > 0 && !_exitingWall)
             StartClimbing();
     }
 
@@ -357,23 +335,23 @@ public class WallRunning : MonoBehaviour
     // to better understand it, check out the explanation in the 10 Day Learning Plan
     private void CheckForWall()
     {
-        float difference = doubleRayCheckDistance * 0.5f;
-        Vector3 differenceV = orientation.forward * difference;
+        float difference = _doubleRayCheckDistance * 0.5f;
+        Vector3 differenceV = _orientation.forward * difference;
 
-        wallLeft = Physics.Raycast(transform.position - differenceV, -orientation.right, out leftWallHit, wallDistanceSide, whatIsWall);
-        wallLeft2 = Physics.Raycast(transform.position + differenceV, -orientation.right, out leftWallHit2, wallDistanceSide, whatIsWall);
+        _wallLeft = Physics.Raycast(transform.position - differenceV, -_orientation.right, out _leftWallHit, _wallDistanceSide, whatIsWall);
+        _wallLeft2 = Physics.Raycast(transform.position + differenceV, -_orientation.right, out _leftWallHit2, _wallDistanceSide, whatIsWall);
 
-        wallRight = Physics.Raycast(transform.position - differenceV, orientation.right, out rightWallHit, wallDistanceSide, whatIsWall);
-        wallRight2 = Physics.Raycast(transform.position + differenceV, orientation.right, out rightWallHit2, wallDistanceSide, whatIsWall);
+        _wallRight = Physics.Raycast(transform.position - differenceV, _orientation.right, out _rightWallHit, _wallDistanceSide, whatIsWall);
+        _wallRight2 = Physics.Raycast(transform.position + differenceV, _orientation.right, out _rightWallHit2, _wallDistanceSide, whatIsWall);
 
-        // wallFront = Physics.Raycast(transform.position, Orientation.forward, out frontWallHit, wallDistanceFront, whatIsWall);
-        wallFront = Physics.SphereCast(transform.position, 0.25f, orientation.forward, out frontWallHit, wallDistanceFront, whatIsWall);
-        wallBack = Physics.Raycast(transform.position, -orientation.forward, out backWallHit, wallDistanceBack, whatIsWall);
+        // _wallFront = Physics.Raycast(transform.position, Orientation.forward, out _frontWallHit, _wallDistanceFront, whatIsWall);
+        _wallFront = Physics.SphereCast(transform.position, 0.25f, _orientation.forward, out _frontWallHit, _wallDistanceFront, whatIsWall);
+        _wallBack = Physics.Raycast(transform.position, -_orientation.forward, out _backWallHit, _wallDistanceBack, whatIsWall);
 
-        wallLookAngle = Vector3.Angle(orientation.forward, -frontWallHit.normal);
+        _wallLookAngle = Vector3.Angle(_orientation.forward, -_frontWallHit.normal);
 
         // reset readyToClimb and wallJumps whenever PlayerParent hits a new wall
-        if (wallLeft || wallRight || wallFront || wallBack)
+        if (_wallLeft || _wallRight || _wallFront || _wallBack)
         {
             if (NewWallHit())
             {
@@ -381,49 +359,49 @@ public class WallRunning : MonoBehaviour
                 ResetWallJumpsDone();
 
                 if (resetJumpsOnNewWall)
-                    pm.ResetDoubleJumps();
+                    _pm.ResetDoubleJumps();
 
-                wallRunTimer = maxWallRunTime;
-                climbTimer = maxClimbTime;
+                _wallRunTimer = maxWallRunTime;
+                _climbTimer = maxClimbTime;
             }
 
             if(resetJumpsOnEveryWall)
-                pm.ResetDoubleJumps();
+                _pm.ResetDoubleJumps();
         }
 
         // vaulting
-        midCheck = Physics.Raycast(transform.position, orientation.forward, vaultDetectionLength, whatIsWall);
+        _midCheck = Physics.Raycast(transform.position, _orientation.forward, vaultDetectionLength, whatIsWall);
 
         RaycastHit feetHit;
-        feetCheck = Physics.Raycast(transform.position + new Vector3(0, -0.9f, 0), orientation.forward, out feetHit, vaultDetectionLength, whatIsWall);
+        _feetCheck = Physics.Raycast(transform.position + new Vector3(0, -0.9f, 0), _orientation.forward, out feetHit, vaultDetectionLength, whatIsWall);
 
-        frontWallAngle = Vector3.Angle(orientation.up, feetHit.normal); // calculate how steep the wall is
+        _frontWallAngle = Vector3.Angle(_orientation.up, feetHit.normal); // calculate how steep the wall is
 
-        // feetCheck = Physics.SphereCast(transform.position + new Vector3(0, -0.9f, 0), 0.1f, Orientation.forward, out feetHit, vaultDetectionLength, whatIsWall);
+        // _feetCheck = Physics.SphereCast(transform.position + new Vector3(0, -0.9f, 0), 0.1f, Orientation.forward, out feetHit, vaultDetectionLength, whatIsWall);
 
-        topReached = feetCheck && !midCheck;
+        topReached = _feetCheck && !_midCheck;
     }
 
     /// a bool called to check if PlayerParent has hit a new wall
     private bool NewWallHit()
     {
-        // if lastWall is null, next one is definitely a new wall -> return true
-        if (lastWall == null)
+        // if _lastWall is null, next one is definitely a new wall -> return true
+        if (_lastWall == null)
             return true;
 
-        // the following statements just check if the new wall (stored in the WallHit variables) is equal to the lastWall
+        // the following statements just check if the new wall (stored in the WallHit variables) is equal to the _lastWall
         // if not -> new Wall has been hit -> return true
 
-        if (wallLeft && (leftWallHit.transform != lastWall || Mathf.Abs(Vector3.Angle(lastWallNormal, leftWallHit.normal)) > minWallNormalAngleChange))
+        if (_wallLeft && (_leftWallHit.transform != _lastWall || Mathf.Abs(Vector3.Angle(_lastWallNormal, _leftWallHit.normal)) > minWallNormalAngleChange))
             return true;
 
-        else if (wallRight && (rightWallHit.transform != lastWall || Mathf.Abs(Vector3.Angle(lastWallNormal, rightWallHit.normal)) > minWallNormalAngleChange))
+        else if (_wallRight && (_rightWallHit.transform != _lastWall || Mathf.Abs(Vector3.Angle(_lastWallNormal, _rightWallHit.normal)) > minWallNormalAngleChange))
             return true;
 
-        else if (wallFront && (frontWallHit.transform != lastWall || Mathf.Abs(Vector3.Angle(lastWallNormal, frontWallHit.normal)) > minWallNormalAngleChange))
+        else if (_wallFront && (_frontWallHit.transform != _lastWall || Mathf.Abs(Vector3.Angle(_lastWallNormal, _frontWallHit.normal)) > minWallNormalAngleChange))
             return true;
 
-        else if (wallBack && (backWallHit.transform != lastWall || Mathf.Abs(Vector3.Angle(lastWallNormal, backWallHit.normal)) > minWallNormalAngleChange))
+        else if (_wallBack && (_backWallHit.transform != _lastWall || Mathf.Abs(Vector3.Angle(_lastWallNormal, _backWallHit.normal)) > minWallNormalAngleChange))
             return true;
 
         // if everything above did not happen, no new wall has been hit -> return false
@@ -434,36 +412,36 @@ public class WallRunning : MonoBehaviour
     /// It simply stores the Transform and Normal of the current wall
     private void RememberLastWall()
     {
-        if (wallLeft)
+        if (_wallLeft)
         {
-            lastWall = leftWallHit.transform;
-            lastWallNormal = leftWallHit.normal;
+            _lastWall = _leftWallHit.transform;
+            _lastWallNormal = _leftWallHit.normal;
         }
 
-        if (wallRight)
+        if (_wallRight)
         {
-            lastWall = rightWallHit.transform;
-            lastWallNormal = rightWallHit.normal;
+            _lastWall = _rightWallHit.transform;
+            _lastWallNormal = _rightWallHit.normal;
         }
 
-        if (wallFront)
+        if (_wallFront)
         {
-            lastWall = frontWallHit.transform;
-            lastWallNormal = frontWallHit.normal;
+            _lastWall = _frontWallHit.transform;
+            _lastWallNormal = _frontWallHit.normal;
         }
 
-        if (wallBack)
+        if (_wallBack)
         {
-            lastWall = backWallHit.transform;
-            lastWallNormal = backWallHit.normal;
+            _lastWall = _backWallHit.transform;
+            _lastWallNormal = _backWallHit.normal;
         }
     }
 
     private bool CanWallRun()
     {
-        // cast a ray down using the minJumpHeight as distance
+        // cast a ray down using the _minJumpHeight as distance
         // if this ray hits something, the PlayerParent is not high enough in the air to wallrun
-        return !Physics.Raycast(transform.position, Vector3.down, minJumpHeight, whatIsGround);
+        return !Physics.Raycast(transform.position, Vector3.down, _minJumpHeight, _whatIsGround);
     }
 
     #endregion
@@ -472,84 +450,84 @@ public class WallRunning : MonoBehaviour
 
     private void StartWallRun()
     {
-        if (!pm.IsStateAllowed(PlayerMovement.MovementMode.wallrunning))
+        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.wallrunning))
             return;
 
         // this will cause the PlayerMovement script to enter the MovementState.Wallrunning
-        pm.Wallrunning = true;
+        _pm.Wallrunning = true;
 
         // limit the y speed while Wallrunning
-        pm.MaxYSpeed = maxClimbYSpeed;
+        _pm.MaxYSpeed = maxClimbYSpeed;
 
-        wallRemembered = false;
+        _wallRemembered = false;
 
         // increase camera fov
-        playerCamScript.DoFov(wallRunFOV, wallRunFOVChangeSpeed);
+        _playerCamScript.DoFov(wallRunFOV, wallRunFOVChangeSpeed);
 
         RememberLastWall();
 
         // set camera tilt
-        if (wallRight) playerCamScript.DoTilt(wallRunTilt ,wallRunTiltChangeSpeed);
-        if(wallLeft) playerCamScript.DoTilt(-wallRunTilt, wallRunTiltChangeSpeed);
+        if (_wallRight) _playerCamScript.DoTilt(wallRunTilt ,wallRunTiltChangeSpeed);
+        if(_wallLeft) _playerCamScript.DoTilt(-wallRunTilt, wallRunTiltChangeSpeed);
     }
 
     private void WallRunningMovement()
     {
         // make sure normal gravity is turned off while Wallrunning
-        rb.useGravity = useGravity;
+        _rb.useGravity = useGravity;
 
         // choose the correct wall normal (direction away from the wall)
-        Vector3 wallNormal = wallRight ? rightWallHit.normal : leftWallHit.normal;
+        Vector3 wallNormal = _wallRight ? _rightWallHit.normal : _leftWallHit.normal;
 
         // calculate the forward direction of the wall
         Vector3 wallForward = Vector3.Cross(wallNormal, transform.up);
 
         /// sometimes you need to switch it
-        if ((orientation.forward - wallForward).magnitude > (orientation.forward - -wallForward).magnitude)
+        if ((_orientation.forward - wallForward).magnitude > (_orientation.forward - -wallForward).magnitude)
             wallForward = -wallForward;
 
         // forward force
-        rb.AddForce(wallForward * wallRunForce, ForceMode.Force);
+        _rb.AddForce(wallForward * wallRunForce, ForceMode.Force);
 
         // upwards/downwards force
-        if (upwardsRunning)
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, wallrunClimbSpeed, rb.linearVelocity.z);
-        if (downwardsRunning)
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, -wallrunClimbSpeed, rb.linearVelocity.z);
+        if (_upwardsRunning)
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, wallrunClimbSpeed, _rb.linearVelocity.z);
+        if (_downwardsRunning)
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, -wallrunClimbSpeed, _rb.linearVelocity.z);
 
         // push to wall force
-        if (!(wallLeft && horizontalInput > 0) && !(wallRight && horizontalInput < 0))
-            rb.AddForce(-wallNormal * 100, ForceMode.Force);
+        if (!(_wallLeft && _horizontalInput > 0) && !(_wallRight && _horizontalInput < 0))
+            _rb.AddForce(-wallNormal * 100, ForceMode.Force);
 
         // weaken gravity
         if (useGravity)
-            rb.AddForce(transform.up * gravityCounterForce, ForceMode.Force);
+            _rb.AddForce(transform.up * gravityCounterForce, ForceMode.Force);
 
         // remember the last wall
-        if (!wallRemembered)
+        if (!_wallRemembered)
         {
             RememberLastWall();
-            wallRemembered = true;
-            /// Note: The wallRemembered bool might seem unnecessary but it isn't
-            /// Without it, the wall would be remembered every single frame, but this way, it's only called once for every new wallrun
+            _wallRemembered = true;
+            // Note: The _wallRemembered bool might seem unnecessary but it isn't
+            // Without it, the wall would be remembered every single frame, but this way, it's only called once for every new wallrun
         }
     }
 
-    /// called when wallRunTimer runs out, PlayerParent performs a walljump or PlayerParent exits the wall on another way
+    /// called when _wallRunTimer runs out, PlayerParent performs a walljump or PlayerParent exits the wall on another way
     private void StopWallRun()
     {
         // activate gravity again
-        rb.useGravity = true;
+        _rb.useGravity = true;
 
         // leave the MovementMove.Wallrunning
-        pm.Wallrunning = false;
+        _pm.Wallrunning = false;
 
         // this will make sure that the y speed of the PlayerParent is unlimited again
-        pm.MaxYSpeed = -1;
+        _pm.MaxYSpeed = -1;
 
         // reset camera fov and tilt
-        playerCamScript.DoFov(-360, wallRunFOVChangeSpeed);
-        playerCamScript.DoTilt(-360, wallRunTiltChangeSpeed);
+        _playerCamScript.DoFov(-360, wallRunFOVChangeSpeed);
+        _playerCamScript.DoTilt(-360, wallRunTiltChangeSpeed);
     }
 
     #endregion
@@ -558,57 +536,57 @@ public class WallRunning : MonoBehaviour
 
     private void StartClimbing()
     {
-        if (!pm.IsStateAllowed(PlayerMovement.MovementMode.climbing))
+        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.climbing))
             return;
 
         // this will cause the PlayerMovement script to enter MovementState.Climbing
-        pm.Climbing = true;
+        _pm.Climbing = true;
 
         // limit the players y speed to your maxClimbSpeed, or vaultClimbSpeed
-        // pm.MaxYSpeed = topReached ? maxVaultClimbYSpeed : maxClimbYSpeed;
-        // pm.MaxYSpeed = maxClimbYSpeed;
+        // _pm.MaxYSpeed = topReached ? maxVaultClimbYSpeed : maxClimbYSpeed;
+        // _pm.MaxYSpeed = maxClimbYSpeed;
 
-        if (topReached) vaultClimbStarted = true;
+        if (topReached) _vaultClimbStarted = true;
 
         // disable gravity
-        rb.useGravity = false;
+        _rb.useGravity = false;
 
-        wallRemembered = false;
+        _wallRemembered = false;
 
         RememberLastWall();
 
         //CHANGE TODO: THIS
         // shake the camera, just a cool visual effect
-        // playerCamScript.DoShake(1, 1);
+        // _playerCamScript.DoShake(1, 1);
     }
 
     private void ClimbingMovement()
     {
         // make sure that gravity stays off
-        if (rb.useGravity != false)
-            rb.useGravity = false;
+        if (_rb.useGravity != false)
+            _rb.useGravity = false;
 
         float speed = topReached ? maxVaultClimbYSpeed : maxClimbYSpeed;
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, speed, rb.linearVelocity.z);
+        _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, speed, _rb.linearVelocity.z);
 
         /* calculate directions
 
         Vector3 upwardsDirection = Vector3.up;
 
         // calculate the direction from the PlayerParent to the wall
-        Vector3 againstWallDirection = (frontWallHit.point - Orientation.position).normalized;
+        Vector3 againstWallDirection = (_frontWallHit.point - Orientation.position).normalized;
 
         // add upwards force
-        rb.AddForce(upwardsDirection * climbForce, ForceMode.Force);
+        _rb.AddForce(upwardsDirection * climbForce, ForceMode.Force);
 
         // push PlayerParent to wall
-        // rb.AddForce(againstWallDirection * pushToWallForce, ForceMode.Force);
+        // _rb.AddForce(againstWallDirection * pushToWallForce, ForceMode.Force);
 
         // remember the last wall
-        if (!wallRemembered)
+        if (!_wallRemembered)
         {
             RememberLastWall();
-            wallRemembered = true;
+            _wallRemembered = true;
         }
         */
     }
@@ -616,31 +594,31 @@ public class WallRunning : MonoBehaviour
     private void StopClimbing()
     {
         // activate the gravity again
-        rb.useGravity = true;
+        _rb.useGravity = true;
 
         // exit MovementMode.Climbing
-        pm.Climbing = false;
+        _pm.Climbing = false;
 
         // make sure the players y speed is no longer limited
-        pm.MaxYSpeed = -1;
+        _pm.MaxYSpeed = -1;
 
         // no longer readyToClimb until the wall is sucessfully exited
         // readyToClimb = false;
 
         //CHANGE TODO: THIS
         // reset RealCam shake
-        // playerCamScript.ResetShake();
+        // _playerCamScript.ResetShake();
 
         //CHANGE
         // reset RealCam fov and tilt
-        // playerCamScript.ResetFov();
-        // playerCamScript.ResetTilt();
+        // _playerCamScript.ResetFov();
+        // _playerCamScript.ResetTilt();
 
-        vaultClimbStarted = false;
+        _vaultClimbStarted = false;
     }
 
-    /// called when the PlayerParent has sucessfully exited a wall
-    /// makes Climbing possible again
+    // called when the PlayerParent has sucessfully exited a wall
+    // makes Climbing possible again
     // private void ResetReadyToClimb()
     // {
     //     readyToClimb = true;
@@ -651,9 +629,9 @@ public class WallRunning : MonoBehaviour
     #region Walljumping
 
     /// Inside of this function the decision between normal or precise wall/climb jumping is made
-    public void WallJump()
+    private void WallJump()
     {
-        if (!pm.IsStateAllowed(PlayerMovement.MovementMode.walljumping))
+        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.walljumping))
             return;
 
         if (!enablePrecisionMode)
@@ -662,67 +640,67 @@ public class WallRunning : MonoBehaviour
             return;
         }
 
-        bool sideWall = wallLeft || wallRight;
+        bool sideWall = _wallLeft || _wallRight;
 
-        if (sideWall && dt.precisionTargetFound) PreciseWallJump();
+        if (sideWall && _dt.PrecisionTargetFound) PreciseWallJump();
         else NormalWallJump();
     }
 
     private void NormalWallJump()
     {
-        if (ledgegrabbing) return;
+        if (LedgeGrabbing) return;
 
-        /// once again, the full explanation how wall jumping works can be found in the 10 Day Learning Plan
+        // once again, the full explanation how wall jumping works can be found in the 10 Day Learning Plan
 
         bool applyUpwardForce = true;
 
-        exitingWall = true;
-        exitWallTimer = exitWallTime;
+        _exitingWall = true;
+        _exitWallTimer = _exitWallTime;
 
         // create a new vector to store the forceToApply
         Vector3 forceToApply = new Vector3();
 
         // I'll explain the next if, else if statements all at once here:
-        ///
-        /// 1. calculate the force to apply by using transform.up and
-        /// the normal of the wall hit (which is the direction away from the wall!)
-        /// 
-        /// 2. if you still have allowed jumps on this wall, set applyUpwardForce to true
-        /// 
-        /// 3. count up the jumps done
+        //
+        // 1. calculate the force to apply by using transform.up and
+        // the normal of the wall hit (which is the direction away from the wall!)
+        // 
+        // 2. if you still have allowed jumps on this wall, set applyUpwardForce to true
+        // 
+        // 3. count up the jumps done
 
-        if (wallLeft)
+        if (_wallLeft)
         {
-            forceToApply = transform.up * wallJumpUpForce + leftWallHit.normal * wallJumpSideForce;
+            forceToApply = transform.up * wallJumpUpForce + _leftWallHit.normal * wallJumpSideForce;
 
-            applyUpwardForce = wallJumpsDone < allowedWallJumps;
-            wallJumpsDone++;
+            applyUpwardForce = _wallJumpsDone < allowedWallJumps;
+            _wallJumpsDone++;
         }
 
-        else if(wallRight)
+        else if(_wallRight)
         {
-            forceToApply = transform.up * wallJumpUpForce + rightWallHit.normal * wallJumpSideForce;
+            forceToApply = transform.up * wallJumpUpForce + _rightWallHit.normal * wallJumpSideForce;
 
-            applyUpwardForce = wallJumpsDone < allowedWallJumps;
-            wallJumpsDone++;
+            applyUpwardForce = _wallJumpsDone < allowedWallJumps;
+            _wallJumpsDone++;
         }
 
-        else if (wallFront)
+        else if (_wallFront)
         {
-            Vector3 againstWallDirection = (frontWallHit.point - orientation.position).normalized;
+            Vector3 againstWallDirection = (_frontWallHit.point - _orientation.position).normalized;
 
             forceToApply = Vector3.up * climbJumpUpForce + -againstWallDirection * climbJumpBackForce;
 
-            applyUpwardForce = climbJumpsDone < allowedClimbJumps;
-            climbJumpsDone++;
+            applyUpwardForce = _climbJumpsDone < allowedClimbJumps;
+            _climbJumpsDone++;
         }
 
-        else if (wallBack)
+        else if (_wallBack)
         {
             // remember the last wall
-            lastWall = backWallHit.transform;
+            _lastWall = _backWallHit.transform;
 
-            Vector3 againstWallDirection = (backWallHit.point - orientation.position).normalized;
+            Vector3 againstWallDirection = (_backWallHit.point - _orientation.position).normalized;
 
             forceToApply = Vector3.up * backWallJumpUpForce + -againstWallDirection * backWallJumpForwardForce;
 
@@ -738,11 +716,11 @@ public class WallRunning : MonoBehaviour
         if (applyUpwardForce)
         {
             // also reset the y velocity first (as always when jumping)
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
             delayedForceToApply = forceToApply;
             Invoke(nameof(DelayedForce), 0.05f);
 
-            pm.Walljumping = true;
+            _pm.Walljumping = true;
             Invoke(nameof(ResetWallJumpingState), wallJumpDuration);
         }
 
@@ -751,13 +729,13 @@ public class WallRunning : MonoBehaviour
         else
         {
             // also reset the y velocity first
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
             // remove upward force (y axis) from forceToApply
             Vector3 noUpwardForce = new Vector3(forceToApply.x, 0f, forceToApply.z);
 
             // apply force without upward component
-            rb.AddForce(noUpwardForce, ForceMode.Impulse);
+            _rb.AddForce(noUpwardForce, ForceMode.Impulse);
         }
 
         // stop wallRun and Climbing immediately
@@ -768,45 +746,45 @@ public class WallRunning : MonoBehaviour
     private Vector3 delayedForceToApply;
     private void DelayedForce()
     {
-        rb.AddForce(delayedForceToApply, ForceMode.Impulse);
+        _rb.AddForce(delayedForceToApply, ForceMode.Impulse);
     }
 
     private void ResetWallJumpingState()
     {
-        pm.Walljumping = false;
+        _pm.Walljumping = false;
     }
 
     /// called whenever PlayerParent hits a new wall
     private void ResetWallJumpsDone()
     {
-        wallJumpsDone = 0;
-        climbJumpsDone = 0;
+        _wallJumpsDone = 0;
+        _climbJumpsDone = 0;
     }
 
     private void PreciseWallJump()
     {
-        exitingWall = true;
-        exitWallTimer = exitWallTime;
+        _exitingWall = true;
+        _exitWallTimer = _exitWallTime;
 
         // before jumping off, make sure that the last wall is remembered
         RememberLastWall();
 
-        Vector3 midPoint = orientation.position;
+        Vector3 midPoint = _orientation.position;
 
-        float markerSphereRelativeYPos = dt.markerSphere.position.y - midPoint.y;
-        float highestPointOfArc = markerSphereRelativeYPos + pm.MaxJumpHeight;
+        float markerSphereRelativeYPos = _dt.MarkerSphere.position.y - midPoint.y;
+        float highestPointOfArc = markerSphereRelativeYPos + _pm.MaxJumpHeight;
 
         // no upwards force when point is below PlayerParent
         if (markerSphereRelativeYPos < 0) highestPointOfArc = 1;
 
         // print("predicted wall jump " + markerSphereRelativeYPos + " " + highestPointOfArc);
 
-        pm.JumpToPosition(dt.markerSphere.position, highestPointOfArc, midPoint);
+        _pm.JumpToPosition(_dt.MarkerSphere.position, highestPointOfArc, midPoint);
 
-        // rb.AddForce(PhysicsExtension.CalculateJumpVelocity(lowestPoint, jumpTarget.position, MaxJumpHeight), ForceMode.Impulse);
-        /// rb.velocity = PhysicsExtension.CalculateJumpVelocity(midPoint, dt.markerSphere.position, highestPointOfArc);
+        // _rb.AddForce(PhysicsExtension.CalculateJumpVelocity(lowestPoint, jumpTarget.position, MaxJumpHeight), ForceMode.Impulse);
+        // _rb.velocity = PhysicsExtension.CalculateJumpVelocity(midPoint, _dt.MarkerSphere.position, highestPointOfArc);
 
-        wallJumpsDone++;
+        _wallJumpsDone++;
 
         // stop wallRun and Climbing immediately
         StopWallRun();
@@ -817,55 +795,55 @@ public class WallRunning : MonoBehaviour
 
     #region StateMachine
 
-    // and here's the state machine that handles all wallmovement states
+    // and here's the _state machine that handles all wallmovement states
     private void StateMachine()
     {
         // I just defined the bools up here because I'm going to use them multiple times in this StateMachine
 
-        bool leftWall = wallLeft && wallLeft2;
-        bool rightWall = wallRight && wallRight2;
+        bool leftWall = _wallLeft && _wallLeft2;
+        bool rightWall = _wallRight && _wallRight2;
         bool sideWall = leftWall || rightWall;
-        bool noInput = horizontalInput == 0 && horizontalInput == 0;
+        bool noInput = _horizontalInput == 0 && _horizontalInput == 0;
 
-        bool climbing = wallFront && verticalInput > 0;
+        bool climbing = _wallFront && _verticalInput > 0;
 
 
         // State 0 - LedgeGrabbing
-        if (ledgegrabbing)
+        if (LedgeGrabbing)
         {
-            state = State.ledgegrabbing;
+            _state = State.ledgegrabbing;
 
-            // everything else in this state gets handled by the LedgeGrabbing script
+            // everything else in this _state gets handled by the LedgeGrabbing script
 
-            if (pm.Climbing) StopClimbing();
+            if (_pm.Climbing) StopClimbing();
         }
 
         // State 1 - Climbing
-        /// Enter state when: there's a wall in front, you're pressing W,
-        /// you're ready to climb and not currently exiting a wall
-        /// also the wall needs to be steep enough
-        else if ((wallFront || topReached) && verticalInput > 0 && wallLookAngle < maxWallLookAngle && !exitingWall && frontWallAngle > minFrontWallAngle)
+        // Enter _state when: there's a wall in front, you're pressing W,
+        // you're ready to climb and not currently exiting a wall
+        // also the wall needs to be steep enough
+        else if ((_wallFront || topReached) && _verticalInput > 0 && _wallLookAngle < maxWallLookAngle && !_exitingWall && _frontWallAngle > minFrontWallAngle)
         {
             // print("Climbing...");
 
-            state = State.climbing;
+            _state = State.climbing;
 
             // start Climbing if not already started
-            if (!pm.Climbing && climbTimer > 0) StartClimbing();
+            if (!_pm.Climbing && _climbTimer > 0) StartClimbing();
 
             // restart Climbing if top has been reached (changes climbspeed)
-            if (!vaultClimbStarted && topReached) StartClimbing();
+            if (!_vaultClimbStarted && topReached) StartClimbing();
 
-            // count down climbTimer
-            if (climbTimer > 0) climbTimer -= Time.deltaTime;
+            // count down _climbTimer
+            if (_climbTimer > 0) _climbTimer -= Time.deltaTime;
 
             // exit wall once the timer runs out
-            if ((climbTimer < 0) && pm.Climbing)
+            if ((_climbTimer < 0) && _pm.Climbing)
             {
-                climbTimer = -1;
+                _climbTimer = -1;
 
-                exitingWall = true;
-                exitWallTimer = exitWallTime;
+                _exitingWall = true;
+                _exitWallTimer = _exitWallTime;
 
                 StopClimbing();
             }
@@ -873,22 +851,22 @@ public class WallRunning : MonoBehaviour
 
 
         // State 2 - Wallrunning
-        /// Enter state when: there's a wall left or right, you're pressing W, 
-        /// you're high enough over the ground and not exiting a wall
-        else if (sideWall && verticalInput > 0 && CanWallRun() && !exitingWall)
+        // Enter _state when: there's a wall left or right, you're pressing W, 
+        // you're high enough over the ground and not exiting a wall
+        else if (sideWall && _verticalInput > 0 && CanWallRun() && !_exitingWall)
         {
-            state = State.wallrunning;
+            _state = State.wallrunning;
 
             // startwallrun
-            if (!pm.Wallrunning) StartWallRun();
+            if (!_pm.Wallrunning) StartWallRun();
 
-            // count down the wallRunTimer
-            wallRunTimer -= Time.deltaTime;
+            // count down the _wallRunTimer
+            _wallRunTimer -= Time.deltaTime;
 
-            // what happens when the wallRunTimer runs out
-            if (wallRunTimer < 0 && pm.Wallrunning)
+            // what happens when the _wallRunTimer runs out
+            if (_wallRunTimer < 0 && _pm.Wallrunning)
             {
-                wallRunTimer = 0;
+                _wallRunTimer = 0;
 
                 // if needed, perform a wall jump
                 if (doJumpOnEndOfTimer)
@@ -896,8 +874,8 @@ public class WallRunning : MonoBehaviour
 
                 else
                 {
-                    exitingWall = true; // this will set the state to State.exiting
-                    exitWallTimer = exitWallTime; // set the exitWallTimer
+                    _exitingWall = true; // this will set the _state to State.exiting
+                    _exitWallTimer = _exitWallTime; // set the _exitWallTimer
                     StopWallRun(); // stop the wallrun
                 }
             }
@@ -905,43 +883,43 @@ public class WallRunning : MonoBehaviour
 
 
         // State 3 - Sliding
-        /// Enter state when: wall back + S Input, sidewalls with A/D but no W input,
-        /// or Climbing but the climbTimer ran out
-        else if ((wallBack && verticalInput < 0) || (((leftWall && horizontalInput < 0) || (rightWall && horizontalInput > 0)) && verticalInput <= 0) || (climbing && climbTimer <= 0))
+        // Enter _state when: wall back + S Input, sidewalls with A/D but no W input,
+        // or Climbing but the _climbTimer ran out
+        else if ((_wallBack && _verticalInput < 0) || (((leftWall && _horizontalInput < 0) || (rightWall && _horizontalInput > 0)) && _verticalInput <= 0) || (climbing && _climbTimer <= 0))
         {
-            state = State.sliding;
+            _state = State.sliding;
 
             // bug fix
-            if (pm.Wallrunning)
+            if (_pm.Wallrunning)
                 StopWallRun();
         }
 
 
         // State 4 - Exiting
-        /// Enter state when: exitingWall was set to true by other functions
-        else if (exitingWall)
+        // Enter _state when: _exitingWall was set to true by other functions
+        else if (_exitingWall)
         {
-            state = State.exiting;
+            _state = State.exiting;
 
             // make sure the PlayerParent can't move for a quick time
-            pm.Restricted = true;
+            _pm.Restricted = true;
 
             // exit out of wall run or climb when active
-            if (pm.Wallrunning)
+            if (_pm.Wallrunning)
                 StopWallRun();
 
-            if (pm.Climbing)
+            if (_pm.Climbing)
                 StopClimbing();
 
             // handle wall-exiting
             // make sure the timer counts down
-            if (exitWallTimer > 0) exitWallTimer -= Time.deltaTime;
+            if (_exitWallTimer > 0) _exitWallTimer -= Time.deltaTime;
 
-            // what happens if the exitWallTimer runs out
-            if (exitWallTimer <= 0 && exitingWall)
+            // what happens if the _exitWallTimer runs out
+            if (_exitWallTimer <= 0 && _exitingWall)
             {
-                // set extiWall to false again -> state will now change to Stat.none
-                exitingWall = false;
+                // set extiWall to false again -> _state will now change to Stat.none
+                _exitingWall = false;
 
                 // // reset readyToClimb when PlayerParent has sucessfully exited the wall
                 // ResetReadyToClimb();
@@ -952,20 +930,26 @@ public class WallRunning : MonoBehaviour
         // State 5 - None
         else
         {
-            state = State.none;
+            _state = State.none;
 
             // exit out of wall run or climb when active
-            if (pm.Wallrunning)
+            if (_pm.Wallrunning)
                 StopWallRun();
 
-            if (pm.Climbing)
+            if (_pm.Climbing)
                 StopClimbing();
         }
 
         // when no longer exiting the wall, allow normal PlayerParent movement again
-        if (state != State.exiting && pm.Restricted)
-            pm.Restricted = false;
+        if (_state != State.exiting && _pm.Restricted)
+            _pm.Restricted = false;
     }
+
+    #endregion
+
+    #region Getters and Setters
+    public bool LedgeGrabbing { get; set; }
+    
 
     #endregion
 
@@ -973,24 +957,26 @@ public class WallRunning : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        float difference = doubleRayCheckDistance * 0.5f;
-        Vector3 differenceV = orientation.forward * difference;
+        if (!Application.isPlaying) return;
+        
+        float difference = _doubleRayCheckDistance * 0.5f;
+        Vector3 differenceV = _orientation.forward * difference;
 
         Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position - differenceV, orientation.right * wallDistanceSide);
+        Gizmos.DrawRay(transform.position - differenceV, _orientation.right * _wallDistanceSide);
         Gizmos.color = Color.green;
-        Gizmos.DrawRay(transform.position + differenceV, orientation.right * wallDistanceSide);
+        Gizmos.DrawRay(transform.position + differenceV, _orientation.right * _wallDistanceSide);
 
         Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position - differenceV, -orientation.right * wallDistanceSide);
+        Gizmos.DrawRay(transform.position - differenceV, -_orientation.right * _wallDistanceSide);
         Gizmos.color = Color.green;
-        Gizmos.DrawRay(transform.position + differenceV, -orientation.right * wallDistanceSide);
+        Gizmos.DrawRay(transform.position + differenceV, -_orientation.right * _wallDistanceSide);
 
         Gizmos.color = Color.blue;
-        Gizmos.DrawRay(transform.position, orientation.forward * wallDistanceFront);
+        Gizmos.DrawRay(transform.position, _orientation.forward * _wallDistanceFront);
 
         Gizmos.color = Color.grey;
-        Gizmos.DrawRay(transform.position, -orientation.forward * wallDistanceBack);
+        Gizmos.DrawRay(transform.position, -_orientation.forward * _wallDistanceBack);
     }
 
     #endregion

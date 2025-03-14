@@ -1,272 +1,261 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
-
-// Dave MovementLab - Grappling
-///
 // Content:
-/// - Swinging ability
-/// - grappling ability
-/// 
+// - Swinging ability
+// - grappling ability
+// 
 // Note:
-/// This script handles starting and stopping the Swinging and grappling ability, as well as moving the PlayerParent
-/// The grappling rope is drawn and animated by the GrapplingRope script
-/// 
-/// If you don't understand the difference between Swinging and grappling, please read the documentation
-/// 
-// Also, the Swinging ability is based on Danis tutorial
-// Credits: https://youtu.be/Xgh4v1w5DxU
+// This script handles starting and stopping the Swinging and grappling ability, as well as moving the PlayerParent
+// The grappling rope is drawn and animated by the GrapplingRope script
 
+// single, or dual Swinging
+// 
+// grappling left or right -> cancels any active swings and grapples
+// no grappling left/right twice in a row
+// Swinging -> cancels any active grapples, exit limited state!
+// 
+// This implies that Swinging and grappling can never be active at the same time, neither can there be 2 active grapples
 
-
-/// single, or dual Swinging
-/// 
-/// grappling left or right -> cancels any active swings and grapples
-/// no grappling left/right twice in a row
-/// Swinging -> cancels any active grapples, exit limited state!
-/// 
-/// This implies that Swinging and grappling can never be active at the same time, neither can there be 2 active grapples
-
-
+[RequireComponent(typeof(PlayerMovement))]
 public class Grappling: MonoBehaviour
 {
-    public enum GrappleMode
+    private enum GrappleMode
     {
         Basic,
         Precise
     }
     
-    [Header("Player References")]
-    
-    public Transform orientation;
-    
-    [Header("Camera References")]
-    
-    public Transform realCamTrans;
-    
     [Header("Hook Rig References")]
     
-    public List<Transform> gunTips;
-    public List<Transform> pointAimers;
+    [SerializeField] private List<Transform> gunTips;
+    
+    [SerializeField] private List<Transform> pointAimers;
     
     [Header("Prediction References")]
     
-    public List<Transform> predictionPoints;
+    [SerializeField] private List<Transform> predictionPoints;
     
     [Header("Input References")]
     
-    public string leftGrappleActionName = "LeftGrapple";
+    [SerializeField] private string leftGrappleActionName = "LeftGrapple";
     
-    public string rightGrappleActionName = "RightGrapple";
+    [SerializeField] private string rightGrappleActionName = "RightGrapple";
     
-    public string leftSwingActionName = "LeftSwing";
+    [SerializeField] private string leftSwingActionName = "LeftSwing";
     
-    public string rightSwingActionName = "RightSwing";
+    [SerializeField] private string rightSwingActionName = "RightSwing";
     
-    public string moveActionName = "Move";
+    [SerializeField] private string moveActionName = "Move";
     
-    public string jumpActionName = "Jump";
-    
-    public InputAction leftGrappleAction;
-    
-    public InputAction rightGrappleAction;
-    
-    public InputAction leftSwingAction;
-    
-    public InputAction rightSwingAction;
-    
-    public InputAction moveAction;
-    
-    public InputAction jumpAction;
+    [SerializeField] private string jumpActionName = "Jump";
     
     [Header("General Hook Settings")]
     
-    public float playerHeight = 2f;
+    [SerializeField] private float playerHeight = 2f;
     
-    public int amountOfHookPoints = 2;
+    [SerializeField] private int amountOfHookPoints = 2;
     
-    public bool useChargeOnHookNotHit = true;
+    [SerializeField] private bool useChargeOnHookNotHit = true;
     
-    public LayerMask whatIsGrappleable; // you can grapple & swing on all objects that are in this layermask
+    [SerializeField] private LayerMask whatIsGrappleable; // you can grapple & swing on all objects that are in this layermask
     
-    public float aimLineSpherecastRadius = 3f;
+    [SerializeField] private float aimLineSpherecastRadius = 3f;
     
     [Header("Grapple Settings")]
     
-    public float maxGrappleDistance = 20f; // max distance you're able to grapple onto objects
+    [SerializeField] private float maxGrappleDistance = 20f; // max distance you're able to grapple onto objects
     
     [Space]
     
-    public float grappleDelayTime = 0.15f; // the time you Freeze in the air before grappling
-    public float grapplingCd = .25f; // cooldown of your grappling ability
+    [SerializeField] private float grappleDelayTime = 0.15f; // the time you Freeze in the air before grappling
+    [SerializeField] private float grapplingCd = .25f; // cooldown of your grappling ability
     
     [Space]
     
-    public GrappleMode grappleMode = GrappleMode.Precise;
+    [SerializeField] private GrappleMode grappleMode = GrappleMode.Precise;
     
     [Space]
     
     [Tooltip("Only applied when grappleMode is set to Precise")]
-    public float overshootYAxis = 2f; // adjust the trajectory hight of the PlayerParent when grappling
+    [SerializeField] private float overshootYAxis = 2f; // adjust the trajectory hight of the PlayerParent when grappling
     
     [Space]
     
     [Tooltip("Only applied when grappleMode is set to Basic")]
-    public float grappleForce = 35f;
+    [SerializeField] private float grappleForce = 35f;
     
     [Tooltip("Only applied when grappleMode is set to Basic")]
-    public float grappleUpwardForce = 7.5f;
+    [SerializeField] private float grappleUpwardForce = 7.5f;
     
     [Space]
     
-    public float grappleDistanceHeightMultiplier = 0.1f; // how much more force you gain when grappling toward objects that are further away
+    [SerializeField] private float grappleDistanceHeightMultiplier = 0.1f; // how much more force you gain when grappling toward objects that are further away
     
     [Space]
     
-    public bool freezeOnGrappleNotHit;
+    [SerializeField] private bool freezeOnGrappleNotHit;
     
     [Header("Swing Settings")]
     
-    public float maxSwingDistance = 20f; // max distance you're able hit objects for Swinging ability
+    [SerializeField] private float maxSwingDistance = 20f; // max distance you're able hit objects for Swinging ability
     
     [Space]
     
-    public float spring = 50f; // spring of the SpringJoint component
-    public float damper = 50f; // damper of the SpringJoint component
-    public float massScale = 1f; // massScale of the SpringJoint component
+    [SerializeField] private float spring = 4.5f; // spring of the SpringJoint component
+    [SerializeField] private float damper = 7f; // damper of the SpringJoint component
+    [SerializeField] private float massScale = 4.5f; // massScale of the SpringJoint component
     
     [Space]
     
-    public bool enableSwingingWithForces = true;
+    [SerializeField] private bool enableSwingingWithForces = true;
     
     [Space]
     
-    public float lateralThrustForce = 2500;
-    public float retractThrustForce = 3500;
-    public float extendCableSpeed = 10;
+    [SerializeField] private float lateralThrustForce = 2500;
+    [SerializeField] private float retractThrustForce = 3500;
+    [SerializeField] private float extendCableSpeed = 15;
     
     //Dynamic, Non-Serialized Below
     
     //Player References
+    private Transform _orientation;
     
-    private Rigidbody rb;
+    private Rigidbody _rb;
     
-    private PlayerMovement pm;
+    private PlayerMovement _pm;
+    
+    private InputAction _leftGrappleAction;
+    
+    private InputAction _rightGrappleAction;
+    
+    private InputAction _leftSwingAction;
+    
+    private InputAction _rightSwingAction;
+    
+    private InputAction _moveAction;
+    
+    private InputAction _jumpAction;
+    
+    //Camera References
+    private Transform _realCamTrans;
     
     //Prediction References
     
-    private List<RaycastHit> predictionHits;
+    private List<RaycastHit> _predictionHits;
     
-    private List<Vector3> grapplePoints; // the point you're grappling to / Swinging on
+    private List<Vector3> _grapplePoints; // the point you're grappling to / Swinging on
     
-    private List<Transform> grappleObjects; // the object transform you're grappling to
+    private List<Transform> _grappleObjects; // the object transform you're grappling to
     
-    private List<Vector3> grappleLocalPoints; //local position of hit point on object
+    private List<Vector3> _grappleLocalPoints; //local position of hit point on object
     
-    private Vector3 pullPoint; // point in space to pull PlayerParent towards
+    private Vector3 _pullPoint; // point in space to pull PlayerParent towards
     
-    //General References
+    //Sprint joint holders
     
-    private List<SpringJoint> joints; // for swining we use Unitys SpringJoint component
+    private List<SpringJoint> _joints; // for swining we use Unitys SpringJoint component
     
     //Input
-    private Vector2 moveInput;
+    private Vector2 _moveInput;
     
     //Timing
     
-    private float grapplingCdTimer;
+    private float _grapplingCdTimer;
 
     //State
-    [HideInInspector] public List<bool> grapplesExecuted;
-    [HideInInspector] public List<bool> grapplesActive;
-    [HideInInspector] public List<bool> swingsActive;
-    
-    private List<bool> hooksActive;
-    
+
+    private List<bool> _grapplesExecuted;
+
+    private void Awake()
+    {
+        // get references
+        _pm = GetComponent<PlayerMovement>();
+        _orientation = _pm.Orientation;
+        _rb = GetComponent<Rigidbody>();
+        
+        PlayerCam playerCam = GetComponent<PlayerCam>();
+        _realCamTrans = playerCam.RealCam.gameObject.transform;
+        
+        PlayerInput playerInput = GetComponent<PlayerInput>();
+        
+        _leftGrappleAction = playerInput.actions.FindAction(leftGrappleActionName);
+        _rightGrappleAction = playerInput.actions.FindAction(rightGrappleActionName);
+        _leftSwingAction = playerInput.actions.FindAction(leftSwingActionName);
+        _rightSwingAction = playerInput.actions.FindAction(rightSwingActionName);
+        _moveAction = playerInput.actions.FindAction(moveActionName);
+        _jumpAction = playerInput.actions.FindAction(jumpActionName);
+    }
+
     private void Start()
     {
         // if you don't set whatIsGrappleable to anything, it's automatically set to Default
         if (whatIsGrappleable.value == 0)
             whatIsGrappleable = LayerMask.GetMask("Default");
 
-        // get references
-        pm = GetComponent<PlayerMovement>();
-        rb = GetComponent<Rigidbody>();
-
         ListSetup();
-        
-        PlayerInput playerInput = GetComponent<PlayerInput>();
-        
-        leftGrappleAction = playerInput.actions.FindAction(leftGrappleActionName);
-        rightGrappleAction = playerInput.actions.FindAction(rightGrappleActionName);
-        leftSwingAction = playerInput.actions.FindAction(leftSwingActionName);
-        rightSwingAction = playerInput.actions.FindAction(rightSwingActionName);
-        moveAction = playerInput.actions.FindAction(moveActionName);
-        jumpAction = playerInput.actions.FindAction(jumpActionName);
     }
 
     private void OnEnable()
     {
-        leftGrappleAction.Enable();
-        rightGrappleAction.Enable();
-        leftSwingAction.Enable();
-        rightSwingAction.Enable();
-        moveAction.Enable();
-        jumpAction.Enable();
+        _leftGrappleAction.Enable();
+        _rightGrappleAction.Enable();
+        _leftSwingAction.Enable();
+        _rightSwingAction.Enable();
+        _moveAction.Enable();
+        _jumpAction.Enable();
     }
     
     private void OnDisable()
     {
-        leftGrappleAction.Disable();
-        rightGrappleAction.Disable();
-        leftSwingAction.Disable();
-        rightSwingAction.Disable();
-        moveAction.Disable();
-        jumpAction.Disable();
+        _leftGrappleAction.Disable();
+        _rightGrappleAction.Disable();
+        _leftSwingAction.Disable();
+        _rightSwingAction.Disable();
+        _moveAction.Disable();
+        _jumpAction.Disable();
     }
 
     private void ListSetup()
     {
-        hooksActive = new List<bool>();
-        predictionHits = new List<RaycastHit>();
+        HooksActive = new List<bool>();
+        _predictionHits = new List<RaycastHit>();
         
-        grapplePoints = new List<Vector3>();
-        grappleObjects = new List<Transform>();
-        grappleLocalPoints = new List<Vector3>();
-        joints = new List<SpringJoint>();
+        _grapplePoints = new List<Vector3>();
+        _grappleObjects = new List<Transform>();
+        _grappleLocalPoints = new List<Vector3>();
+        _joints = new List<SpringJoint>();
 
-        grapplesExecuted = new List<bool>();
-        grapplesActive = new List<bool>();
-        swingsActive = new List<bool>();
+        _grapplesExecuted = new List<bool>();
+        GrapplesActive = new List<bool>();
+        SwingsActive = new List<bool>();
 
         for (int i = 0; i < amountOfHookPoints; i++)
         {
-            hooksActive.Add(false);
-            predictionHits.Add(new RaycastHit());
-            grappleObjects.Add(null);
-            grappleLocalPoints.Add(Vector3.zero);
-            joints.Add(null);
-            grapplePoints.Add(Vector3.zero);
-            grapplesExecuted.Add(false);
-            grapplesActive.Add(false);
-            swingsActive.Add(false);
+            HooksActive.Add(false);
+            _predictionHits.Add(new RaycastHit());
+            _grappleObjects.Add(null);
+            _grappleLocalPoints.Add(Vector3.zero);
+            _joints.Add(null);
+            _grapplePoints.Add(Vector3.zero);
+            _grapplesExecuted.Add(false);
+            GrapplesActive.Add(false);
+            SwingsActive.Add(false);
         }
     }
 
     private void Update()
     {
         // cooldown timer
-        if (grapplingCdTimer > 0)
-            grapplingCdTimer -= Time.deltaTime;
+        if (_grapplingCdTimer > 0)
+            _grapplingCdTimer -= Time.deltaTime;
 
         // make sure MyInput() is called every frame
         MyInput();
 
-        if (enableSwingingWithForces && joints[0] != null || joints[1] != null) OdmGearMovement();
+        if (enableSwingingWithForces && _joints[0] != null || _joints[1] != null) OdmGearMovement();
 
         CheckForSwingPoints();
     }
@@ -275,48 +264,47 @@ public class Grappling: MonoBehaviour
     {
         //due to modifiers on input for k&m, we want to always read if grapple is pressed first
         
-        
-        if (leftGrappleAction.triggered)
+        if (_leftGrappleAction.triggered)
         {
             StartGrapple(0);
         }
         
-        if (!grapplesActive[0] && leftSwingAction.triggered)
+        if (!GrapplesActive[0] && _leftSwingAction.triggered)
         {
             StartSwing(0);
         }
         
-        if (rightGrappleAction.triggered)
+        if (_rightGrappleAction.triggered)
         {
             StartGrapple(1);
         }
         
-        if (!grapplesActive[1] && rightSwingAction.triggered)
+        if (!GrapplesActive[1] && _rightSwingAction.triggered)
         {
             StartSwing(1);
         }
         
-        if (grapplesActive[0])
+        if (GrapplesActive[0])
         {
-            if (leftGrappleAction.phase != InputActionPhase.Performed) TryStopGrapple(0);
+            if (_leftGrappleAction.phase != InputActionPhase.Performed) TryStopGrapple(0);
         }
         
-        if (grapplesActive[1])
+        if (GrapplesActive[1])
         {
-            if (rightGrappleAction.phase != InputActionPhase.Performed) TryStopGrapple(1);
+            if (_rightGrappleAction.phase != InputActionPhase.Performed) TryStopGrapple(1);
         }
         
-        if (swingsActive[0])
+        if (SwingsActive[0])
         {
-            if (!leftSwingAction.IsPressed()) StopSwing(0);
+            if (!_leftSwingAction.IsPressed()) StopSwing(0);
         }
         
-        if (swingsActive[1])
+        if (SwingsActive[1])
         {
-            if (!rightSwingAction.IsPressed()) StopSwing(1);
+            if (!_rightSwingAction.IsPressed()) StopSwing(1);
         }
         
-        moveInput = moveAction.ReadValue<Vector2>();
+        _moveInput = _moveAction.ReadValue<Vector2>();
     }
 
     #region Swinging
@@ -325,18 +313,18 @@ public class Grappling: MonoBehaviour
     {
         for (int i = 0; i < amountOfHookPoints; i++)
         {
-            if (hooksActive[i])
+            if (HooksActive[i])
             {
                 TrackObject(i);
             }
             else
             {
-                RaycastHit hit = predictionHits[i];
+                RaycastHit hit = _predictionHits[i];
                 Physics.SphereCast(pointAimers[i].position, aimLineSpherecastRadius, pointAimers[i].forward, out hit, maxSwingDistance, whatIsGrappleable);
 
                 // check if direct hit is available
                 RaycastHit directHit;
-                Physics.Raycast(orientation.position, realCamTrans.forward, out directHit, maxSwingDistance, whatIsGrappleable);
+                Physics.Raycast(_orientation.position, _realCamTrans.forward, out directHit, maxSwingDistance, whatIsGrappleable);
 
                 Vector3 realHitPoint = Vector3.zero;
 
@@ -367,13 +355,13 @@ public class Grappling: MonoBehaviour
 
                 // print("hit: " + hit.point);
 
-                predictionHits[i] = directHit.point == Vector3.zero ? hit : directHit;
+                _predictionHits[i] = directHit.point == Vector3.zero ? hit : directHit;
             }
         }
     }
-    public void StartSwing(int swingIndex)
+    private void StartSwing(int swingIndex)
     {
-        if (!pm.IsStateAllowed(PlayerMovement.MovementMode.swinging))
+        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.swinging))
             return;
         
         // no Swinging point can be found
@@ -382,18 +370,18 @@ public class Grappling: MonoBehaviour
             if (useChargeOnHookNotHit)
             {
                 // the grapple point is now just a point in the air
-                /// calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                grapplePoints[swingIndex] = realCamTrans.position + realCamTrans.forward * maxGrappleDistance;
+                // calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
+                _grapplePoints[swingIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
-                swingsActive[swingIndex] = true;
+                SwingsActive[swingIndex] = true;
                 UpdateHooksActive();
                 
                 //no grapple object
-                grappleObjects[swingIndex] = null;
+                _grappleObjects[swingIndex] = null;
                 
                 //no local point
-                grappleLocalPoints[swingIndex] = Vector3.zero;
+                _grappleLocalPoints[swingIndex] = Vector3.zero;
                 
                 StartCoroutine(StopFailedSwing(swingIndex, 0.15f));
             }
@@ -403,66 +391,66 @@ public class Grappling: MonoBehaviour
         
         // cancel all active grapples
         CancelActiveGrapples();
-        pm.ResetRestrictions();
+        _pm.ResetRestrictions();
         
         //if Stopfailedswing is running, stop it
         StopCoroutine(nameof(StopFailedSwing));
         
         // this will cause the PlayerMovement script to enter MovementMode.Swinging
-        pm.Swinging = true;
+        _pm.Swinging = true;
 
-        //corresponding grappleObjects is the object the raycast hit
-        grappleObjects[swingIndex] = predictionHits[swingIndex].transform;
+        //corresponding _grappleObjects is the object the raycast hit
+        _grappleObjects[swingIndex] = _predictionHits[swingIndex].transform;
         
         //converting hit point to local position of hit on object
-        grappleLocalPoints[swingIndex] = grappleObjects[swingIndex].
-            InverseTransformPoint(predictionHits[swingIndex].point);
+        _grappleLocalPoints[swingIndex] = _grappleObjects[swingIndex].
+            InverseTransformPoint(_predictionHits[swingIndex].point);
 
         // the exact point where you swing on
-        grapplePoints[swingIndex] = predictionHits[swingIndex].point;
+        _grapplePoints[swingIndex] = _predictionHits[swingIndex].point;
 
         // add a springJoint component to your PlayerParent
-        joints[swingIndex] = gameObject.AddComponent<SpringJoint>();
-        joints[swingIndex].autoConfigureConnectedAnchor = false;
+        _joints[swingIndex] = gameObject.AddComponent<SpringJoint>();
+        _joints[swingIndex].autoConfigureConnectedAnchor = false;
 
         // set the anchor of the springJoint
-        joints[swingIndex].connectedAnchor = grapplePoints[swingIndex];
+        _joints[swingIndex].connectedAnchor = _grapplePoints[swingIndex];
 
         // calculate the distance to the grapplePoint
-        float distanceFromPoint = Vector3.Distance(transform.position, grapplePoints[swingIndex]);
+        float distanceFromPoint = Vector3.Distance(transform.position, _grapplePoints[swingIndex]);
 
         // the distance grapple will try to keep from grapple point.
-        // joints[swingIndex].maxDistance = distanceFromPoint * 0.8f;
-        // joints[swingIndex].minDistance = distanceFromPoint * 0.25f;
+        // _joints[swingIndex].maxDistance = distanceFromPoint * 0.8f;
+        // _joints[swingIndex].minDistance = distanceFromPoint * 0.25f;
 
-        joints[swingIndex].maxDistance = distanceFromPoint;
-        joints[swingIndex].minDistance = 0;
+        _joints[swingIndex].maxDistance = distanceFromPoint;
+        _joints[swingIndex].minDistance = 0;
 
         // adjust these values to fit your game
-        joints[swingIndex].spring = spring;
-        joints[swingIndex].damper = damper;
-        joints[swingIndex].massScale = massScale;
+        _joints[swingIndex].spring = spring;
+        _joints[swingIndex].damper = damper;
+        _joints[swingIndex].massScale = massScale;
 
-        swingsActive[swingIndex] = true;
+        SwingsActive[swingIndex] = true;
         UpdateHooksActive();
     }
 
-    public void StopSwing(int swingIndex)
+    private void StopSwing(int swingIndex)
     {
-        pm.Swinging = false;
-        swingsActive[swingIndex] = false;
+        _pm.Swinging = false;
+        SwingsActive[swingIndex] = false;
 
         UpdateHooksActive();
 
         // destroy the SpringJoint again after you stopped Swinging 
-        Destroy(joints[swingIndex]);
+        Destroy(_joints[swingIndex]);
     }
     
     private IEnumerator StopFailedSwing(int swingIndex, float waitTime)
     {
         yield return new WaitForSeconds(waitTime);
         
-        swingsActive[swingIndex] = false;
+        SwingsActive[swingIndex] = false;
         UpdateHooksActive();
     }
 
@@ -471,40 +459,40 @@ public class Grappling: MonoBehaviour
     #region Odm Gear
     private void OdmGearMovement()
     {
-        if (swingsActive[0] && !swingsActive[1]) pullPoint = grapplePoints[0];
-        if (swingsActive[1] && !swingsActive[0]) pullPoint = grapplePoints[1];
+        if (SwingsActive[0] && !SwingsActive[1]) _pullPoint = _grapplePoints[0];
+        if (SwingsActive[1] && !SwingsActive[0]) _pullPoint = _grapplePoints[1];
         // get midpoint if both swing points are active
-        if (swingsActive[0] && swingsActive[1])
+        if (SwingsActive[0] && SwingsActive[1])
         {
-            Vector3 dirToGrapplePoint1 = grapplePoints[1] - grapplePoints[0];
-            pullPoint = grapplePoints[0] + dirToGrapplePoint1 * 0.5f;
+            Vector3 dirToGrapplePoint1 = _grapplePoints[1] - _grapplePoints[0];
+            _pullPoint = _grapplePoints[0] + dirToGrapplePoint1 * 0.5f;
         }
 
         // rightmoveInput.
-        if (moveInput.x > 0) rb.AddForce(orientation.right * lateralThrustForce * Time.deltaTime);
+        if (_moveInput.x > 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * _orientation.right);
         // left
-        if (moveInput.x < 0) rb.AddForce(-orientation.right * lateralThrustForce * Time.deltaTime);
+        if (_moveInput.x < 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * -_orientation.right);
         // forward
-        if (moveInput.y > 0) rb.AddForce(orientation.forward * lateralThrustForce * Time.deltaTime);
+        if (_moveInput.y > 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * _orientation.forward);
         // backward
-        /// if (RawMoveInput.y < 0) rb.AddForce(-Orientation.forward * lateralThrustForce * Time.deltaTime);
+        // if (RawMoveInput.y < 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * -Orientation.forward);
         // shorten cable
-        if (jumpAction.IsPressed())
+        if (_jumpAction.IsPressed())
         {
-            Vector3 directionToPoint = pullPoint - transform.position;
-            rb.AddForce(directionToPoint.normalized * retractThrustForce * Time.deltaTime);
+            Vector3 directionToPoint = _pullPoint - transform.position;
+            _rb.AddForce(retractThrustForce * Time.deltaTime * directionToPoint.normalized);
 
             // calculate the distance to the grapplePoint
-            float distanceFromPoint = Vector3.Distance(transform.position, pullPoint);
+            float distanceFromPoint = Vector3.Distance(transform.position, _pullPoint);
 
             // the distance grapple will try to keep from grapple point
             UpdateJoints(distanceFromPoint);
         }
         // extend cable
-        if (moveInput.y < 0)
+        if (_moveInput.y < 0)
         {
             // calculate the distance to the grapplePoint
-            float extendedDistanceFromPoint = Vector3.Distance(transform.position, pullPoint) + extendCableSpeed;
+            float extendedDistanceFromPoint = Vector3.Distance(transform.position, _pullPoint) + extendCableSpeed;
 
             // the distance grapple will try to keep from grapple point
             UpdateJoints(extendedDistanceFromPoint);
@@ -513,25 +501,25 @@ public class Grappling: MonoBehaviour
 
     private void UpdateJoints(float distanceFromPoint)
     {
-        for (int i = 0; i < joints.Count; i++)
+        for (int i = 0; i < _joints.Count; i++)
         {
-            if (joints[i] != null)
+            if (_joints[i] != null)
             {
-                joints[i].maxDistance = distanceFromPoint * 0.8f;
-                joints[i].minDistance = distanceFromPoint * 0.25f;
+                _joints[i].maxDistance = distanceFromPoint * 0.8f;
+                _joints[i].minDistance = distanceFromPoint * 0.25f;
             }
         }
     }
 
     #endregion
 
-    /// Here you'll find all of the code specificly needed for the grappling ability
+    // Here you'll find all the code specifically needed for the grappling ability
     #region Grappling
 
-    public void StartGrapple(int grappleIndex)
+    private void StartGrapple(int grappleIndex)
     {
         // in cooldown
-        if (grapplingCdTimer > 0) return;
+        if (_grapplingCdTimer > 0) return;
 
         // cancel active swings and grapples
         CancelActiveSwings();
@@ -543,22 +531,22 @@ public class Grappling: MonoBehaviour
             // print("grapple: target found");
 
             // set cooldown
-            grapplingCdTimer = grapplingCd;
+            _grapplingCdTimer = grapplingCd;
 
             // this will cause the PlayerMovement script to change to MovemementMode.Freeze
-            /// -> therefore the PlayerParent will Freeze mid-air for some time before grappling
-            pm.Freeze = true;
+            // -> therefore the PlayerParent will Freeze mid-air for some time before grappling
+            _pm.Freeze = true;
 
             // same stuff as in StartSwing() function
-            grappleObjects[grappleIndex] = predictionHits[grappleIndex].transform;
+            _grappleObjects[grappleIndex] = _predictionHits[grappleIndex].transform;
             
             //same as in StartSwing()
-            grappleLocalPoints[grappleIndex] = grappleObjects[grappleIndex].
-                InverseTransformPoint(predictionHits[grappleIndex].point);
+            _grappleLocalPoints[grappleIndex] = _grappleObjects[grappleIndex].
+                InverseTransformPoint(_predictionHits[grappleIndex].point);
 
-            grapplePoints[grappleIndex] = predictionHits[grappleIndex].point;
+            _grapplePoints[grappleIndex] = _predictionHits[grappleIndex].point;
 
-            grapplesActive[grappleIndex] = true;
+            GrapplesActive[grappleIndex] = true;
             
             UpdateHooksActive();
 
@@ -573,28 +561,28 @@ public class Grappling: MonoBehaviour
             if (freezeOnGrappleNotHit)
             {
                 // we still want to Freeze the PlayerParent for a bit
-                pm.Freeze = true;
+                _pm.Freeze = true;
             }
             
             //if using a charge, we want to use the charge and show like the PlayerParent is attempting to grapple air
             if (useChargeOnHookNotHit)
             {
                 // set cooldown
-                grapplingCdTimer = grapplingCd;
+                _grapplingCdTimer = grapplingCd;
 
                 // the grapple point is now just a point in the air
-                /// calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                grapplePoints[grappleIndex] = realCamTrans.position + realCamTrans.forward * maxGrappleDistance;
+                // calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
+                _grapplePoints[grappleIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
-                grapplesActive[grappleIndex] = true;
+                GrapplesActive[grappleIndex] = true;
                 UpdateHooksActive();
                 
                 //no grapple object
-                grappleObjects[grappleIndex] = null;
+                _grappleObjects[grappleIndex] = null;
                 
                 //no local point
-                grappleLocalPoints[grappleIndex] = Vector3.zero;
+                _grappleLocalPoints[grappleIndex] = Vector3.zero;
 
                 // call the StopGrapple() function after the grappleDelayTime is over
                 StartCoroutine(StopGrapple(grappleIndex, grappleDelayTime));
@@ -602,12 +590,12 @@ public class Grappling: MonoBehaviour
         }
     }
 
-    public IEnumerator ExecuteGrapple(int grappleIndex)
+    private IEnumerator ExecuteGrapple(int grappleIndex)
     {
         yield return new WaitForSeconds(grappleDelayTime);
 
         // make sure that the PlayerParent can move again
-        pm.Freeze = false;
+        _pm.Freeze = false;
 
         if(grappleMode == GrappleMode.Precise)
         {
@@ -615,7 +603,7 @@ public class Grappling: MonoBehaviour
             Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - (playerHeight / 2), transform.position.z);
 
             // calculate how much higher the grapple point is relative to the PlayerParent
-            float grapplePointRelativeYPos = grapplePoints[grappleIndex].y - lowestPoint.y;
+            float grapplePointRelativeYPos = _grapplePoints[grappleIndex].y - lowestPoint.y;
             
             //if relative y offset is above relative PlayerParent height, add all needed height, otherwise add less
             float highestPointOfArc = grapplePointRelativeYPos >= playerHeight ?
@@ -623,37 +611,37 @@ public class Grappling: MonoBehaviour
 
             // print("trying to grapple to " + grapplePointRelativeYPos + " which arc " + highestPointOfArc);
 
-            pm.JumpToPosition(grapplePoints[grappleIndex], highestPointOfArc, default, 3f);
+            _pm.JumpToPosition(_grapplePoints[grappleIndex], highestPointOfArc, default, 3f);
         }
 
         if(grappleMode == GrappleMode.Basic)
         {
             // calculate the direction from the PlayerParent to the grapplePoint
-            Vector3 direction = (grapplePoints[grappleIndex] - transform.position).normalized;
+            Vector3 direction = (_grapplePoints[grappleIndex] - transform.position).normalized;
 
             // reset the y velocity of your rigidbody
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
             // the further the grapple point is away, the higher the distanceBoost should be
-            float distanceBoost = Vector3.Distance(transform.position, grapplePoints[grappleIndex]) * grappleDistanceHeightMultiplier;
+            float distanceBoost = Vector3.Distance(transform.position, _grapplePoints[grappleIndex]) * grappleDistanceHeightMultiplier;
 
             // apply force to your rigidbody in the direction towards the grapplePoint
-            rb.AddForce(direction * grappleForce , ForceMode.Impulse);
+            _rb.AddForce(direction * grappleForce , ForceMode.Impulse);
             // also apply upwards force that scales with the distanceBoost
-            rb.AddForce(Vector3.up * (grappleUpwardForce * distanceBoost), ForceMode.Impulse);
-            /// -> make sure to use ForceMode.Impulse because you're only applying force once
+            _rb.AddForce(Vector3.up * (grappleUpwardForce * distanceBoost), ForceMode.Impulse);
+            // -> make sure to use ForceMode.Impulse because you're only applying force once
         }
 
         // Stop grapple after a second, (by this time you'll already have travelled most of the distance anyway)
         // StartCoroutine(StopGrapple(grappleIndex, 1f));
         
-        grapplesExecuted[grappleIndex] = true;
+        _grapplesExecuted[grappleIndex] = true;
     }
 
     private void TryStopGrapple(int grappleIndex)
     {
         // can't stop grapple if not even executed
-        if (!grapplesExecuted[grappleIndex]) return;
+        if (!_grapplesExecuted[grappleIndex]) return;
 
         StartCoroutine(StopGrapple(grappleIndex));
     }
@@ -663,14 +651,14 @@ public class Grappling: MonoBehaviour
         yield return new WaitForSeconds(delay);
 
         // make sure PlayerParent can move
-        if(pm.Freeze) pm.Freeze = false;
+        if(_pm.Freeze) _pm.Freeze = false;
 
-        pm.ResetRestrictions();
+        _pm.ResetRestrictions();
 
-        // reset the grapplesExecuted bool
-        grapplesExecuted[grappleIndex] = false;
+        // reset the _grapplesExecuted bool
+        _grapplesExecuted[grappleIndex] = false;
 
-        grapplesActive[grappleIndex] = false;
+        GrapplesActive[grappleIndex] = false;
         
         UpdateHooksActive();
 
@@ -697,8 +685,8 @@ public class Grappling: MonoBehaviour
 
     private void UpdateHooksActive()
     {
-        for (int i = 0; i < grapplePoints.Count; i++)
-            hooksActive[i] = grapplesActive[i] || swingsActive[i];
+        for (int i = 0; i < _grapplePoints.Count; i++)
+            HooksActive[i] = GrapplesActive[i] || SwingsActive[i];
     }
 
     public void OnObjectTouch()
@@ -723,40 +711,40 @@ public class Grappling: MonoBehaviour
     private void TrackObject(int grappleIndex)
     {
         //implement canceling of grapple if object is destroyed later //TODO: THIS
-        if (grappleObjects[grappleIndex] == null) return;
+        if (_grappleObjects[grappleIndex] == null) return;
         
         //use local position of hit point on object
-        grapplePoints[grappleIndex] = grappleObjects[grappleIndex].TransformPoint(grappleLocalPoints[grappleIndex]);
+        _grapplePoints[grappleIndex] = _grappleObjects[grappleIndex].TransformPoint(_grappleLocalPoints[grappleIndex]);
         
         //was going null in grapple cancel
-        if (joints[grappleIndex] != null)
+        if (_joints[grappleIndex] != null)
         {
-            joints[grappleIndex].connectedAnchor = grapplePoints[grappleIndex];
+            _joints[grappleIndex].connectedAnchor = _grapplePoints[grappleIndex];
         }
     }
 
     #endregion
 
-    #region Getters
+    #region Getters and Setters
 
     private Vector3 currentGrapplePosition;
 
     private bool TargetPointFound(int index)
     {
-        return predictionHits[index].point != Vector3.zero;
+        return _predictionHits[index].point != Vector3.zero;
     }
 
     // a bool to check if we're currently Swinging or grappling
     /// function needed and called from the GrapplingRope script
     public bool IsHooking(int index)
     {
-        return hooksActive[index];
+        return HooksActive[index];
     }
     
     private bool AnyGrappleExecuted()
     {
-        for (int i = 0; i < grapplesExecuted.Count; i++)
-            if (grapplesExecuted[i]) return true;
+        for (int i = 0; i < _grapplesExecuted.Count; i++)
+            if (_grapplesExecuted[i]) return true;
         
         return false;
     }
@@ -765,13 +753,19 @@ public class Grappling: MonoBehaviour
     /// function needed and called from the GrapplingRope script
     public Vector3 GetGrapplePoint(int index)
     {
-        return grapplePoints[index];
+        return _grapplePoints[index];
     }
 
     public Vector3 GetGunTipPosition(int index)
     {
         return gunTips[index].position;
     }
+    
+    public List<bool> HooksActive { get; private set; }
+    
+    public List<bool> GrapplesActive { get; private set; }
+    
+    public List<bool> SwingsActive { get; private set; }
 
     #endregion
 }

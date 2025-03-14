@@ -1,123 +1,109 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
-// Dave MovementLab - LedgeGrabbing
-///
-// Content:
-/// - detecting and moving towards ledges
-/// - holding onto ledges
-/// - jumping away from ledges
-///
-// Note:
-/// This script is an extension of the WallRunning script, I did it this way, because 
-/// the WallRunning script is already like 700 lines long
-/// 
+//This script is an extension of the WallRunning script
 
+[RequireComponent(typeof(PlayerMovement))]
 public class LedgeGrabbing : MonoBehaviour
 {
-    [Header("Player References")]
-    
-    private WallRunning main; // this script is an extension of the main Wallrunning script
-    
-    private PlayerMovement pm;
-    
-    public Transform orientation;
-    
-    private Rigidbody rb;
-    
-    [Header("Camera References")]
-    
-    public Transform realCamTrans;
-    
     [Header("Input References")]
     
-    public string jumpActionName = "Jump";
-    
-    public InputAction jumpAction;
+    [SerializeField] private string jumpActionName = "Jump";
     
     [Header("Detection Settings")]
     
-    public float ledgeDetectionLength = 3;
-    public float ledgeSphereCastRadius = 0.5f;
+    [SerializeField] private float ledgeDetectionLength = 3;
+    [SerializeField] private float ledgeSphereCastRadius = 0.5f;
     
     [Space]
     
-    public float maxLedgeGrabDistance;
+    [SerializeField] private float maxLedgeGrabDistance = 2;
     
     [Space]
     
-    public float minTimeOnLedge;
+    [SerializeField] private float minTimeOnLedge = 0.5f;
     
     [Space]
     
-    public LayerMask whatIsLedge;
+    [SerializeField] private LayerMask whatIsLedge;
     
     [Header("Ledge Grabbing Behaviour Settings")]
     
-    public float moveToLedgeSpeed = 12;
+    [SerializeField] private float moveToLedgeSpeed = 12;
     
     [Space]
     
-    public float ledgeJumpForwardForce = 14;
-    public float ledgeJumpUpForce = 5;
+    [SerializeField] private float ledgeJumpForwardForce = 14;
+    [SerializeField] private float ledgeJumpUpForce = 5;
     
     [Space]
     
-    public float exitLedgeTime = 0.2f;
-    
-    //IDK if needed, wasn't used - Sid
-    // public float maxLedgeJumpUpSpeed;
-    
-    [Header("State")]
-    
-    public bool exitingLedge;
-    
-    public Transform currLedge;
+    [SerializeField] private float exitLedgeTime = 0.2f;
     
     //Dynamic, Non Serialized Below
     
+    //Player
+    private Transform _orientation;
+    
+    private WallRunning _mainWr;
+    
+    private PlayerMovement _pm;
+    
+    private Rigidbody _rb;
+    
+    private InputAction _jumpAction;
+    
+    //Camera References
+    private Transform _realCamTrans;
+    
     //Timing
-    private float timeOnLedge;
+    private float _timeOnLedge;
 
     //State
-    private bool holding;
+    private bool _holding;
     
     // Detection
-    private RaycastHit ledgeHit;
+    private RaycastHit _ledgeHit;
     
-    private Vector3 directionToLedge;
+    private Transform _currLedge;
     
-    private float distanceToLedge;
+    private Vector3 _directionToLedge;
     
-    private Transform lastLedge;
+    private float _distanceToLedge;
     
-    private float exitLedgeTimer = 0.2f;
+    private Transform _lastLedge;
+    
+    //Timing
+    
+    private float _exitLedgeTimer;
+    
+    //IDK if needed, wasn't used - Sid
+    // public float maxLedgeJumpUpSpeed;
 
-
-    private void Start()
+    private void Awake()
     {
-        // get references
-        pm = GetComponent<PlayerMovement>();
-        rb = GetComponent<Rigidbody>();
-        main = GetComponent<WallRunning>();
+        //get references
+        _pm = GetComponent<PlayerMovement>();
+        _orientation = _pm.Orientation;
+        _rb = GetComponent<Rigidbody>();
+        _mainWr = GetComponent<WallRunning>();
+        
+        PlayerCam playerCamScript = GetComponent<PlayerCam>();
+        _realCamTrans = playerCamScript.RealCam.transform;
         
         PlayerInput playerInput = GetComponent<PlayerInput>();
         
-        jumpAction = playerInput.actions.FindAction(jumpActionName);
+        _jumpAction = playerInput.actions.FindAction(jumpActionName);
     }
 
     private void OnEnable()
     {
-        jumpAction.Enable();
+        _jumpAction.Enable();
     }
     
     private void OnDisable()
     {
-        jumpAction.Disable();
+        _jumpAction.Disable();
     }
 
     private void Update()
@@ -131,40 +117,40 @@ public class LedgeGrabbing : MonoBehaviour
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
-        Vector2 inputDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        Vector2 inputDirection = _orientation.forward * verticalInput + _orientation.right * horizontalInput;
 
         // SubState 1 - Holding onto ledge
-        if (holding)
+        if (_holding)
         {
             FreezeRigidbodyOnLedge();
 
-            if (timeOnLedge > minTimeOnLedge && inputDirection != Vector2.zero) ExitLedgeHold();
+            if (_timeOnLedge > minTimeOnLedge && inputDirection != Vector2.zero) ExitLedgeHold();
 
-            timeOnLedge += Time.deltaTime;
+            _timeOnLedge += Time.deltaTime;
         }
 
         // SubState 2 - Exiting Ledge
-        else if(exitingLedge)
+        else if(ExitingLedge)
         {
-            if (exitLedgeTimer > 0) exitLedgeTimer -= Time.deltaTime;
-            else exitingLedge = false;
+            if (_exitLedgeTimer > 0) _exitLedgeTimer -= Time.deltaTime;
+            else ExitingLedge = false;
         }
 
-        if (holding && jumpAction.triggered) LedgeJump();
+        if (_holding && _jumpAction.triggered) LedgeJump();
     }
 
     private void LedgeDetection()
     {
-        bool ledgeDetected = Physics.SphereCast(transform.position, ledgeSphereCastRadius, realCamTrans.forward, out ledgeHit, ledgeDetectionLength, whatIsLedge);
+        bool ledgeDetected = Physics.SphereCast(transform.position, ledgeSphereCastRadius, _realCamTrans.forward, out _ledgeHit, ledgeDetectionLength, whatIsLedge);
 
-        if (ledgeHit.transform == null) return;
+        if (_ledgeHit.transform == null) return;
 
-        directionToLedge = ledgeHit.transform.position - transform.position;
-        distanceToLedge = directionToLedge.magnitude;
+        _directionToLedge = _ledgeHit.transform.position - transform.position;
+        _distanceToLedge = _directionToLedge.magnitude;
 
-        if (lastLedge != null && ledgeHit.transform == lastLedge) return;
+        if (_lastLedge != null && _ledgeHit.transform == _lastLedge) return;
 
-        if (ledgeDetected && distanceToLedge < maxLedgeGrabDistance && !holding) EnterLedgeHold();
+        if (ledgeDetected && _distanceToLedge < maxLedgeGrabDistance && !_holding) EnterLedgeHold();
     }
 
     private void LedgeJump()
@@ -178,50 +164,50 @@ public class LedgeGrabbing : MonoBehaviour
 
     private void DelayedForce()
     {
-        Vector3 forceToAdd = realCamTrans.forward * ledgeJumpForwardForce + orientation.up * ledgeJumpUpForce;
-        rb.linearVelocity = Vector3.zero;
-        rb.AddForce(forceToAdd, ForceMode.Impulse);
+        Vector3 forceToAdd = _realCamTrans.forward * ledgeJumpForwardForce + _orientation.up * ledgeJumpUpForce;
+        _rb.linearVelocity = Vector3.zero;
+        _rb.AddForce(forceToAdd, ForceMode.Impulse);
     }
 
     private void EnterLedgeHold()
     {
-        if (exitingLedge) return;
+        if (ExitingLedge) return;
 
         // print("entered ledge hold");
 
-        main.ledgegrabbing = true;
-        holding = true;
+        _mainWr.LedgeGrabbing = true;
+        _holding = true;
 
-        pm.Restricted = true;
+        _pm.Restricted = true;
         
         //USED TO BE IN, I UNCOMMENTED BC MAX SPEED STAYED UNLIMITED, IDK WHY - Sid
-        // pm.UnlimitedSpeed = true;
+        // _pm.UnlimitedSpeed = true;
 
-        currLedge = ledgeHit.transform;
-        lastLedge = ledgeHit.transform;
+        _currLedge = _ledgeHit.transform;
+        _lastLedge = _ledgeHit.transform;
 
-        rb.useGravity = false;
-        rb.linearVelocity = Vector3.zero;
+        _rb.useGravity = false;
+        _rb.linearVelocity = Vector3.zero;
     }
 
     //Didn't seem to do anything, so I commented it out - Sid
     // bool touchingLedge;
     private void FreezeRigidbodyOnLedge()
     {
-        rb.useGravity = false;
+        _rb.useGravity = false;
 
-        Vector3 directionToLedge = currLedge.position - transform.position;
+        Vector3 directionToLedge = _currLedge.position - transform.position;
 
-        if (directionToLedge.magnitude > maxLedgeGrabDistance && holding) ExitLedgeHold();
+        if (directionToLedge.magnitude > maxLedgeGrabDistance && _holding) ExitLedgeHold();
 
         // Move PlayerParent towards ledge
         if (directionToLedge.magnitude > 1f)
         {
-            // Vector3 directionToLedge = ledgeHit.transform.position - transform.position;
-            // rb.velocity = directionToLedge.normalized * moveToLedgeSpeed;
+            // Vector3 _directionToLedge = _ledgeHit.transform.position - transform.position;
+            // _rb.velocity = _directionToLedge.normalized * moveToLedgeSpeed;
 
-            if (rb.linearVelocity.magnitude < moveToLedgeSpeed)
-                rb.AddForce(directionToLedge.normalized * moveToLedgeSpeed * 1000f * Time.deltaTime);
+            if (_rb.linearVelocity.magnitude < moveToLedgeSpeed)
+                _rb.AddForce(directionToLedge.normalized * moveToLedgeSpeed * 1000f * Time.deltaTime);
 
             // The current problem is that I can't set the velocity from here, I can only add force
             // -> but then the force is mainly upwards :D
@@ -232,27 +218,27 @@ public class LedgeGrabbing : MonoBehaviour
         // Hold onto ledge
         else
         {
-            if (pm.UnlimitedSpeed) pm.UnlimitedSpeed = false;
-            if (!pm.Freeze) pm.Freeze = true;
-            //rb.velocity = Vector3.zero;
+            if (_pm.UnlimitedSpeed) _pm.UnlimitedSpeed = false;
+            if (!_pm.Freeze) _pm.Freeze = true;
+            //_rb.velocity = Vector3.zero;
             // print("hanging on ledge");
         }
     }
 
     private void ExitLedgeHold()
     {
-        exitingLedge = true;
-        exitLedgeTimer = exitLedgeTime;
+        ExitingLedge = true;
+        _exitLedgeTimer = exitLedgeTime;
 
-        main.ledgegrabbing = false;
-        holding = false;
-        timeOnLedge = 0;
+        _mainWr.LedgeGrabbing = false;
+        _holding = false;
+        _timeOnLedge = 0;
 
-        pm.Freeze = false;
-        pm.UnlimitedSpeed = false;
-        pm.Restricted = false;
+        _pm.Freeze = false;
+        _pm.UnlimitedSpeed = false;
+        _pm.Restricted = false;
 
-        rb.useGravity = true;
+        _rb.useGravity = true;
 
         StopAllCoroutines();
         Invoke(nameof(ResetLastLedge), 1f);
@@ -260,8 +246,14 @@ public class LedgeGrabbing : MonoBehaviour
 
     private void ResetLastLedge()
     {
-        lastLedge = null;
+        _lastLedge = null;
     }
+
+    #region Getters and Setters
+
+    public bool ExitingLedge { get; private set; }
+
+    #endregion
 
 
     //Wasn't used, so I commented it out - Sid

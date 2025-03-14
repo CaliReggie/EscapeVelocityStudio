@@ -1,63 +1,58 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Serialization;
 
+// This script handles all kinds of extra detections and calculations needed as information for other scripts.
+// keeps all other scripts shorter and more understandable.
 
-// Dave MovementLab - Detector
-///
-// Content:
-/// - detection for jump predictions
-///
-// Note:
-/// This script handles all kinds of extra detections and calculations needed as information for other scripts.
-/// I made this extra script to keep all other scripts shorter and more understandable.
-
-
+[RequireComponent(typeof(PlayerMovement))]
 public class Detector : MonoBehaviour
 {
-    [Header("References")]
-    
-    public PlayerMovement pm;
-    
-    public Transform orientation;
-    
-    [Header("Detection")]
-    
-    public LayerMask whatIsGround;
-    
     [Header("Behaviour")]
     
-    public bool showMarkerSphere = false;
+    [SerializeField] private bool showMarkerSphere;
     
-    [Header("Jump Prediction State")]
-    
-    [HideInInspector] public bool precisionTargetFound;
-    [HideInInspector] public bool precisionTargetIsWall;
-
     [Header("Debugging")]
     
-    public bool debuggingEnabled;
+    [SerializeField] private bool debuggingEnabled;
     
-    public MeshRenderer renderMarkerSphere;
+    [field: SerializeField] public Transform MarkerSphere { get; private set; }
     
-    public Transform markerSphere;
+    [SerializeField] private MeshRenderer markerSphereRenderer;
     
-    public Transform someSecondSphere;
+    [SerializeField] private TextMeshProUGUI textPredictionState;
     
-    public TextMeshProUGUI textPredictionState;
+    //Private, or Non-Serialized Below
+    
+    //Player References
+    private PlayerMovement _pm;
+    
+    private Transform _orientation;
+    
+    //Detection
+    private LayerMask _whatIsGround;
 
+    private void Awake()
+    {
+        //get references
+        _pm = GetComponent<PlayerMovement>();
+        
+        _orientation = _pm.Orientation;
+    }
+    
     private void Start()
     {
+        //waited for pm to initialize
+        _whatIsGround = _pm.WhatIsGround;
+        
         // if no ground layermask is selected, set it to "Default"
-        if (whatIsGround.value == 0)
-            whatIsGround = LayerMask.GetMask("Default");
+        if (_whatIsGround.value == 0)
+            _whatIsGround = LayerMask.GetMask("Default");
 
         if (!debuggingEnabled)
         {
-            renderMarkerSphere.enabled = false;
-            someSecondSphere.GetComponent<MeshRenderer>().enabled = false;
+            markerSphereRenderer.enabled = false;
         }
     }
 
@@ -66,58 +61,56 @@ public class Detector : MonoBehaviour
         JumpPrediction();
 
         if(showMarkerSphere)
-            renderMarkerSphere.enabled = precisionTargetFound;
+            markerSphereRenderer.enabled = PrecisionTargetFound;
     }
 
-    /// This function tries to predict where the PlayerParent wants to jump next.
-    /// Needed for precise ground and wall jumping.
+    // This function tries to predict where the PlayerParent wants to jump next.
+    // Needed for precise ground and wall jumping.
     private void JumpPrediction()
     {
         RaycastHit viewRayHit;
         string predictionState;
 
-        if (Physics.Raycast(orientation.position, orientation.forward, out viewRayHit, pm.MaxJumpRange, whatIsGround))
+        if (Physics.Raycast(_orientation.position, _orientation.forward, out viewRayHit, _pm.MaxJumpRange, _whatIsGround))
         {
             // Case 1 - raycast hits (in maxDistance)
-            markerSphere.position = viewRayHit.point;
+            MarkerSphere.position = viewRayHit.point;
 
             predictionState = "in distance";
 
-            precisionTargetFound = true;
+            PrecisionTargetFound = true;
         }
 
-        else if (Physics.SphereCast(orientation.position, 1f, orientation.forward, out viewRayHit, 10f, whatIsGround))
+        else if (Physics.SphereCast(_orientation.position, 1f, _orientation.forward, out viewRayHit, 10f, _whatIsGround))
         {
             // Case 2 - raycast hits (out of maxDistance)
 
             // calculate nearest possible point
-            Vector3 maxRangePoint = orientation.position + orientation.forward * pm.MaxJumpRange;
+            Vector3 maxRangePoint = _orientation.position + _orientation.forward * _pm.MaxJumpRange;
 
             RaycastHit wallHit;
-            if (Physics.Raycast(maxRangePoint, -viewRayHit.normal, out wallHit, 4f, whatIsGround))
+            if (Physics.Raycast(maxRangePoint, -viewRayHit.normal, out wallHit, 4f, _whatIsGround))
             {
-                markerSphere.position = wallHit.point;
+                MarkerSphere.position = wallHit.point;
                 predictionState = "out of distance, to wall";
 
-                precisionTargetFound = true;
+                PrecisionTargetFound = true;
             }
             else
             {
-                someSecondSphere.position = viewRayHit.point;
-
-                if (Vector3.Distance(orientation.position, viewRayHit.point) <= pm.MaxJumpRange)
+                if (Vector3.Distance(_orientation.position, viewRayHit.point) <= _pm.MaxJumpRange)
                 {
                     predictionState = "out of distance, hitPoint";
-                    markerSphere.position = viewRayHit.point;
+                    MarkerSphere.position = viewRayHit.point;
 
-                    precisionTargetFound = true;
+                    PrecisionTargetFound = true;
                 }
                 else
                 {
                     predictionState = "out of distance, can't predict point..."; // -> same as case 3
-                    markerSphere.position = orientation.position + orientation.forward * pm.MaxJumpRange;
+                    MarkerSphere.position = _orientation.position + _orientation.forward * _pm.MaxJumpRange;
 
-                    precisionTargetFound = false;
+                    PrecisionTargetFound = false;
                 }
             }
         }
@@ -127,18 +120,22 @@ public class Detector : MonoBehaviour
             // Case 3 - raycast completely misses
             // -> Normal Jump
             // Gizmos.DrawWireSphere(RealCam.transform.position + camHolder.forward * MaxJumpRange, .5f);
-            markerSphere.position = orientation.position + orientation.forward * pm.MaxJumpRange;
+            MarkerSphere.position = _orientation.position + _orientation.forward * _pm.MaxJumpRange;
             predictionState = "complete miss";
 
-            precisionTargetFound = false;
+            PrecisionTargetFound = false;
         }
 
-        if (precisionTargetFound)
-            precisionTargetIsWall = viewRayHit.transform.gameObject.layer == 8;
+        if (PrecisionTargetFound)
+            PrecisionTargetIsWall = viewRayHit.transform.gameObject.layer == 8;
         else
-            precisionTargetIsWall = false;
+            PrecisionTargetIsWall = false;
 
         if (debuggingEnabled)
             textPredictionState.SetText(predictionState);
     }
+    
+    public bool PrecisionTargetFound { get; private set; }
+    
+    public bool PrecisionTargetIsWall { get; private set; }
 }

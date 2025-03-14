@@ -7,7 +7,7 @@ using UnityEditor;
 
 #if UNITY_EDITOR
 
-//maaking custom GUI buttons
+//making custom GUI buttons
 [CustomEditor(typeof(PlayerCam))]
 public class PlayerCamEditor : Editor
 {
@@ -49,6 +49,7 @@ public enum EControlScheme
         Gamepad
     }
 
+[RequireComponent(typeof(PlayerMovement))]
 public class PlayerCam : MonoBehaviour
 {
     [Header("Cam References")]
@@ -153,23 +154,11 @@ public class PlayerCam : MonoBehaviour
 
     private void Awake()
     {
-        if (_lookAction == null)
-        {
-            Debug.LogError("Look action not set in ThirdPersonCameraController");
-            
-            Destroy(gameObject);
-        }
+        // get references
         
-        if (_moveAction == null)
-        {
-            Debug.LogError("Move action not set in ThirdPersonCameraController");
-            
-            Destroy(gameObject);
-        }
+        _rb = GetComponent<Rigidbody>();
         
-        Cursor.lockState = CursorLockMode.Locked;
-        
-        Cursor.visible = false;
+        _thirdPersonFixedCamFollow = thirdPersonFixedCam.GetComponent<CinemachineThirdPersonFollow>();
         
         PlayerInput playerInput = GetComponent<PlayerInput>();
         
@@ -186,9 +175,9 @@ public class PlayerCam : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Unknown control scheme, destroying attached Player Input GameObject");
+            Debug.LogError("Unknown control scheme, disabling");
             
-            Destroy(gameObject);
+            enabled = false;
         }
         
         playerInput.onControlsChanged += OnControlSchemeChanged;
@@ -199,12 +188,10 @@ public class PlayerCam : MonoBehaviour
     
     private void Start()
     {
-        // get the components
-        _rb = GetComponent<Rigidbody>();
+        Cursor.lockState = CursorLockMode.Locked;
         
-        // get the third person fixed RealCamTrans follow component
-        _thirdPersonFixedCamFollow = thirdPersonFixedCam.GetComponent<CinemachineThirdPersonFollow>();
-
+        Cursor.visible = false;
+        
         SwitchCamType(CurrentCamType);
     }
     
@@ -395,8 +382,8 @@ public class PlayerCam : MonoBehaviour
     }
 
 
-    /// double click the field below to show all fov, tilt and RealCam shake code
-    /// Note: For smooth transitions I use the free DoTween Asset!
+    // double click the field below to show all fov, tilt and RealCam shake code
+    // Note: For smooth transitions I use the free DoTween Asset!
     #region Fov, Tilt and CamShake
 
     /// function called when starting to wallrun or starting to dash
