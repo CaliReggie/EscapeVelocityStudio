@@ -76,7 +76,7 @@ public class PlayerAttacks : MonoBehaviour
         PlayerCam playerCamScript = GetComponent<PlayerCam>();
         _realCamPos = playerCamScript.RealCam.gameObject.transform;
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         potentialEnergyAttackAction = playerInput.actions.FindAction(potentialEnergyAttackActionName);
         kineticEnergyAttackAction = playerInput.actions.FindAction(kineticEnergyAttackActionName);

@@ -4,6 +4,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEditor;
+using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
 
@@ -62,15 +63,10 @@ public class PlayerCam : MonoBehaviour
     
     [field: SerializeField] public Camera RealCam { get; private set; }
     
+    
     [Header("Player References")]
     
-    [SerializeField] private Transform orientation;
-    
     [SerializeField] private Transform camOrientation;
-    
-    [SerializeField] private Transform player;
-    
-    [SerializeField] private Transform playerObj;
     
     [SerializeField] private Transform grappleRig;
     
@@ -122,14 +118,19 @@ public class PlayerCam : MonoBehaviour
 
     public event Action<ECamType> OnSwitchCamType;
     
-    //References
-    private CinemachineThirdPersonFollow _thirdPersonFixedCamFollow;
+    //Player References
+    private Transform _orientation;
+    
+    private Transform _playerObj;
     
     private Rigidbody _rb;
     
     private InputAction _lookAction;
     
     private InputAction _moveAction;
+    
+    //Camera References
+    private CinemachineThirdPersonFollow _thirdPersonFixedCamFollow;
     
     //Input
     private Vector2 _lookInput;
@@ -155,12 +156,16 @@ public class PlayerCam : MonoBehaviour
     private void Awake()
     {
         // get references
-        
         _rb = GetComponent<Rigidbody>();
         
         _thirdPersonFixedCamFollow = thirdPersonFixedCam.GetComponent<CinemachineThirdPersonFollow>();
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerMovement pm = GetComponent<PlayerMovement>();
+        _orientation = pm.Orientation;
+        _playerObj = pm.PlayerObj;
+        
+        
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         //set the control scheme
         string currentControlScheme = playerInput.currentControlScheme;
@@ -298,8 +303,8 @@ public class PlayerCam : MonoBehaviour
                 _firstPersonXRot = Mathf.Clamp(_firstPersonXRot, -89f, 89f);
                 
                 //rotate PlayerParent object and Orientation along only the y axis
-                orientation.rotation = Quaternion.Euler(0, _firstPersonYRot, 0);
-                playerObj.rotation = Quaternion.Euler(0, _firstPersonYRot, 0);
+                _orientation.rotation = Quaternion.Euler(0, _firstPersonYRot, 0);
+                _playerObj.rotation = Quaternion.Euler(0, _firstPersonYRot, 0);
                 
                 
                 //rotate RealCamTrans Orientation fully
@@ -314,18 +319,18 @@ public class PlayerCam : MonoBehaviour
             case ECamType.ThirdOrbit:
                 
                 //rotate RealCamTrans Orientation fully to direction from RealCamTrans to PlayerParent
-                camOrientation.rotation = Quaternion.LookRotation(player.position - new Vector3(thirdPersonOrbitCinCam.transform.position.x,
+                camOrientation.rotation = Quaternion.LookRotation(_playerObj.position - new Vector3(thirdPersonOrbitCinCam.transform.position.x,
                     RealCam.transform.position.y, thirdPersonOrbitCinCam.transform.position.z));
                 
                 //rotate PlayerParent Orientation along only the y axis of RealCamTrans Orientation
-                orientation.rotation = Quaternion.Euler(0, camOrientation.rotation.eulerAngles.y, 0);
+                _orientation.rotation = Quaternion.Euler(0, camOrientation.rotation.eulerAngles.y, 0);
 
                 //use relative input direction to rotate PlayerParent object relative to PlayerParent Orientation
-                Vector3 relativeInputDir = orientation.forward * _moveInput.y + orientation.right * _moveInput.x;
+                Vector3 relativeInputDir = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
                 
                 if (relativeInputDir != Vector3.zero)
                 {
-                    playerObj.forward = Vector3.Slerp(playerObj.forward, relativeInputDir, Time.deltaTime *
+                    _playerObj.forward = Vector3.Slerp(_playerObj.forward, relativeInputDir, Time.deltaTime *
                         playerRotSpeed);
                 }
                 
@@ -347,8 +352,8 @@ public class PlayerCam : MonoBehaviour
                 
                 camOrientation.transform.rotation = Quaternion.Euler(_thirdFixedXRot, _thirdFixedYRot, 0);
                 
-                orientation.rotation = Quaternion.Euler(0, _thirdFixedYRot, 0);
-                playerObj.rotation = Quaternion.Euler(0, _thirdFixedYRot, 0);
+                _orientation.rotation = Quaternion.Euler(0, _thirdFixedYRot, 0);
+                _playerObj.rotation = Quaternion.Euler(0, _thirdFixedYRot, 0);
                 
                 break;
                 
@@ -367,7 +372,7 @@ public class PlayerCam : MonoBehaviour
             
             case ECamType.ThirdOrbit:
                 
-                Vector3 orbitViewDir = player.position - thirdPersonOrbitCinCam.transform.position;
+                Vector3 orbitViewDir = _playerObj.position - thirdPersonOrbitCinCam.transform.position;
                 
                 grappleRig.rotation = Quaternion.LookRotation(orbitViewDir);
                 

@@ -80,7 +80,7 @@ public class Dashing : MonoBehaviour
         _playerCamScript = GetComponent<PlayerCam>();
         _realCamTrans = _playerCamScript.RealCam.gameObject.transform;
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         _dashAction = playerInput.actions.FindAction(dashActionName);
     }

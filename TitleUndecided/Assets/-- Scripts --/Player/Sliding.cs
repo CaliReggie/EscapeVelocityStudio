@@ -71,7 +71,7 @@ public class Sliding : MonoBehaviour
         _orientation    = _pm.Orientation;
         _playerColl = GetComponent<CapsuleCollider>();
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         _slideAction = playerInput.actions.FindAction(slideActionName);
     }

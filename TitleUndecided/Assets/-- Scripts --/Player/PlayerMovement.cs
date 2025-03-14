@@ -3,7 +3,6 @@ using TMPro;
 using PhysicsExtensions;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(PlayerCam))]
@@ -194,7 +193,7 @@ public class PlayerMovement : MonoBehaviour
             _momentumExtensionEnabled = true;
         }
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         _moveAction = playerInput.actions.FindAction(moveActionName);
         _jumpAction = playerInput.actions.FindAction(jumpActionName);

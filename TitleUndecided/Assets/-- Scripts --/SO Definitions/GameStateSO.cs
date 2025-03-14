@@ -6,7 +6,8 @@ public enum EGameState
     MainMenu,
     Game,
     Pause,
-    GameOver
+    GameOver,
+    Reset
 }
 
 /// <summary>

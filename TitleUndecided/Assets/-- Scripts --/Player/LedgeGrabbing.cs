@@ -91,7 +91,7 @@ public class LedgeGrabbing : MonoBehaviour
         PlayerCam playerCamScript = GetComponent<PlayerCam>();
         _realCamTrans = playerCamScript.RealCam.transform;
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         _jumpAction = playerInput.actions.FindAction(jumpActionName);
     }

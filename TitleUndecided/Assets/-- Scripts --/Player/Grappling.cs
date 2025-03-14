@@ -179,7 +179,7 @@ public class Grappling: MonoBehaviour
         PlayerCam playerCam = GetComponent<PlayerCam>();
         _realCamTrans = playerCam.RealCam.gameObject.transform;
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         _leftGrappleAction = playerInput.actions.FindAction(leftGrappleActionName);
         _rightGrappleAction = playerInput.actions.FindAction(rightGrappleActionName);

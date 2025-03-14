@@ -244,7 +244,7 @@ public class WallRunning : MonoBehaviour
         _lg = GetComponent<LedgeGrabbing>();
         _dt = GetComponent<Detector>();
         
-        PlayerInput playerInput = GetComponent<PlayerInput>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
         _wallJumpAction = playerInput.actions.FindAction(wallJumpActionName);
         // upwardsRunAction = playerInput.actions.FindAction(upwardsRunActionName);
