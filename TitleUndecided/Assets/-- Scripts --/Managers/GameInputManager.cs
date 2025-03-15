@@ -10,9 +10,7 @@ public class GameInputManager : MonoBehaviour
     
     [Header("Player Spawning")]
     
-    [SerializeField] private GameObject uiScenePrefab;
-        
-    [SerializeField] private GameObject playableScenePrefab;
+    [SerializeField] private GameObject playableScenePlayerPrefab;
 
     [Header("Dynamic")]
 
@@ -26,6 +24,8 @@ public class GameInputManager : MonoBehaviour
     // References
     
     private PlayerInputManager _playerInputManager;
+    
+    private Vector3 _currentSpawnPos, _currentSpawnRot;
     
     private void Awake()
     {
@@ -86,35 +86,32 @@ public class GameInputManager : MonoBehaviour
     
     private void EnablePlayableSpawn()
     {
-        if (playableScenePrefab == null)
+        if (playableScenePlayerPrefab == null)
         {
             Debug.LogError("No Playable Scene Prefab assigned in the inspector!");
             
             return;
         }
         
-        _playerInputManager.playerPrefab = playableScenePrefab;
+        //setting prefab to spawn
+        _playerInputManager.playerPrefab = playableScenePlayerPrefab;
         
+        //setting spawn pos and rot from current scene info
+        _currentSpawnPos = GameStateManager.Instance.CurrentGameStateSceneInfo.SceneSpawnWorldPos;
+        
+        _currentSpawnRot = GameStateManager.Instance.CurrentGameStateSceneInfo.SceneSpawnRot;
+        
+        //enabling joining
         JoiningEnabled = true;
-    }
-    
-    private void EnableUISpawn()
-    {
-        // if (uiScenePrefab == null)
-        // {
-        //     Debug.LogError("No UI Scene Prefab assigned in the inspector!");
-        //     
-        //     return;
-        // }
-        //
-        // _playerInputManager.playerPrefab = uiScenePrefab;
-        //
-        // JoiningEnabled = true;
     }
     
     private void OnPlayerJoined(PlayerInput playerInput)
     {
         PlayerInput = playerInput;
+        
+        //Setting player parent (player input) world spawn loc and rot
+        playerInput.transform.position = _currentSpawnPos;
+        playerInput.transform.rotation = Quaternion.Euler(_currentSpawnRot);
     }
     
     private void OnPlayerLeft(PlayerInput playerInput)
@@ -146,14 +143,17 @@ public class GameInputManager : MonoBehaviour
         {
             case EGameState.Reset:
                 
-                JoiningEnabled = false;
+                JoiningEnabled = false; // Disable joining
+                
+                // Reset spawn pos and rot
+                _currentSpawnPos = Vector3.zero;
+                
+                _currentSpawnRot = Vector3.zero;
                 
                 break;
             
             case EGameState.MainMenu:
-                
-                EnableUISpawn();
-                
+                //Do something
                 break;
             
             case EGameState.Game:

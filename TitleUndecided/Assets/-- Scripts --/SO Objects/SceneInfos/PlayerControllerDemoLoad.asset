@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <SceneName>k__BackingField: PlayerControllerDemo
   <SceneStartState>k__BackingField: 2
+  sceneSpawnWorldPos: {x: 89.23, y: 27.442, z: -34.93}
+  sceneSpawnRot: {x: 0, y: 90, z: 0}

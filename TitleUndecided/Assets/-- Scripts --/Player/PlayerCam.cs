@@ -207,6 +207,13 @@ public class PlayerCam : MonoBehaviour
         _lookAction.Enable();
         
         _moveAction.Enable();
+        
+        //setting first person and third fixed rots based on current rots
+        _firstPersonYRot = _orientation.eulerAngles.y;
+        _firstPersonXRot = _orientation.eulerAngles.x;
+        
+        _thirdFixedYRot = _orientation.eulerAngles.y;
+        _thirdFixedXRot = _orientation.eulerAngles.x;
     }
     
     private void OnDisable()

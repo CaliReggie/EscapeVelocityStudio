@@ -90,8 +90,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba64085449d5b634493d571fe670aca7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiScenePrefab: {fileID: 0}
-  playableScenePrefab: {fileID: 6203304367237142539, guid: 20dd83c54b1592a4db36441848eafc5d,
+  playableScenePlayerPrefab: {fileID: 6203304367237142539, guid: 20dd83c54b1592a4db36441848eafc5d,
     type: 3}
   placeholder: 0
   <PlayerInput>k__BackingField: {fileID: 0}

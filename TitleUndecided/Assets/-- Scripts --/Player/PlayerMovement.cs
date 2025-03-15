@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 using PhysicsExtensions;
@@ -225,6 +226,11 @@ public class PlayerMovement : MonoBehaviour
         _startCollCenterY = _playerColl.center.y;
 
         _readyToJump = true;
+        
+        //Managing spawn pos since rigidbody attached. Parent trans set to desired spawn pos + rot in GameInputManager
+        Vector3 offset = transform.position - transform.parent.position;
+        
+        _rb.MovePosition(transform.parent.position + offset); // rigidbody needs to be moved specially to move GO
     }
 
     private void OnEnable()
