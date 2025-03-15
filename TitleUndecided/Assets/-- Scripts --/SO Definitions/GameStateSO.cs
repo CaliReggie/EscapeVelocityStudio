@@ -3,11 +3,11 @@ using UnityEngine;
 
 public enum EGameState
 {
+    Reset,
     MainMenu,
     Game,
     Pause,
-    GameOver,
-    Reset
+    GameOver
 }
 
 /// <summary>
@@ -19,7 +19,7 @@ public class GameStateSO : ScriptableObject
     /// <summary>
     /// The current game state. Do not set this directly; use GameStateManager to set the game state.
     /// </summary>
-    [field: SerializeField] public EGameState GameState { get; private set; } = EGameState.MainMenu;
+    [field: SerializeField] public EGameState GameState { get; private set; } = EGameState.Reset;
     
     public void SetGameState(EGameState state, GameStateManager authorizer)
     {

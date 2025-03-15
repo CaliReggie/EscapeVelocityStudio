@@ -834,6 +834,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6203304367237142540}
   - component: {fileID: 5764976879232728685}
+  - component: {fileID: 4058362271373679927}
   m_Layer: 0
   m_Name: PlayablePlayer
   m_TagString: Untagged
@@ -890,6 +891,19 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 6203304367693416331}
+--- !u!114 &4058362271373679927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6203304367237142539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7bc5d7bd2fb5af4db974f6e930be86a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pauseAction: Cancel
 --- !u!1 &6203304367693416329
 GameObject:
   m_ObjectHideFlags: 0
@@ -964,7 +978,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 3206657
+    m_Bits: 1109505
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1417,7 +1431,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6203304368357292904
 Transform:
   m_ObjectHideFlags: 0
@@ -1427,7 +1441,7 @@ Transform:
   m_GameObject: {fileID: 6203304368357292919}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 1.6170006, z: 0.042}
+  m_LocalPosition: {x: -0.0000000037252903, y: 1.6170006, z: 0.04199982}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1497,8 +1511,6 @@ GameObject:
   - component: {fileID: 6203304367677133244}
   - component: {fileID: 6203304368605208349}
   - component: {fileID: 6203304368605208351}
-  - component: {fileID: 3014917137250817695}
-  - component: {fileID: 4975238898405478326}
   m_Layer: 13
   m_Name: PlayerParent
   m_TagString: Player
@@ -1599,7 +1611,7 @@ MonoBehaviour:
   thirdPersonRenderMask:
     serializedVersion: 2
     m_Bits: 3206657
-  <CurrentCamType>k__BackingField: 2
+  <CurrentCamType>k__BackingField: 0
   keyAndMouseFirstPersonLookSpeedMult: 0.5
   gamepadFirstPersonLookSpeedMult: 1.25
   gamepadFirstPersonVerticalModifier: 0.5
@@ -1669,10 +1681,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   camEffectResetSpeed: 0.1
-  textSpeed: {fileID: 0}
-  textYSpeed: {fileID: 0}
-  textMoveState: {fileID: 0}
-  textSpeedChangeFactor: {fileID: 0}
 --- !u!114 &5965718284427126071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1830,7 +1838,6 @@ MonoBehaviour:
   wallRunFOVChangeSpeed: 0.2
   wallRunTilt: 5
   wallRunTiltChangeSpeed: 0.2
-  text_wallState: {fileID: 0}
 --- !u!114 &6203304368605208347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1949,69 +1956,6 @@ MonoBehaviour:
   debuggingEnabled: 0
   <MarkerSphere>k__BackingField: {fileID: 2623530894546235191}
   markerSphereRenderer: {fileID: 294500666847184937}
-  textPredictionState: {fileID: 0}
---- !u!114 &3014917137250817695
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6203304368605208357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 997541486d0d171448bad608a1cbbefc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  heightRange: {x: 5, y: 100}
-  kineticSpeedGainThreshold: 20
-  kineticGainPerSecond: 15
-  kineticSpeedLossThreshold: 8
-  kineticLossAbovePerSecond: 5
-  kineticLossBelowPerSecond: 15
---- !u!114 &4975238898405478326
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6203304368605208357}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b0a98566764d76a4d8ec9294d7fca704, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  swordScript: {fileID: 0}
-  potentialEnergyField: {fileID: 0}
-  potentialEnergyAttackActionName: PotentialAttack
-  kineticEnergyAttackActionName: KineticAttack
-  potentialEnergyAttackAction:
-    m_Name: Potential Energy Attack
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 6715e0e6-26ea-44b7-83e6-e2fc2c1c6f5b
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings: []
-    m_Flags: 0
-  kineticEnergyAttackAction:
-    m_Name: Kinetic Energy Attack
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 40f33eeb-8178-4a6b-a007-cb61c9570849
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings: []
-    m_Flags: 0
-  whatIsAttackable:
-    serializedVersion: 2
-    m_Bits: 36352
-  potentialEnergyAttackPrediction: {fileID: 303538786347710358}
-  potentialPredictionSpherecastRadius: 3
-  potentialEnergyAttackDistance: 50
-  potentialEnergyAttackDuration: 1
-  potentialEnergyAttackCooldown: 5
-  kineticEnergyAttackDuration: 3
-  kineticEnergyAttackCooldown: 5
 --- !u!1 &6366089962580002061
 GameObject:
   m_ObjectHideFlags: 0
@@ -2448,7 +2392,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4978725435959519586
 Transform:
   m_ObjectHideFlags: 0

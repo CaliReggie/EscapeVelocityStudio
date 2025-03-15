@@ -14,8 +14,6 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Grappling))]
 [RequireComponent(typeof(LedgeGrabbing))]
 [RequireComponent(typeof(Detector))]
-[RequireComponent(typeof(PlayerEnergy))]
-[RequireComponent(typeof(PlayerAttacks))]
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -117,13 +115,6 @@ public class PlayerMovement : MonoBehaviour
     
     [SerializeField] private float camEffectResetSpeed = 0.1f;
     
-    [Header("Debug")]
-    
-    [SerializeField] private TextMeshProUGUI textSpeed;
-    [SerializeField] private TextMeshProUGUI textYSpeed;
-    [SerializeField] private TextMeshProUGUI textMoveState;
-    [SerializeField] private TextMeshProUGUI textSpeedChangeFactor;
-    
     //Dynamic, Non Serialized Below
     
     //References
@@ -168,6 +159,12 @@ public class PlayerMovement : MonoBehaviour
     private float _desiredMaxSpeed; // needed to smoothly change between speed limitations
     private float _maxSpeed; // this variable changes depending on which movement mode you are in
     
+    //Debug
+    private TextMeshProUGUI _textSpeed;
+    private TextMeshProUGUI _textYSpeed;
+    private TextMeshProUGUI _textMoveState;
+    private TextMeshProUGUI _textSpeedChangeFactor;
+    
     //IDK if needed, wasn't used in script - Sid
     //private float _desiredMaxSpeedLastFrame; // the previous desired max speed
     
@@ -199,6 +196,12 @@ public class PlayerMovement : MonoBehaviour
         _jumpAction = playerInput.actions.FindAction(jumpActionName);
         _sprintAction = playerInput.actions.FindAction(sprintActionName);
         _crouchAction = playerInput.actions.FindAction(crouchActionName);
+        
+        // Debug
+        _textSpeed = UIManager.Instance.SpeedText;
+        _textYSpeed = UIManager.Instance.YVelText;
+        _textMoveState = UIManager.Instance.MoveStateText;
+        _textSpeedChangeFactor = UIManager.Instance.WallStateText;
         
         // Set Important Fields
         
@@ -871,28 +874,28 @@ public class PlayerMovement : MonoBehaviour
 
     private void DebugText()
     {
-        if (textSpeed != null)
+        if (_textSpeed != null)
         {
             Vector3 rbFlatVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
-            textSpeed.SetText("Speed: " + Round(rbFlatVelocity.magnitude, 1) + "/" + Round(_maxSpeed,0));
+            _textSpeed.SetText("Speed: " + Round(rbFlatVelocity.magnitude, 1) + "/" + Round(_maxSpeed,0));
         }
 
-        if (textYSpeed != null)
-            textYSpeed.SetText("Y Speed: " + Round(_rb.linearVelocity.y, 1));
+        if (_textYSpeed != null)
+            _textYSpeed.SetText("Y Speed: " + Round(_rb.linearVelocity.y, 1));
 
-        if (textMoveState != null)
-            textMoveState.SetText(MoveMode.ToString());
+        if (_textMoveState != null)
+            _textMoveState.SetText(MoveMode.ToString());
 
         if (!_momentumExtensionEnabled)
             return;
 
-        if (textSpeedChangeFactor != null)
+        if (_textSpeedChangeFactor != null)
         {
             if (isIncreasingMaxSpeed)
-                textSpeedChangeFactor.SetText("Increase: " + increaseSpeedChangeFactor.ToString());
+                _textSpeedChangeFactor.SetText("Increase: " + increaseSpeedChangeFactor.ToString());
             else
             {
-                textSpeedChangeFactor.SetText("Decrease: " + (decreaseSpeedChangeFactor*_momentumExtension.GetSurfaceSpeedDecreaseFactor(Grounded)).ToString());
+                _textSpeedChangeFactor.SetText("Decrease: " + (decreaseSpeedChangeFactor*_momentumExtension.GetSurfaceSpeedDecreaseFactor(Grounded)).ToString());
             }
         }
     }

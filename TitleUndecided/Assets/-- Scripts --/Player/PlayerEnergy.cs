@@ -176,7 +176,7 @@ public class PlayerEnergy : MonoBehaviour
             
             if (_potentialEnergy > 100) _potentialEnergy = 100;
             
-            UIManager.Instance.SetPotentialEnergyFill(_potentialEnergy / 100);
+           
         }
     }
     
@@ -188,7 +188,7 @@ public class PlayerEnergy : MonoBehaviour
             
             if (_kineticEnergy > 100) _kineticEnergy = 100;
             
-            UIManager.Instance.SetKineticEnergyFill(_kineticEnergy / 100);
+           
         }
     }
     

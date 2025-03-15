@@ -124,10 +124,6 @@ public class WallRunning : MonoBehaviour
     [SerializeField] private float wallRunTilt = 5f; // the tilt of the camera while Wallrunning
     [SerializeField] private float wallRunTiltChangeSpeed = 0.2f; // how fast the tilt changes while Wallrunning
     
-    [Header("Debugging")]
-
-    [SerializeField] private TextMeshProUGUI text_wallState; // displaying text ingame
-    
     //Dynamic, Non-Serialized Below
     
     // this entire section is for defining how long the raycasts forward, sideways and backwards are
@@ -233,6 +229,9 @@ public class WallRunning : MonoBehaviour
     // jump counters
     private int _wallJumpsDone;
     private int _climbJumpsDone;
+    
+    //Debug
+    private TextMeshProUGUI _text_wallState; // displaying text ingame
 
     private void Awake()
     {
@@ -249,6 +248,8 @@ public class WallRunning : MonoBehaviour
         _wallJumpAction = playerInput.actions.FindAction(wallJumpActionName);
         // upwardsRunAction = playerInput.actions.FindAction(upwardsRunActionName);
         // downwardsRunAction = playerInput.actions.FindAction(downwardsRunActionName);
+        
+        _text_wallState = UIManager.Instance.WallStateText;
     }
 
     private void Start()
@@ -290,8 +291,8 @@ public class WallRunning : MonoBehaviour
             _lastWall = null; // by setting the _lastWall to null -> next wall will definitely be seen as a new one
 
         // just setting the Ui text, ignore
-        if(text_wallState != null)
-            text_wallState.SetText(_state.ToString());
+        if(_text_wallState != null)
+            _text_wallState.SetText(_state.ToString());
     }
 
     private void FixedUpdate()

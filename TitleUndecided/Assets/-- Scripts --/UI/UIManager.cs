@@ -1,20 +1,52 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
+using UnityEngine.Serialization;
 
+[RequireComponent(typeof(Canvas))]
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance { get; private set; }
+    public static UIManager Instance;
     
-    [Header("UI Element References")]
+    [field: SerializeField] public TextMeshProUGUI SpeedText { get; private set; }
     
-    [SerializeField] private Image potentialEnergyFill;
+    [field: SerializeField] public TextMeshProUGUI YVelText { get; private set; }
     
-    [SerializeField] private Image kineticEnergyFill;
+    [field: SerializeField] public TextMeshProUGUI MoveStateText { get; private set; }
     
-        //Dynamic, Non - Serialized Below
+    [field: SerializeField] public TextMeshProUGUI WallStateText { get; private set; }
     
+    [field: SerializeField] public TextMeshProUGUI PredictionStateText { get; private set; }
+
+    [Header("UI Page References")] 
     
-    private void Awake()
+    [SerializeField] private GameObject mainMenuPage;
+    
+    [SerializeField] private GameObject playerHUDPage;
+    
+    [SerializeField] private GameObject pausePage;
+        
+    [Header("Holders")]
+    
+    [SerializeField] private Transform iconHolder;
+    
+    // [Header("Interactable Display Settings")]
+    //
+    // [SerializeField]
+    // private GameObject interactableDisplay;
+    //
+    // [SerializeField]
+    // private EScreenPos interactableDisplayPos = EScreenPos.BottomCenter;
+    //
+    // [SerializeField]
+    // private Vector2 interactableDisplayOffset = Vector2.zero;
+    
+    //Rect and screen info
+    private RectTransform _canvasRectTransform;
+    
+    void Awake()
     {
         if (Instance == null)
         {
@@ -22,20 +54,136 @@ public class UIManager : MonoBehaviour
             
             DontDestroyOnLoad(gameObject);
         }
-        else Destroy(gameObject);
+        else
+        {
+            Destroy(gameObject);
+        }
+        
+        if (_canvasRectTransform == null) _canvasRectTransform = GetComponent<RectTransform>();
+        
+        //if no holder create one as first child
+        if (iconHolder == null)
+        {
+            iconHolder = Instantiate(new GameObject("Icon Holder"), transform).transform;
+
+            iconHolder.SetAsFirstSibling();
+        }
+        
+        if (mainMenuPage == null) 
+        {
+            Debug.LogError( "Main Menu Page not set in UIManager, disabling UIManager" );
+            
+            enabled = false;
+            
+            return;
+        }
     }
 
-    #region Setters
-
-    public void SetPotentialEnergyFill(float fillAmount)
+    private void OnEnable()
     {
-        if (potentialEnergyFill != null) potentialEnergyFill.fillAmount = fillAmount;
+        GameStateManager.Instance.OnGameStateChanged += OnStateChange;
     }
     
-    public void SetKineticEnergyFill(float fillAmount)
+    private void OnDisable()
     {
-        if (kineticEnergyFill != null) kineticEnergyFill.fillAmount = fillAmount;
+        GameStateManager.Instance.OnGameStateChanged -= OnStateChange;
     }
 
-    #endregion
+    private void OnStateChange(EGameState toState, EGameState fromState)
+    {
+        switch (fromState)
+        {
+            case EGameState.Reset:
+                
+                // Turn off all UI
+                mainMenuPage.SetActive(false);
+                playerHUDPage.SetActive(false);
+                pausePage.SetActive(false);
+                
+                break;
+            
+            case EGameState.MainMenu:
+                
+                // Turn off relevant UI
+                mainMenuPage.SetActive(false);
+                
+                break;
+            
+            case EGameState.Game:
+                
+                // Turn off relevant UI
+                playerHUDPage.SetActive(false);
+                
+                break;
+            
+            case EGameState.Pause:
+                
+                // Turn off relevant UI
+                pausePage.SetActive(false);
+                
+                break;
+            
+            case EGameState.GameOver:
+                break;
+        }
+        
+        switch (toState)
+        {
+            case EGameState.Reset:
+                break;
+            
+            case EGameState.MainMenu:
+                
+                // Turn on relevant UI
+                mainMenuPage.SetActive(true);
+                
+                CursorLocked(false);
+                
+                break;
+            
+            case EGameState.Game:
+                
+                // Turn on relevant UI
+                playerHUDPage.SetActive(true);
+                
+                CursorLocked(true);
+                
+                break;
+            
+            case EGameState.Pause:
+                
+                // Turn on relevant UI
+                pausePage.SetActive(true);
+                
+                CursorLocked(false);
+                
+                break;
+            
+            case EGameState.GameOver:
+                break;
+        }
+    }
+    
+    private void CursorLocked(bool locked)
+    {
+        Cursor.visible = !locked;
+        
+        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+    }
+    
+    public void CALL_SCENE_RELOAD()
+    {
+        GameStateManager.Instance.ReloadScene();
+    }
+    
+    
+    public void CALL_SCENE_LOAD(GameStateSceneInfo info)
+    {
+        GameStateManager.Instance.LoadSceneWithGameStateSceneInfo(info);
+    }
+    
+    public void CALL_QUIT()
+    {
+        GameStateManager.Instance.QUIT_GAME();
+    }
 }

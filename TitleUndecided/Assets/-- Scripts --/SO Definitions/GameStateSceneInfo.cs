@@ -10,5 +10,5 @@ public class GameStateSceneInfo : ScriptableObject
     [field: SerializeField] public string SceneName { get; private set; }
     
     [Tooltip("The game state that the scene should load with.")]
-    [field: SerializeField] public EGameState GameState { get; private set; } = EGameState.MainMenu;
+    [field: SerializeField] public EGameState SceneStartState { get; private set; } = EGameState.MainMenu;
 }

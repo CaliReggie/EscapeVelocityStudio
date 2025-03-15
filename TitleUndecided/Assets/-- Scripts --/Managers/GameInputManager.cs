@@ -79,9 +79,9 @@ public class GameInputManager : MonoBehaviour
     {
         GameStateManager.Instance.OnGameStateChanged -= OnGameStateChanged;
         
-        _playerInputManager.onPlayerJoined -= OnPlayerJoined;
-        
-        _playerInputManager.onPlayerLeft -= OnPlayerLeft;
+        // _playerInputManager.onPlayerJoined -= OnPlayerJoined;
+        //
+        // _playerInputManager.onPlayerLeft -= OnPlayerLeft;
     }
     
     private void EnablePlayableSpawn()
@@ -100,16 +100,16 @@ public class GameInputManager : MonoBehaviour
     
     private void EnableUISpawn()
     {
-        if (uiScenePrefab == null)
-        {
-            Debug.LogError("No UI Scene Prefab assigned in the inspector!");
-            
-            return;
-        }
-        
-        _playerInputManager.playerPrefab = uiScenePrefab;
-        
-        JoiningEnabled = true;
+        // if (uiScenePrefab == null)
+        // {
+        //     Debug.LogError("No UI Scene Prefab assigned in the inspector!");
+        //     
+        //     return;
+        // }
+        //
+        // _playerInputManager.playerPrefab = uiScenePrefab;
+        //
+        // JoiningEnabled = true;
     }
     
     private void OnPlayerJoined(PlayerInput playerInput)
@@ -122,33 +122,52 @@ public class GameInputManager : MonoBehaviour
         PlayerInput = null;
     }
     
-    private void OnGameStateChanged(EGameState state)
+    private void OnGameStateChanged(EGameState toState, EGameState fromState)
     {
-        switch (state)
+        switch (fromState)
         {
+            case EGameState.Reset:
+                break;
+            
             case EGameState.MainMenu:
-                
-                EnableUISpawn();
-                
                 break;
+            
             case EGameState.Game:
-                
-                EnablePlayableSpawn();
-                
                 break;
+            
             case EGameState.Pause:
-                // Do something
                 break;
+            
             case EGameState.GameOver:
-                // Do something
                 break;
+        }
+        
+        switch (toState)
+        {
             case EGameState.Reset:
                 
                 JoiningEnabled = false;
                 
                 break;
-            default:
-                Debug.LogError("Unhandled game state: " + state);
+            
+            case EGameState.MainMenu:
+                
+                EnableUISpawn();
+                
+                break;
+            
+            case EGameState.Game:
+                
+                EnablePlayableSpawn();
+                
+                break;
+            
+            case EGameState.Pause:
+                // Do something
+                break;
+            
+            case EGameState.GameOver:
+                // Do something
                 break;
         }
     }

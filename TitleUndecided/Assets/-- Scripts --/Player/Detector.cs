@@ -21,7 +21,7 @@ public class Detector : MonoBehaviour
     
     [SerializeField] private MeshRenderer markerSphereRenderer;
     
-    [SerializeField] private TextMeshProUGUI textPredictionState;
+    
     
     //Private, or Non-Serialized Below
     
@@ -32,13 +32,18 @@ public class Detector : MonoBehaviour
     
     //Detection
     private LayerMask _whatIsGround;
-
+    
+    //Debug
+    private TextMeshProUGUI _textPredictionState;
+    
     private void Awake()
     {
         //get references
         _pm = GetComponent<PlayerMovement>();
         
         _orientation = _pm.Orientation;
+        
+        _textPredictionState = UIManager.Instance.PredictionStateText;
     }
     
     private void Start()
@@ -75,7 +80,7 @@ public class Detector : MonoBehaviour
         {
             // Case 1 - raycast hits (in maxDistance)
             MarkerSphere.position = viewRayHit.point;
-
+            
             predictionState = "in distance";
 
             PrecisionTargetFound = true;
@@ -131,8 +136,8 @@ public class Detector : MonoBehaviour
         else
             PrecisionTargetIsWall = false;
 
-        if (debuggingEnabled)
-            textPredictionState.SetText(predictionState);
+        if (debuggingEnabled && _textPredictionState != null)
+            _textPredictionState.SetText(predictionState);
     }
     
     public bool PrecisionTargetFound { get; private set; }

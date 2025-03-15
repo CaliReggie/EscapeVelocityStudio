@@ -20,11 +20,11 @@ public class GameStateListener : MonoBehaviour
     }
     
     // Responds to state changes and attempts to invoke the UnityEvent associated with the state
-    private void OnGameStateChanged(EGameState state)
+    private void OnGameStateChanged(EGameState toState , EGameState fromState)
     {
         foreach (var stateResponse in stateResponses)
         {
-            if (stateResponse.State == state)
+            if (stateResponse.State == toState)
             {
                 stateResponse.Response.Invoke();
                 

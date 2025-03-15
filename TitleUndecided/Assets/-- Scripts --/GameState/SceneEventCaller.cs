@@ -84,9 +84,9 @@ public class SceneEventCaller : MonoBehaviour
         }
     }
     
-    private void OnGameStateChanged(EGameState state)
+    private void OnGameStateChanged(EGameState toState, EGameState fromState)
     {
-        if (callOnStates.Contains(state))
+        if (callOnStates.Contains(toState))
         {
             CallEvent();
         }

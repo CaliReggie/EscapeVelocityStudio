@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/- Scenes -/Blockouts/BlockoutTesting.unity
+    path: Assets/- Scenes -/PlayerControllerDemo.unity
     guid: 1c1452bb3e24b0646a118a0d9293604c
   - enabled: 1
     path: Assets/- Scenes -/MainMenu.unity
