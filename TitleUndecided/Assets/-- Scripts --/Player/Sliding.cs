@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 
 [RequireComponent(typeof(PlayerMovement))]
@@ -20,7 +21,9 @@ public class Sliding : MonoBehaviour
     
     [SerializeField] private bool useDynamicSlideForce = true; //if true, PlayerParent momentum on slide equal to that of when pressed
     
-    [SerializeField] private float nonDynamicSlideForce = 200f;
+    [SerializeField] private float slideForce = 200f; // Flat slide force applied whenever pressed
+    
+    [SerializeField] private float dynamicSlideForce = 200f; // Additive force based on PlayerParent momentum
 
     [Header("Behaviour Settings")]
     
@@ -102,8 +105,9 @@ public class Sliding : MonoBehaviour
         _horizontalInput = Input.GetAxisRaw("Horizontal");
         _verticalInput = Input.GetAxisRaw("Vertical");
 
-        // if you press down the slide key while moving -> StartSlide
-        if (_slideAction.triggered && (_horizontalInput != 0 || _verticalInput != 0))
+        // if you press down the slide key while moving and not crouching,
+        // try to start Sliding, can be denied by movement extension
+        if (_slideAction.triggered && (_horizontalInput != 0 || _verticalInput != 0) && !_pm.Crouching)
         {
             if (reverseCoyoteTime) _bufferSlide = true;
             else if (_pm.Grounded && _readyToSlide) _bufferSlide = true;
@@ -177,18 +181,15 @@ public class Sliding : MonoBehaviour
         // calculate the direction of your keyboard input relative to the players Orientation (where the PlayerParent is looking)
         Vector3 inputDirection = Vector3.Normalize(_orientation.forward * _verticalInput + _orientation.right * _horizontalInput);
         
-        //altering slide force before sending in if desired
-        if (useDynamicSlideForce)
-        {
-            nonDynamicSlideForce = _dynamicStartForce;
-        }
+        // slide force calculated based on the dynamic force or the non-dynamic force
+        float force = useDynamicSlideForce ? _dynamicStartForce + dynamicSlideForce : slideForce;
 
         // Mode 1 - Sliding Normal
         // slide time is limited
         if(!_pm.OnSlope() || _rb.linearVelocity.y > -0.1f)
         {
-            // add force in the direction of your keyboard input
-            _rb.AddForce(inputDirection * nonDynamicSlideForce, ForceMode.Force);
+            // add force in the direction of your input
+            _rb.AddForce(inputDirection * force, ForceMode.Force);
 
             // count down timer
             _slideTimer -= Time.deltaTime;
@@ -199,7 +200,7 @@ public class Sliding : MonoBehaviour
         else
         {
             // add force in the direction of your keyboard input
-            _rb.AddForce(_pm.GetSlopeMoveDirection(inputDirection) * nonDynamicSlideForce, ForceMode.Force);
+            _rb.AddForce(_pm.GetSlopeMoveDirection(inputDirection) * force, ForceMode.Force);
         }
 
         // stop Sliding again if the timer runs out

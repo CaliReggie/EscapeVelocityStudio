@@ -26,14 +26,14 @@ public class MomentumExtension : MonoBehaviour
         new MovementState("Wallrunning", PlayerMovement.MovementMode.wallrunning, 1, 1),
         new MovementState("Walljumping", PlayerMovement.MovementMode.walljumping, 1, 1),
         new MovementState("Climbing", PlayerMovement.MovementMode.climbing, 1, 1),
-        new MovementState("Dashing", PlayerMovement.MovementMode.dashing, -1, 10),
+        new MovementState("Dashing", PlayerMovement.MovementMode.dashing, -1, 10)
     };
 
     [SerializeField] private List<MovementState> hardcodedMovementStates = new List<MovementState>()
     {
         new MovementState("Unlimited", PlayerMovement.MovementMode.unlimited, -1, -1),
         new MovementState("Limited", PlayerMovement.MovementMode.limited, -1, 1),
-        new MovementState("Freeze", PlayerMovement.MovementMode.freeze, -1, -1),
+        new MovementState("Freeze", PlayerMovement.MovementMode.freeze, -1, -1)
     };
 
     private MovementState GetMovementState(PlayerMovement.MovementMode movementMode)
@@ -105,6 +105,8 @@ public class MomentumExtension : MonoBehaviour
         }
         else
         {
+            Debug.LogError("MovementState not found");
+            
             speedChangeFactor = -1;
         }
 
@@ -122,12 +124,13 @@ public class MomentumExtension : MonoBehaviour
         bool stateAllowed = true;
 
         if(currMomentum < movementState.MinNeededMomentum)
+        {
             stateAllowed = false;
+        }
         else if (currMomentum > movementState.MaxAllowedMomentum)
+        {
             stateAllowed = false;
-
-        // Debug.Log($"CurrMomentum {currMomentum}, MinMomentum {movementState.MinNeededMomentum},
-        // MaxMomentum {movementState.MaxAllowedMomentum} -> State {movementState.StateName} allowed -> {stateAllowed}");
+        }
 
         return stateAllowed;
     }
@@ -141,10 +144,11 @@ public class MovementState
     [field: SerializeField] public PlayerMovement.MovementMode MovementMode { get; private set; }
 
     [Tooltip("-1 means instant speed change")]
-    [field: SerializeField] public float SpeedBuildupFactor { get; private set; } = -1;
+    [field: SerializeField]
+    public float SpeedBuildupFactor { get; private set; }
     
     [Tooltip("-1 means instant speed change")]
-    [field: SerializeField] public float SpeedBuilddownFactor { get; private set; } = -1;
+    [field: SerializeField] public float SpeedBuilddownFactor { get; private set; }
 
     [field: SerializeField] [Range(0f, 100f)] public float MinNeededMomentum { get; private set; } = 0f;
     
@@ -152,14 +156,11 @@ public class MovementState
 
     public MovementState(string stateName, PlayerMovement.MovementMode movementMode, float speedBuildupFactor, float speedBuilddownFactor)
     {
-        this.StateName = stateName;
-        this.MovementMode = movementMode;
-        this.SpeedBuildupFactor = speedBuildupFactor;
-        this.SpeedBuilddownFactor = speedBuilddownFactor;
+        StateName = stateName;
+        MovementMode = movementMode;
+        SpeedBuildupFactor = speedBuildupFactor;
+        SpeedBuilddownFactor = speedBuilddownFactor;
     }
 
-    public MovementState(PlayerMovement.MovementMode movementMode)
-    {
-        this.MovementMode = movementMode;
-    }
+
 }

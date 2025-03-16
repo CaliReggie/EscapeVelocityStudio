@@ -93,13 +93,15 @@ public class PlayerMovement : MonoBehaviour
     
     // these variables define how fast your PlayerParent can move while being in the specific movemt mode
     [SerializeField] private float walkMaxSpeed = 4f;
-    [SerializeField] private float sprintMaxSpeed = 7f;
+    [SerializeField] private float sprintMaxSpeed = 8f;
     [SerializeField] private float crouchMaxSpeed = 2f;
-    [SerializeField] private float slopeSlideMaxSpeed = 30f;
+    [SerializeField] private float slideMaxSpeed = 10f;
+    [SerializeField] private float slopeSlideMaxSpeed = 35f;
+    [SerializeField] private float wallRunMaxSpeed = 10f;
     [SerializeField] private float wallJumpMaxSpeed = 12f;
-    [SerializeField] private float climbMaxSpeed = 3f;
-    [SerializeField] private float dashMaxSpeed = 15f;
-    [SerializeField] private float swingMaxSpeed = 17f;
+    [SerializeField] private float climbMaxSpeed = 4f;
+    [SerializeField] private float dashMaxSpeed = 30f;
+    [SerializeField] private float swingMaxSpeed = 35f;
     
     [Space]
     
@@ -308,8 +310,8 @@ public class PlayerMovement : MonoBehaviour
             DoubleJump();
         }
 
-        // if you press the crouch key with no input, start Crouching
-        if (_crouchAction.triggered && (RawMoveInput == Vector2.zero))
+        // if you press the crouch key, try start crouching. Can still be denied by momentum extension
+        if (_crouchAction.triggered)
             StartCrouch();
 
         // uncrouch again when you release the crouch key
@@ -364,6 +366,8 @@ public class PlayerMovement : MonoBehaviour
         // if you move faster over the y axis than you are allowed...
         if(MaxYSpeed != -1 && currYVel > MaxYSpeed)
         {
+            //TODO: Better swing grav?
+            //
             // special case for Swinging
             if (MoveMode == MovementMode.swinging)
                 _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, _maxSpeed * 0.5f, _rb.linearVelocity.z);
@@ -377,13 +381,53 @@ public class PlayerMovement : MonoBehaviour
     /// function called the entire time
     private void HandleDrag()
     {
+        // unlimited, // players speed is not being limited at all
+        // limited, // limit speed to a specific value using EnableLimitedSpeed()
+        // freeze, // PlayerParent can't move at all
+        // dashing,
+        // sliding,
+        // crouching,
+        // sprinting,
+        // walking,
+        // wallrunning,
+        // walljumping,
+        // climbing,
+        // swinging,
+        // air
+        
         // if you're walking or Sprinting, apply drag to your rigidbody in order to prevent slippery movement
-        if (MoveMode == MovementMode.walking || MoveMode == MovementMode.sprinting)
-            _rb.linearDamping = groundDrag;
-
+        if (Grounded)
+        {
+            switch (MoveMode)
+            {
+                case MovementMode.dashing:
+                case MovementMode.sliding:
+                    
+                    _rb.linearDamping = groundDrag * 0.5f;
+                    
+                    break;
+                
+                case MovementMode.crouching:
+                case MovementMode.sprinting:
+                case MovementMode.walking:
+                    
+                _rb.linearDamping = groundDrag;
+                
+                break;
+                
+                default:
+                    
+                    _rb.linearDamping = 0;
+                    
+                    break;
+            }
+        }
         // in any other case you don't want any drag
         else
+        {
             _rb.linearDamping = 0;
+        }
+            
     }
 
     #endregion
@@ -569,7 +613,7 @@ public class PlayerMovement : MonoBehaviour
         {
             MoveMode = MovementMode.unlimited;
 
-            // this way the PlayerParent can go as fast as he wants
+            // this way the tlayer can go as fast as he wants
             _desiredMaxSpeed = 1000f;
         }
 
@@ -598,7 +642,7 @@ public class PlayerMovement : MonoBehaviour
         else if (Wallrunning)
         { 
             MoveMode = MovementMode.wallrunning;
-            _desiredMaxSpeed = sprintMaxSpeed;
+            _desiredMaxSpeed = wallRunMaxSpeed;
         }
 
         // Mode - Climbing
@@ -618,7 +662,10 @@ public class PlayerMovement : MonoBehaviour
                 _desiredMaxSpeed = slopeSlideMaxSpeed;
             }
             else
-                _desiredMaxSpeed = _maxSpeed;
+            {
+                _desiredMaxSpeed = slideMaxSpeed;
+            }
+                
         }
 
         // Mode - Crouching
@@ -654,23 +701,13 @@ public class PlayerMovement : MonoBehaviour
         {
             MoveMode = MovementMode.air;
 
-            if (_desiredMaxSpeed < walkMaxSpeed)
-                _desiredMaxSpeed = sprintMaxSpeed;
-
-            else
-                _desiredMaxSpeed = walkMaxSpeed;
+            _desiredMaxSpeed = sprintMaxSpeed;
+                
         }
         
         // minimum momentum
         if (_momentumExtensionEnabled && _maxSpeed < _momentumExtension.MinimalMomentum && MoveMode != MovementMode.freeze)
             _maxSpeed = _momentumExtension.MinimalMomentum;
-
-        if (_momentumExtensionEnabled)
-            UpdateMomentumBasedMaxSpeed();
-        else
-        {
-            _maxSpeed = _desiredMaxSpeed;
-        }
         
         // movement mode switched
         if (movementModeLastFrame != MoveMode)
@@ -683,17 +720,23 @@ public class PlayerMovement : MonoBehaviour
                 if (MoveMode != MovementMode.air)
                 {
                     increaseSpeedChangeFactor = _momentumExtension.GetIncreaseSpeedChangeFactor(MoveMode);
-                }
-                if (previousMovementMode != MovementMode.air)
-                {
-                    decreaseSpeedChangeFactor = _momentumExtension.GetDecreaseSpeedChangeFactor(previousMovementMode);
-                }
                     
+                    decreaseSpeedChangeFactor = _momentumExtension.GetDecreaseSpeedChangeFactor(MoveMode);
+                }
             }
         }
 
         //_desiredMaxSpeedLastFrame = _desiredMaxSpeed;
         movementModeLastFrame = MoveMode;
+        
+        if (_momentumExtensionEnabled)
+        {
+            UpdateMomentumBasedMaxSpeed();
+        }
+        else
+        {
+            _maxSpeed = _desiredMaxSpeed;
+        }
     }
 
     private bool isIncreasingMaxSpeed;
@@ -765,11 +808,11 @@ public class PlayerMovement : MonoBehaviour
     {
         // shoot a raycast down to check if you hit something
         // the "out _slopeHit" bit makes sure that you store the information of the object you hit
-        if (Physics.Raycast(transform.position, Vector3.down, out _slopeHit, BasePlayerHeight * 0.5f + 0.5f))
+        if (Physics.Raycast(transform.position, Vector3.down, out _slopeHit, BasePlayerHeight * 0.5f + 0.5f, WhatIsGround))
         {
             // calculate the angle of the ground you're standing on (how steep it is)
             float angle = Vector3.Angle(Vector3.up, _slopeHit.normal);
-
+            
             // check if the angle is smaller than your maxSlopeAngle
             // -> that means you're standing on a slope -> return true
             return angle < maxSlopeAngle && angle != 0;
@@ -886,11 +929,9 @@ public class PlayerMovement : MonoBehaviour
             _textSpeed.SetText("Speed: " + Round(rbFlatVelocity.magnitude, 1) + "/" + Round(_maxSpeed,0));
         }
 
-        if (_textYSpeed != null)
-            _textYSpeed.SetText("Y Speed: " + Round(_rb.linearVelocity.y, 1));
+        if (_textYSpeed != null) _textYSpeed.SetText("Y Speed: " + Round(_rb.linearVelocity.y, 1));
 
-        if (_textMoveState != null)
-            _textMoveState.SetText(MoveMode.ToString());
+        if (_textMoveState != null) _textMoveState.SetText(MoveMode.ToString());
 
         if (!_momentumExtensionEnabled)
             return;
@@ -898,7 +939,9 @@ public class PlayerMovement : MonoBehaviour
         if (_textSpeedChangeFactor != null)
         {
             if (isIncreasingMaxSpeed)
+            {
                 _textSpeedChangeFactor.SetText("Increase: " + increaseSpeedChangeFactor.ToString());
+            }
             else
             {
                 _textSpeedChangeFactor.SetText("Decrease: " + (decreaseSpeedChangeFactor*_momentumExtension.GetSurfaceSpeedDecreaseFactor(Grounded)).ToString());

@@ -1560,11 +1560,13 @@ MonoBehaviour:
   walkMaxSpeed: 4
   sprintMaxSpeed: 8
   crouchMaxSpeed: 2
-  slopeSlideMaxSpeed: 30
-  wallJumpMaxSpeed: 10
+  slideMaxSpeed: 10
+  slopeSlideMaxSpeed: 35
+  wallRunMaxSpeed: 10
+  wallJumpMaxSpeed: 12
   climbMaxSpeed: 4
-  dashMaxSpeed: 30
-  swingMaxSpeed: 30
+  dashMaxSpeed: 22.5
+  swingMaxSpeed: 35
   speedIncreaseMultiplier: 1
   slopeIncreaseMultiplier: 5
   maxSlopeAngle: 45
@@ -1587,55 +1589,55 @@ MonoBehaviour:
   momentumIncreaseFactor: 1
   momentumDecreaseFactorOnGround: 2.5
   momentumDecreaseFactorInAir: 0.5
-  <MinimalMomentum>k__BackingField: 3
+  <MinimalMomentum>k__BackingField: 0
   movementStates:
   - <StateName>k__BackingField: Walking
     <MovementMode>k__BackingField: 7
-    <SpeedBuildupFactor>k__BackingField: 1
-    <SpeedBuilddownFactor>k__BackingField: 1
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: 10
     <MinNeededMomentum>k__BackingField: 0
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Sprinting
     <MovementMode>k__BackingField: 6
-    <SpeedBuildupFactor>k__BackingField: 1
-    <SpeedBuilddownFactor>k__BackingField: 1
+    <SpeedBuildupFactor>k__BackingField: 4
+    <SpeedBuilddownFactor>k__BackingField: 10
     <MinNeededMomentum>k__BackingField: 0
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Crouching
     <MovementMode>k__BackingField: 5
-    <SpeedBuildupFactor>k__BackingField: 1
-    <SpeedBuilddownFactor>k__BackingField: 1
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: 10
     <MinNeededMomentum>k__BackingField: 0
-    <MaxAllowedMomentum>k__BackingField: 100
+    <MaxAllowedMomentum>k__BackingField: 4
   - <StateName>k__BackingField: Swinging
     <MovementMode>k__BackingField: 11
-    <SpeedBuildupFactor>k__BackingField: 1
-    <SpeedBuilddownFactor>k__BackingField: 1
+    <SpeedBuildupFactor>k__BackingField: 17.5
+    <SpeedBuilddownFactor>k__BackingField: 5
     <MinNeededMomentum>k__BackingField: 0
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Sliding
     <MovementMode>k__BackingField: 4
-    <SpeedBuildupFactor>k__BackingField: 2
-    <SpeedBuilddownFactor>k__BackingField: 1
-    <MinNeededMomentum>k__BackingField: 0
+    <SpeedBuildupFactor>k__BackingField: 100
+    <SpeedBuilddownFactor>k__BackingField: 5
+    <MinNeededMomentum>k__BackingField: 4
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Wallrunning
     <MovementMode>k__BackingField: 8
-    <SpeedBuildupFactor>k__BackingField: 1
-    <SpeedBuilddownFactor>k__BackingField: 1
-    <MinNeededMomentum>k__BackingField: 0
+    <SpeedBuildupFactor>k__BackingField: 10
+    <SpeedBuilddownFactor>k__BackingField: 5
+    <MinNeededMomentum>k__BackingField: 1
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Walljumping
     <MovementMode>k__BackingField: 9
-    <SpeedBuildupFactor>k__BackingField: 1
-    <SpeedBuilddownFactor>k__BackingField: 1
-    <MinNeededMomentum>k__BackingField: 0
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: 5
+    <MinNeededMomentum>k__BackingField: 1
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Climbing
     <MovementMode>k__BackingField: 10
     <SpeedBuildupFactor>k__BackingField: 1
     <SpeedBuilddownFactor>k__BackingField: 1
-    <MinNeededMomentum>k__BackingField: 0
+    <MinNeededMomentum>k__BackingField: 1
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Dashing
     <MovementMode>k__BackingField: 3
@@ -1679,7 +1681,8 @@ MonoBehaviour:
   minSlideTime: 0.1
   maxSlideTime: 0.75
   useDynamicSlideForce: 1
-  nonDynamicSlideForce: 200
+  slideForce: 200
+  dynamicSlideForce: 200
   slideColliderHeight: 1
   slideColliderCenterY: -0.5
   reverseCoyoteTime: 1
