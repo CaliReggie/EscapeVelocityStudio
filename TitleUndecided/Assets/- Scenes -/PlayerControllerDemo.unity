@@ -25628,9 +25628,60 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
         type: 3}
+      propertyPath: sceneEvents.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<SceneEventName>k__BackingField
+      value: MainLoad
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
       propertyPath: sceneEvents.Array.data[0].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 174279889}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 174279889}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: LoadSceneWithGameStateSceneInfo
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: GameStateManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
+      value: 
+      objectReference: {fileID: 11400000, guid: a08e13f21969f474fbd8f925f168daf3,
+        type: 2}
+    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
+        type: 3}
+      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: GameStateSceneInfo, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 7402111010806789878, guid: 3223369eceb4495498188e169cb7f1af,
         type: 3}
       propertyPath: m_Name
