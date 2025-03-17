@@ -146,8 +146,6 @@ public class Grappling: MonoBehaviour
     
     private List<RaycastHit> _predictionHits;
     
-    private List<Vector3> _grapplePoints; // the point you're grappling to / Swinging on
-    
     private List<Transform> _grappleObjects; // the object transform you're grappling to
     
     private List<Vector3> _grappleLocalPoints; //local position of hit point on object
@@ -223,7 +221,7 @@ public class Grappling: MonoBehaviour
         HooksActive = new List<bool>();
         _predictionHits = new List<RaycastHit>();
         
-        _grapplePoints = new List<Vector3>();
+        HookPoints = new List<Vector3>();
         _grappleObjects = new List<Transform>();
         _grappleLocalPoints = new List<Vector3>();
         _joints = new List<SpringJoint>();
@@ -239,7 +237,7 @@ public class Grappling: MonoBehaviour
             _grappleObjects.Add(null);
             _grappleLocalPoints.Add(Vector3.zero);
             _joints.Add(null);
-            _grapplePoints.Add(Vector3.zero);
+            HookPoints.Add(Vector3.zero);
             _grapplesExecuted.Add(false);
             GrapplesActive.Add(false);
             SwingsActive.Add(false);
@@ -371,7 +369,7 @@ public class Grappling: MonoBehaviour
             {
                 // the grapple point is now just a point in the air
                 // calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                _grapplePoints[swingIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
+                HookPoints[swingIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
                 SwingsActive[swingIndex] = true;
@@ -407,17 +405,17 @@ public class Grappling: MonoBehaviour
             InverseTransformPoint(_predictionHits[swingIndex].point);
 
         // the exact point where you swing on
-        _grapplePoints[swingIndex] = _predictionHits[swingIndex].point;
+        HookPoints[swingIndex] = _predictionHits[swingIndex].point;
 
         // add a springJoint component to your PlayerParent
         _joints[swingIndex] = gameObject.AddComponent<SpringJoint>();
         _joints[swingIndex].autoConfigureConnectedAnchor = false;
 
         // set the anchor of the springJoint
-        _joints[swingIndex].connectedAnchor = _grapplePoints[swingIndex];
+        _joints[swingIndex].connectedAnchor = HookPoints[swingIndex];
 
         // calculate the distance to the grapplePoint
-        float distanceFromPoint = Vector3.Distance(transform.position, _grapplePoints[swingIndex]);
+        float distanceFromPoint = Vector3.Distance(transform.position, HookPoints[swingIndex]);
 
         // the distance grapple will try to keep from grapple point.
         // _joints[swingIndex].maxDistance = distanceFromPoint * 0.8f;
@@ -459,13 +457,13 @@ public class Grappling: MonoBehaviour
     #region Odm Gear
     private void OdmGearMovement()
     {
-        if (SwingsActive[0] && !SwingsActive[1]) _pullPoint = _grapplePoints[0];
-        if (SwingsActive[1] && !SwingsActive[0]) _pullPoint = _grapplePoints[1];
+        if (SwingsActive[0] && !SwingsActive[1]) _pullPoint = HookPoints[0];
+        if (SwingsActive[1] && !SwingsActive[0]) _pullPoint = HookPoints[1];
         // get midpoint if both swing points are active
         if (SwingsActive[0] && SwingsActive[1])
         {
-            Vector3 dirToGrapplePoint1 = _grapplePoints[1] - _grapplePoints[0];
-            _pullPoint = _grapplePoints[0] + dirToGrapplePoint1 * 0.5f;
+            Vector3 dirToGrapplePoint1 = HookPoints[1] - HookPoints[0];
+            _pullPoint = HookPoints[0] + dirToGrapplePoint1 * 0.5f;
         }
 
         // rightmoveInput.
@@ -544,7 +542,7 @@ public class Grappling: MonoBehaviour
             _grappleLocalPoints[grappleIndex] = _grappleObjects[grappleIndex].
                 InverseTransformPoint(_predictionHits[grappleIndex].point);
 
-            _grapplePoints[grappleIndex] = _predictionHits[grappleIndex].point;
+            HookPoints[grappleIndex] = _predictionHits[grappleIndex].point;
 
             GrapplesActive[grappleIndex] = true;
             
@@ -572,7 +570,7 @@ public class Grappling: MonoBehaviour
 
                 // the grapple point is now just a point in the air
                 // calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                _grapplePoints[grappleIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
+                HookPoints[grappleIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
                 GrapplesActive[grappleIndex] = true;
@@ -603,7 +601,7 @@ public class Grappling: MonoBehaviour
             Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - (playerHeight / 2), transform.position.z);
 
             // calculate how much higher the grapple point is relative to the PlayerParent
-            float grapplePointRelativeYPos = _grapplePoints[grappleIndex].y - lowestPoint.y;
+            float grapplePointRelativeYPos = HookPoints[grappleIndex].y - lowestPoint.y;
             
             //if relative y offset is above relative PlayerParent height, add all needed height, otherwise add less
             float highestPointOfArc = grapplePointRelativeYPos >= playerHeight ?
@@ -611,19 +609,19 @@ public class Grappling: MonoBehaviour
 
             // print("trying to grapple to " + grapplePointRelativeYPos + " which arc " + highestPointOfArc);
 
-            _pm.JumpToPosition(_grapplePoints[grappleIndex], highestPointOfArc, default, 3f);
+            _pm.JumpToPosition(HookPoints[grappleIndex], highestPointOfArc, default, 3f);
         }
 
         if(grappleMode == GrappleMode.Basic)
         {
             // calculate the direction from the PlayerParent to the grapplePoint
-            Vector3 direction = (_grapplePoints[grappleIndex] - transform.position).normalized;
+            Vector3 direction = (HookPoints[grappleIndex] - transform.position).normalized;
 
             // reset the y velocity of your rigidbody
             _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
             // the further the grapple point is away, the higher the distanceBoost should be
-            float distanceBoost = Vector3.Distance(transform.position, _grapplePoints[grappleIndex]) * grappleDistanceHeightMultiplier;
+            float distanceBoost = Vector3.Distance(transform.position, HookPoints[grappleIndex]) * grappleDistanceHeightMultiplier;
 
             // apply force to your rigidbody in the direction towards the grapplePoint
             _rb.AddForce(direction * grappleForce , ForceMode.Impulse);
@@ -685,7 +683,7 @@ public class Grappling: MonoBehaviour
 
     private void UpdateHooksActive()
     {
-        for (int i = 0; i < _grapplePoints.Count; i++)
+        for (int i = 0; i < HookPoints.Count; i++)
             HooksActive[i] = GrapplesActive[i] || SwingsActive[i];
     }
 
@@ -714,12 +712,12 @@ public class Grappling: MonoBehaviour
         if (_grappleObjects[grappleIndex] == null) return;
         
         //use local position of hit point on object
-        _grapplePoints[grappleIndex] = _grappleObjects[grappleIndex].TransformPoint(_grappleLocalPoints[grappleIndex]);
+        HookPoints[grappleIndex] = _grappleObjects[grappleIndex].TransformPoint(_grappleLocalPoints[grappleIndex]);
         
         //was going null in grapple cancel
         if (_joints[grappleIndex] != null)
         {
-            _joints[grappleIndex].connectedAnchor = _grapplePoints[grappleIndex];
+            _joints[grappleIndex].connectedAnchor = HookPoints[grappleIndex];
         }
     }
 
@@ -753,7 +751,7 @@ public class Grappling: MonoBehaviour
     /// function needed and called from the GrapplingRope script
     public Vector3 GetGrapplePoint(int index)
     {
-        return _grapplePoints[index];
+        return HookPoints[index];
     }
 
     public Vector3 GetGunTipPosition(int index)
@@ -763,9 +761,10 @@ public class Grappling: MonoBehaviour
     
     public List<bool> HooksActive { get; private set; }
     
+    public List<Vector3> HookPoints { get; private set; } // the point you're grappling to / Swinging on
+    
     public List<bool> GrapplesActive { get; private set; }
     
     public List<bool> SwingsActive { get; private set; }
-
     #endregion
 }

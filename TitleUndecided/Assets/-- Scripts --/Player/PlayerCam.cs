@@ -124,6 +124,8 @@ public class PlayerCam : MonoBehaviour
     
     //Player References
     private Transform _orientation;
+
+    private Grappling _grappling;
     
     private Transform _playerObj;
     
@@ -163,6 +165,8 @@ public class PlayerCam : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         
         _thirdPersonFixedCamFollow = thirdPersonFixedCam.GetComponent<CinemachineThirdPersonFollow>();
+        
+        _grappling = GetComponent<Grappling>();
         
         PlayerMovement pm = GetComponent<PlayerMovement>();
         _orientation = pm.Orientation;
@@ -369,18 +373,41 @@ public class PlayerCam : MonoBehaviour
         if (aimArms)
         {
             //Match arm aim
-        
             Vector3 targetLeftArmRotation = leftArmAim.eulerAngles;
-        
-            targetLeftArmRotation.x = camOrientation.eulerAngles.x;
-        
-            leftArmAim.eulerAngles = targetLeftArmRotation;
-        
             Vector3 targetRightArmRotation = rightArmAim.eulerAngles;
-        
-            targetRightArmRotation.x = camOrientation.eulerAngles.x;
-        
-            rightArmAim.eulerAngles = targetRightArmRotation;
+            
+            if (_grappling.HooksActive[0])
+            {
+                Vector3 targetLeftDir = _grappling.HookPoints[0] - hookPrediction.position;
+                
+                Vector3 test = Quaternion.LookRotation(targetLeftDir).eulerAngles;
+                
+                Debug.DrawRay(hookPrediction.position, targetLeftDir * 10, Color.red);
+                
+                Debug.Log(test.x);
+            }
+            else
+            {
+                targetLeftArmRotation.x = camOrientation.eulerAngles.x;
+                    
+                leftArmAim.eulerAngles = targetLeftArmRotation;
+            }
+            
+            if (_grappling.HooksActive[1])
+            {
+                
+                Quaternion targetRightDir = Quaternion.LookRotation(_grappling.HookPoints[1] - hookPrediction.position);
+                
+                targetRightArmRotation.x = targetRightDir.x;
+                
+                rightArmAim.eulerAngles = targetRightArmRotation;
+            }
+            else
+            {
+                targetRightArmRotation.x = camOrientation.eulerAngles.x;
+                        
+                rightArmAim.eulerAngles = targetRightArmRotation;
+            }
         }
     }
     
