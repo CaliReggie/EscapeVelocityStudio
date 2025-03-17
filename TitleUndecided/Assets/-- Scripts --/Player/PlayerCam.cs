@@ -53,6 +53,7 @@ public enum EControlScheme
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerCam : MonoBehaviour
 {
+    [SerializeField] private bool aimArms;
     [SerializeField] private Transform leftArmAim;
     [SerializeField] private Transform rightArmAim;
     
@@ -364,20 +365,23 @@ public class PlayerCam : MonoBehaviour
                 break;
                 
         }
+
+        if (aimArms)
+        {
+            //Match arm aim
         
-        //Match arm aim
+            Vector3 targetLeftArmRotation = leftArmAim.eulerAngles;
         
-        Vector3 targetLeftArmRotation = leftArmAim.eulerAngles;
+            targetLeftArmRotation.x = camOrientation.eulerAngles.x;
         
-        targetLeftArmRotation.x = camOrientation.eulerAngles.x;
+            leftArmAim.eulerAngles = targetLeftArmRotation;
         
-        leftArmAim.eulerAngles = targetLeftArmRotation;
+            Vector3 targetRightArmRotation = rightArmAim.eulerAngles;
         
-        Vector3 targetRightArmRotation = rightArmAim.eulerAngles;
+            targetRightArmRotation.x = camOrientation.eulerAngles.x;
         
-        targetRightArmRotation.x = camOrientation.eulerAngles.x;
-        
-        rightArmAim.eulerAngles = targetRightArmRotation;
+            rightArmAim.eulerAngles = targetRightArmRotation;
+        }
     }
     
     private void HookPredictionOrientation()
