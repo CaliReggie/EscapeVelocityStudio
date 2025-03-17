@@ -53,6 +53,9 @@ public enum EControlScheme
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerCam : MonoBehaviour
 {
+    [SerializeField] private Transform leftArmAim;
+    [SerializeField] private Transform rightArmAim;
+    
     [Header("Cam References")]
     
     [SerializeField] private CinemachineCamera firstPersonCinCam;
@@ -68,7 +71,7 @@ public class PlayerCam : MonoBehaviour
     
     [SerializeField] private Transform camOrientation;
     
-    [SerializeField] private Transform grappleRig;
+    [SerializeField] private Transform hookPrediction;
     
     [Header("Input References")]
     
@@ -82,7 +85,7 @@ public class PlayerCam : MonoBehaviour
     
     [SerializeField] private LayerMask thirdPersonRenderMask = -1;
     
-    [field: SerializeField] public ECamType CurrentCamType { get; private set; } = ECamType.FirstPerson;
+    [field: SerializeField] public ECamType CurrentCamType { get; private set; }
     
     [Header("First Person Cam Settings")]
     
@@ -231,7 +234,7 @@ public class PlayerCam : MonoBehaviour
         
         ManageCamera();
         
-        ManageGrappleGear();
+        HookPredictionOrientation();
     }
     
     private void GetInput()
@@ -361,32 +364,48 @@ public class PlayerCam : MonoBehaviour
                 break;
                 
         }
+        
+        //Match arm aim
+        
+        Vector3 targetLeftArmRotation = leftArmAim.eulerAngles;
+        
+        targetLeftArmRotation.x = camOrientation.eulerAngles.x;
+        
+        leftArmAim.eulerAngles = targetLeftArmRotation;
+        
+        Vector3 targetRightArmRotation = rightArmAim.eulerAngles;
+        
+        targetRightArmRotation.x = camOrientation.eulerAngles.x;
+        
+        rightArmAim.eulerAngles = targetRightArmRotation;
     }
     
-    private void ManageGrappleGear()
+    private void HookPredictionOrientation()
     {
-        switch(CurrentCamType)
-        {
-            case ECamType.FirstPerson:
-                
-                grappleRig.rotation = Quaternion.Euler(_firstPersonXRot, _firstPersonYRot, 0);
-                
-                break;
-            
-            case ECamType.ThirdOrbit:
-                
-                Vector3 orbitViewDir = _playerObj.position - thirdPersonOrbitCinCam.transform.position;
-                
-                grappleRig.rotation = Quaternion.LookRotation(orbitViewDir);
-                
-                break;
-            
-            case ECamType.ThirdFixed:
-                
-                grappleRig.rotation = Quaternion.Euler(_thirdFixedXRot, _thirdFixedYRot, 0);
-                
-                break;
-        }
+        // switch(CurrentCamType)
+        // {
+        //     case ECamType.FirstPerson:
+        //         
+        //         hookPrediction.rotation = Quaternion.Euler(_firstPersonXRot, _firstPersonYRot, 0);
+        //         
+        //         break;
+        //     
+        //     case ECamType.ThirdOrbit:
+        //         
+        //         Vector3 orbitViewDir = _playerObj.position - thirdPersonOrbitCinCam.transform.position;
+        //         
+        //         hookPrediction.rotation = Quaternion.LookRotation(orbitViewDir);
+        //         
+        //         break;
+        //     
+        //     case ECamType.ThirdFixed:
+        //         
+        //         hookPrediction.rotation = Quaternion.Euler(_thirdFixedXRot, _thirdFixedYRot, 0);
+        //         
+        //         break;
+        // }
+        
+        hookPrediction.rotation = Quaternion.Euler(camOrientation.eulerAngles.x, camOrientation.eulerAngles.y, 0);
     }
 
 
