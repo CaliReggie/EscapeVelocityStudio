@@ -1600,7 +1600,7 @@ Animator:
   m_GameObject: {fileID: 3652489542949530835}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 26d5a89bc7c2c4444a1658bc1d1cfa60, type: 2}
+  m_Controller: {fileID: 9100000, guid: 9794bae0babaaa8408e2b62b5d15048e, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1877,7 +1877,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6400701358191160081
 Transform:
   m_ObjectHideFlags: 0
@@ -1908,7 +1908,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Weight: 0
   m_Data:
-    m_Root: {fileID: 6044863527666769053}
+    m_Root: {fileID: 7274391866299769331}
     m_Tip: {fileID: 2980425559934967700}
     m_Target: {fileID: 4971051853094325676}
     m_ChainRotationWeight: 1
@@ -2404,7 +2404,7 @@ Animator:
   m_GameObject: {fileID: 5040554882116555027}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 26d5a89bc7c2c4444a1658bc1d1cfa60, type: 2}
+  m_Controller: {fileID: 9100000, guid: 0ec2af0e0008d1a43a87ee939a9531ac, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -5017,7 +5017,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4685553038815554368
 Transform:
   m_ObjectHideFlags: 0
@@ -5048,7 +5048,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Weight: 0
   m_Data:
-    m_Root: {fileID: 5805812311395534072}
+    m_Root: {fileID: 7726079137808222568}
     m_Tip: {fileID: 8549072756398138885}
     m_Target: {fileID: 725033814236850849}
     m_ChainRotationWeight: 1
@@ -6074,7 +6074,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: a3a348fc313b53a44ab5b8f348e2a5eb, type: 2}
+      objectReference: {fileID: 9100000, guid: 00216381029a4ee4fb82213f456cbcad, type: 2}
     - target: {fileID: 6315765792793278136, guid: bfa42ba6d484e4e448024c9acf736ce9,
         type: 3}
       propertyPath: m_Layer
