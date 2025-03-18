@@ -130,6 +130,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CustomAttack",
+                    "type": "Button",
+                    "id": "d6020d31-b304-4c45-8145-6d4af4e8e041",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CustomTeleport",
+                    "type": "Button",
+                    "id": "292c3ba5-2fd5-4431-b219-6701fea32717",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CustomSwap",
+                    "type": "Button",
+                    "id": "0eb13b3b-8274-4a61-b7bd-95bbe1cdc144",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -526,6 +553,39 @@
                     "processors": "",
                     "groups": ";Gamepad",
                     "action": "RightGrapple",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5d840200-809e-4638-9773-a437b5a9f264",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "CustomAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d4767c5b-3f70-4b93-a481-f5513a39edf6",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "CustomTeleport",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e783c6aa-3219-450c-8a36-2665d3afb873",
+                    "path": "<Keyboard>/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "CustomSwap",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
