@@ -157,6 +157,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ArmTrigger",
+                    "type": "Button",
+                    "id": "09b38225-79ed-461a-86a3-566264f86380",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -586,6 +595,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "CustomSwap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3b2cbb3f-3f2e-4225-834e-136b6e2fad8e",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "ArmTrigger",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
