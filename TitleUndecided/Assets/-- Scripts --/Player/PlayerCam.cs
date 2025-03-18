@@ -54,10 +54,7 @@ public enum EControlScheme
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerCam : MonoBehaviour
 {
-    [SerializeField] private Transform leftArmAim;
-    [SerializeField] private Transform rightArmAim;
     
-    [SerializeField] private List<Transform> hookArmAimRotations;
     
     [Header("Cam References")]
     
@@ -73,6 +70,8 @@ public class PlayerCam : MonoBehaviour
     [Header("Player References")]
     
     [SerializeField] private Transform hookPrediction;
+    
+    [SerializeField] private List<Transform> hookArmAimRotations;
     
     [field: SerializeField] public Transform CamOrientation { get; private set; }
     
@@ -389,8 +388,6 @@ public class PlayerCam : MonoBehaviour
     private void ManageHooks()
     {
         hookPrediction.rotation = Quaternion.Euler(CamOrientation.eulerAngles.x, CamOrientation.eulerAngles.y, 0);
-
-        
         
         //updating target arm rotations
         for ( int i = 0; i < hookArmAimRotations.Count; i++)
@@ -401,8 +398,7 @@ public class PlayerCam : MonoBehaviour
             {
                 Vector3 toGrappleDir = _grappling.HookPoints[i] - hookPrediction.position;
                 
-                targetRotDir.x = Quaternion.LookRotation(toGrappleDir, hookArmAimRotations[i].up).eulerAngles.x;
-                
+                targetRotDir.x = Quaternion.LookRotation(toGrappleDir).eulerAngles.x;
             }
             else
             {
@@ -411,7 +407,6 @@ public class PlayerCam : MonoBehaviour
 
             hookArmAimRotations[i].eulerAngles = targetRotDir;
         }
-        
     }
 
 
@@ -597,4 +592,16 @@ public class PlayerCam : MonoBehaviour
     }
 
     #endregion
+}
+
+[Serializable]
+public class ArmRotationInfo
+{
+    public Transform ArmAim;
+    
+    public Quaternion StartRot;
+    
+    public Quaternion LowerAdditiveBounds;
+    
+    public Quaternion UpperAdditiveBounds;
 }
