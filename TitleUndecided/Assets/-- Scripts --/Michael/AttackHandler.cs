@@ -99,6 +99,7 @@ public class AttackHandler : MonoBehaviour
     {
         transform.position = teleportTarget.transform.position;
         Destroy(teleportTarget);
+        S.activeTeleport = false;
     }
 
     public static void ActivateTeleport(GameObject teleportTar)

@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4927286572826526651}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.009901466, y: 0.9889469, z: -0.07783186, w: 0.12581}
+  m_LocalRotation: {x: -0.12492047, y: 0.621137, z: 0.10115862, w: 0.76704025}
   m_LocalPosition: {x: 84.4, y: 15.335, z: -19.858}
   m_LocalScale: {x: 0.5, y: 0.05, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -156,6 +156,9 @@ MonoBehaviour:
   ricochet: 1
   maxRicochetCount: 3
   rayDist: 0.6
+  ricochetMask:
+    serializedVersion: 2
+    m_Bits: 0
   teleporterPrefab: {fileID: 7360639938885337017, guid: 9bd404f3a897c3a48906ef90656e76eb,
     type: 3}
   playerHeight: 0

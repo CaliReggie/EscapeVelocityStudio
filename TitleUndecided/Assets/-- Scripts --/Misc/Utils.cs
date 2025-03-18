@@ -52,4 +52,9 @@ public class Utils : MonoBehaviour
         
         return targetPos;
     }
+    public static bool IsLayerInLayerMask(int layer, LayerMask layerMask)
+    {
+        return ((1 << layer) & layerMask.value) != 0;
+    }
+
 }

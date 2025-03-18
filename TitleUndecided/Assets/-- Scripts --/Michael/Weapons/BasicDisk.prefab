@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4927286572826526651}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.124137826, y: -0.3063733, z: -0.040334824, w: 0.9429201}
+  m_LocalRotation: {x: -0.2550748, y: 0.67373466, z: 0.26879278, w: 0.63935035}
   m_LocalPosition: {x: 84.4, y: 15.335, z: -19.858}
   m_LocalScale: {x: 0.5, y: 0.05, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -151,8 +151,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a480b89a639614d84b7ce549ae5a1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 15
+  speed: 20
   lifeSpan: 5
   ricochet: 1
   maxRicochetCount: 3
   rayDist: 0.6
+  ricochetMask:
+    serializedVersion: 2
+    m_Bits: 1024

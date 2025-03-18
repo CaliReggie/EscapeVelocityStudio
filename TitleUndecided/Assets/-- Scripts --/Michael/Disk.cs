@@ -9,7 +9,7 @@ public class Disk : Weapon
     public bool ricochet = false;
     public int maxRicochetCount = 0;
     public float rayDist = 0.6f;
-
+    public LayerMask ricochetMask;
     private GameObject recentHitObject;
     private float recentHitTime;
     private float startTime;
@@ -48,13 +48,17 @@ public class Disk : Weapon
 
     protected virtual void Movement()
     {
-        transform.forward = rb.linearVelocity.normalized;
+        if (rb.linearVelocity.magnitude > 0.05f)
+        {
+            transform.forward = rb.linearVelocity.normalized;
+        }
         rb.AddForce(new Vector3(0f, -5f, 0f), ForceMode.Acceleration);
     }
 
     protected virtual void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.gameObject.layer == 13)
+        
+        if (!Utils.IsLayerInLayerMask(collision.gameObject.layer, ricochetMask))
         {
             return;
         }
@@ -64,6 +68,7 @@ public class Disk : Weapon
             {
                 return;
             } 
+            Debug.Log("Collision Hit: " + collision.collider.gameObject.name);
             Ricochet(collision.contacts[0].normal);
         }
         else
@@ -75,12 +80,13 @@ public class Disk : Weapon
 
     protected virtual void RayRicochetCheck()
     {
-        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, rayDist))
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, rayDist, ricochetMask))
         {
             if (recentHitObject == hit.collider.gameObject && ((Time.time - recentHitTime) < 0.25f) || hit.collider.gameObject.layer == 13)
             {
                 return;
             }
+            Debug.Log("Raycast Hit: " + hit.collider.gameObject.name);
             Ricochet(hit.normal);
             recentHitObject = hit.collider.gameObject;
         }
