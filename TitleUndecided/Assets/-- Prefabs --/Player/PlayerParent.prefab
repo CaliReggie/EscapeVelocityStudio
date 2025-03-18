@@ -3751,12 +3751,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftArmAim: {fileID: 5088672178666374444}
   rightArmAim: {fileID: 6973680499730770122}
+  hookArmAimRotations:
+  - {fileID: 5088672178666374444}
+  - {fileID: 6973680499730770122}
   firstPersonCinCam: {fileID: 211337961086038659}
   thirdPersonOrbitCinCam: {fileID: 8550983039436619985}
   thirdPersonFixedCam: {fileID: 1805998685722152318}
   <RealCam>k__BackingField: {fileID: 6203304367693416331}
-  camOrientation: {fileID: 1981107739239566877}
   hookPrediction: {fileID: 686690557260470736}
+  <CamOrientation>k__BackingField: {fileID: 1981107739239566877}
   lookActionName: Look
   moveActionName: Move
   firstPersonRenderMask:
@@ -4070,7 +4073,8 @@ MonoBehaviour:
   damper: 7
   massScale: 4.5
   enableSwingingWithForces: 1
-  lateralThrustForce: 2500
+  directionalThrustForce: 2500
+  upwardThrustModifier: 0.5
   retractThrustForce: 3500
   extendCableSpeed: 12.5
 --- !u!114 &6203304368605208349
@@ -4610,7 +4614,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6973680499730770122}
   m_Layer: 13
-  m_Name: TipTarget
+  m_Name: RightRotTipTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5100,7 +5104,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5088672178666374444}
   m_Layer: 13
-  m_Name: TipTarget
+  m_Name: LeftRotTipTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

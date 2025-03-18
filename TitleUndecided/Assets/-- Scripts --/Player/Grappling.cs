@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 // Content:
 // - Swinging ability
@@ -112,9 +113,11 @@ public class Grappling: MonoBehaviour
     
     [SerializeField] private bool enableSwingingWithForces = true;
     
+    [FormerlySerializedAs("lateralThrustForce")]
     [Space]
     
-    [SerializeField] private float lateralThrustForce = 2500;
+    [SerializeField] private float directionalThrustForce = 2500;
+    [Range(0,1)] [SerializeField] private float upwardThrustModifier = 0.5f;
     [SerializeField] private float retractThrustForce = 3500;
     [SerializeField] private float extendCableSpeed = 15;
     
@@ -140,7 +143,7 @@ public class Grappling: MonoBehaviour
     private InputAction _jumpAction;
     
     //Camera References
-    private Transform _realCamTrans;
+    private Transform _camOrientation;
     
     //Prediction References
     
@@ -175,7 +178,7 @@ public class Grappling: MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         
         PlayerCam playerCam = GetComponent<PlayerCam>();
-        _realCamTrans = playerCam.RealCam.gameObject.transform;
+        _camOrientation = playerCam.CamOrientation;
         
         PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
@@ -322,7 +325,7 @@ public class Grappling: MonoBehaviour
 
                 // check if direct hit is available
                 RaycastHit directHit;
-                Physics.Raycast(_orientation.position, _realCamTrans.forward, out directHit, maxSwingDistance, whatIsGrappleable);
+                Physics.Raycast(_orientation.position, _camOrientation.forward, out directHit, maxSwingDistance, whatIsGrappleable);
 
                 Vector3 realHitPoint = Vector3.zero;
 
@@ -369,7 +372,7 @@ public class Grappling: MonoBehaviour
             {
                 // the grapple point is now just a point in the air
                 // calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                HookPoints[swingIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
+                HookPoints[swingIndex] = _camOrientation.position + _camOrientation.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
                 SwingsActive[swingIndex] = true;
@@ -465,36 +468,46 @@ public class Grappling: MonoBehaviour
             Vector3 dirToGrapplePoint1 = HookPoints[1] - HookPoints[0];
             _pullPoint = HookPoints[0] + dirToGrapplePoint1 * 0.5f;
         }
-
-        // rightmoveInput.
-        if (_moveInput.x > 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * _orientation.right);
-        // left
-        if (_moveInput.x < 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * -_orientation.right);
-        // forward
-        if (_moveInput.y > 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * _orientation.forward);
-        // backward
-        // if (RawMoveInput.y < 0) _rb.AddForce(lateralThrustForce * Time.deltaTime * -Orientation.forward);
-        // shorten cable
-        if (_jumpAction.IsPressed())
+        //Force will always be added in dir of camoriented move input (look where you want to go)
+        
+        // We will use a quadrant ideology for retraction. If angle from oriented move input relative to direction to grapple point
+        // is within -45 to 45 degrees, we will retract, if otherwise within -135 to 135 degrees, we do nothing,
+        // and otherwise we extend
+        
+        Vector3 orientedInputDir = _camOrientation.forward * _moveInput.y + _camOrientation.right * _moveInput.x;
+        
+        Vector3 dirToPoint = _pullPoint - transform.position;
+        
+        float distToPoint = Vector3.Magnitude(dirToPoint);
+        
+        if (_moveInput != Vector2.zero)
         {
-            Vector3 directionToPoint = _pullPoint - transform.position;
-            _rb.AddForce(retractThrustForce * Time.deltaTime * directionToPoint.normalized);
-
-            // calculate the distance to the grapplePoint
-            float distanceFromPoint = Vector3.Distance(transform.position, _pullPoint);
-
-            // the distance grapple will try to keep from grapple point
-            UpdateJoints(distanceFromPoint);
+            float angle = Vector3.SignedAngle(orientedInputDir, dirToPoint, Vector3.up);
+        
+            bool retract = angle > -45 && angle < 45;
+        
+            bool extend = angle < -135 || angle > 135;
+            
+            Vector3 forceToAdd = Time.deltaTime * directionalThrustForce * orientedInputDir;
+            
+            if (retract)
+            {
+                forceToAdd += Time.deltaTime * retractThrustForce * dirToPoint.normalized;
+            }
+            else if (extend)
+            {
+                distToPoint += extendCableSpeed;
+            }
+            
+            if (forceToAdd.y > 0)
+            {
+                forceToAdd.y *= upwardThrustModifier;
+            }
+            
+            _rb.AddForce(forceToAdd);
         }
-        // extend cable
-        if (_moveInput.y < 0)
-        {
-            // calculate the distance to the grapplePoint
-            float extendedDistanceFromPoint = Vector3.Distance(transform.position, _pullPoint) + extendCableSpeed;
-
-            // the distance grapple will try to keep from grapple point
-            UpdateJoints(extendedDistanceFromPoint);
-        }
+        
+        UpdateJoints(distToPoint);
     }
 
     private void UpdateJoints(float distanceFromPoint)
@@ -570,7 +583,7 @@ public class Grappling: MonoBehaviour
 
                 // the grapple point is now just a point in the air
                 // calculated by taking your cameras position + the forwardDirection times your maxGrappleDistance
-                HookPoints[grappleIndex] = _realCamTrans.position + _realCamTrans.forward * maxGrappleDistance;
+                HookPoints[grappleIndex] = _camOrientation.position + _camOrientation.forward * maxGrappleDistance;
                 
                 //setting grapple active for rope to show
                 GrapplesActive[grappleIndex] = true;

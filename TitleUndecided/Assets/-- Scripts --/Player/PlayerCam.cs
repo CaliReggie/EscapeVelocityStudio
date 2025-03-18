@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -53,9 +54,10 @@ public enum EControlScheme
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerCam : MonoBehaviour
 {
-    [SerializeField] private bool aimArms;
     [SerializeField] private Transform leftArmAim;
     [SerializeField] private Transform rightArmAim;
+    
+    [SerializeField] private List<Transform> hookArmAimRotations;
     
     [Header("Cam References")]
     
@@ -70,9 +72,10 @@ public class PlayerCam : MonoBehaviour
     
     [Header("Player References")]
     
-    [SerializeField] private Transform camOrientation;
-    
     [SerializeField] private Transform hookPrediction;
+    
+    [field: SerializeField] public Transform CamOrientation { get; private set; }
+    
     
     [Header("Input References")]
     
@@ -153,6 +156,10 @@ public class PlayerCam : MonoBehaviour
     private float _thirdFixedXRot;
     private float _thirdFixedYRot;
     
+    private List<Vector3> _startRotDirs;
+    
+    private List<float> _startYRots;
+    
     //Gamepad control schemes
     
     const string GAMEPADSCHEMENAME = "Gamepad";
@@ -222,6 +229,14 @@ public class PlayerCam : MonoBehaviour
         
         _thirdFixedYRot = _orientation.eulerAngles.y;
         _thirdFixedXRot = _orientation.eulerAngles.x;
+        
+        //setting arm rots
+        _startRotDirs = new List<Vector3>();
+        
+        for (int i = 0; i < hookArmAimRotations.Count; i++)
+        {
+            _startRotDirs.Add(hookArmAimRotations[i].eulerAngles);
+        }
     }
     
     private void OnDisable()
@@ -239,7 +254,7 @@ public class PlayerCam : MonoBehaviour
         
         ManageCamera();
         
-        HookPredictionOrientation();
+        ManageHooks();
     }
     
     private void GetInput()
@@ -263,7 +278,7 @@ public class PlayerCam : MonoBehaviour
                 
                 RealCam.cullingMask = firstPersonRenderMask;
                 
-                firstPersonCinCam.transform.position = camOrientation.position;
+                firstPersonCinCam.transform.position = CamOrientation.position;
                 
                 firstPersonCinCam.gameObject.SetActive( true);
                 
@@ -319,22 +334,22 @@ public class PlayerCam : MonoBehaviour
                 
                 
                 //rotate RealCamTrans Orientation fully
-                camOrientation.rotation = Quaternion.Euler(_firstPersonXRot, _firstPersonYRot, 0);
+                CamOrientation.rotation = Quaternion.Euler(_firstPersonXRot, _firstPersonYRot, 0);
                 
                 //apply position and rotation to the CinCamera
-                firstPersonCinCam.transform.rotation = camOrientation.rotation;
-                firstPersonCinCam.transform.position = camOrientation.position; // camOrientation is childed to PlayerParent
+                firstPersonCinCam.transform.rotation = CamOrientation.rotation;
+                firstPersonCinCam.transform.position = CamOrientation.position; // CamOrientation is childed to PlayerParent
                 
                 break;
             
             case ECamType.ThirdOrbit:
                 
                 //rotate RealCamTrans Orientation fully to direction from RealCamTrans to PlayerParent
-                camOrientation.rotation = Quaternion.LookRotation(_playerObj.position - new Vector3(thirdPersonOrbitCinCam.transform.position.x,
+                CamOrientation.rotation = Quaternion.LookRotation(_playerObj.position - new Vector3(thirdPersonOrbitCinCam.transform.position.x,
                     RealCam.transform.position.y, thirdPersonOrbitCinCam.transform.position.z));
                 
                 //rotate PlayerParent Orientation along only the y axis of RealCamTrans Orientation
-                _orientation.rotation = Quaternion.Euler(0, camOrientation.rotation.eulerAngles.y, 0);
+                _orientation.rotation = Quaternion.Euler(0, CamOrientation.rotation.eulerAngles.y, 0);
 
                 //use relative input direction to rotate PlayerParent object relative to PlayerParent Orientation
                 Vector3 relativeInputDir = _orientation.forward * _moveInput.y + _orientation.right * _moveInput.x;
@@ -361,7 +376,7 @@ public class PlayerCam : MonoBehaviour
                 
                 _thirdFixedXRot = Mathf.Clamp(_thirdFixedXRot, -89, 89);
                 
-                camOrientation.transform.rotation = Quaternion.Euler(_thirdFixedXRot, _thirdFixedYRot, 0);
+                CamOrientation.transform.rotation = Quaternion.Euler(_thirdFixedXRot, _thirdFixedYRot, 0);
                 
                 _orientation.rotation = Quaternion.Euler(0, _thirdFixedYRot, 0);
                 _playerObj.rotation = Quaternion.Euler(0, _thirdFixedYRot, 0);
@@ -369,74 +384,34 @@ public class PlayerCam : MonoBehaviour
                 break;
                 
         }
-
-        if (aimArms)
-        {
-            //Match arm aim
-            Vector3 targetLeftArmRotation = leftArmAim.eulerAngles;
-            Vector3 targetRightArmRotation = rightArmAim.eulerAngles;
-            
-            if (_grappling.HooksActive[0])
-            {
-                Vector3 targetLeftDir = _grappling.HookPoints[0] - hookPrediction.position;
-                
-                Vector3 test = Quaternion.LookRotation(targetLeftDir).eulerAngles;
-                
-                Debug.DrawRay(hookPrediction.position, targetLeftDir * 10, Color.red);
-                
-                Debug.Log(test.x);
-            }
-            else
-            {
-                targetLeftArmRotation.x = camOrientation.eulerAngles.x;
-                    
-                leftArmAim.eulerAngles = targetLeftArmRotation;
-            }
-            
-            if (_grappling.HooksActive[1])
-            {
-                
-                Quaternion targetRightDir = Quaternion.LookRotation(_grappling.HookPoints[1] - hookPrediction.position);
-                
-                targetRightArmRotation.x = targetRightDir.x;
-                
-                rightArmAim.eulerAngles = targetRightArmRotation;
-            }
-            else
-            {
-                targetRightArmRotation.x = camOrientation.eulerAngles.x;
-                        
-                rightArmAim.eulerAngles = targetRightArmRotation;
-            }
-        }
     }
     
-    private void HookPredictionOrientation()
+    private void ManageHooks()
     {
-        // switch(CurrentCamType)
-        // {
-        //     case ECamType.FirstPerson:
-        //         
-        //         hookPrediction.rotation = Quaternion.Euler(_firstPersonXRot, _firstPersonYRot, 0);
-        //         
-        //         break;
-        //     
-        //     case ECamType.ThirdOrbit:
-        //         
-        //         Vector3 orbitViewDir = _playerObj.position - thirdPersonOrbitCinCam.transform.position;
-        //         
-        //         hookPrediction.rotation = Quaternion.LookRotation(orbitViewDir);
-        //         
-        //         break;
-        //     
-        //     case ECamType.ThirdFixed:
-        //         
-        //         hookPrediction.rotation = Quaternion.Euler(_thirdFixedXRot, _thirdFixedYRot, 0);
-        //         
-        //         break;
-        // }
+        hookPrediction.rotation = Quaternion.Euler(CamOrientation.eulerAngles.x, CamOrientation.eulerAngles.y, 0);
+
         
-        hookPrediction.rotation = Quaternion.Euler(camOrientation.eulerAngles.x, camOrientation.eulerAngles.y, 0);
+        
+        //updating target arm rotations
+        for ( int i = 0; i < hookArmAimRotations.Count; i++)
+        {
+            Vector3 targetRotDir = hookArmAimRotations[i].eulerAngles;
+            
+            if (_grappling.HooksActive[i])
+            {
+                Vector3 toGrappleDir = _grappling.HookPoints[i] - hookPrediction.position;
+                
+                targetRotDir.x = Quaternion.LookRotation(toGrappleDir, hookArmAimRotations[i].up).eulerAngles.x;
+                
+            }
+            else
+            {
+                targetRotDir.x = CamOrientation.eulerAngles.x;
+            }
+
+            hookArmAimRotations[i].eulerAngles = targetRotDir;
+        }
+        
     }
 
 
