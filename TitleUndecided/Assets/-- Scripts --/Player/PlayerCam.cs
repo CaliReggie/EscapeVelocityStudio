@@ -71,7 +71,7 @@ public class PlayerCam : MonoBehaviour
     
     [SerializeField] private Transform hookPrediction;
     
-    [SerializeField] private List<Transform> hookArmAimRotations;
+    [SerializeField] private List<Transform> armBaseRigTargetRots;
     
     [field: SerializeField] public Transform CamOrientation { get; private set; }
     
@@ -232,9 +232,9 @@ public class PlayerCam : MonoBehaviour
         //setting arm rots
         _startRotDirs = new List<Vector3>();
         
-        for (int i = 0; i < hookArmAimRotations.Count; i++)
+        for (int i = 0; i < armBaseRigTargetRots.Count; i++)
         {
-            _startRotDirs.Add(hookArmAimRotations[i].eulerAngles);
+            _startRotDirs.Add(armBaseRigTargetRots[i].eulerAngles);
         }
     }
     
@@ -390,9 +390,9 @@ public class PlayerCam : MonoBehaviour
         hookPrediction.rotation = Quaternion.Euler(CamOrientation.eulerAngles.x, CamOrientation.eulerAngles.y, 0);
         
         //updating target arm rotations
-        for ( int i = 0; i < hookArmAimRotations.Count; i++)
+        for ( int i = 0; i < armBaseRigTargetRots.Count; i++)
         {
-            Vector3 targetRotDir = hookArmAimRotations[i].eulerAngles;
+            Vector3 targetRotDir = armBaseRigTargetRots[i].eulerAngles;
             
             if (_grappling.HooksActive[i])
             {
@@ -405,7 +405,7 @@ public class PlayerCam : MonoBehaviour
                 targetRotDir.x = CamOrientation.eulerAngles.x;
             }
 
-            hookArmAimRotations[i].eulerAngles = targetRotDir;
+            armBaseRigTargetRots[i].eulerAngles = targetRotDir;
         }
     }
 

@@ -159,9 +159,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "ArmTrigger",
+                    "name": "UseLeftArm",
                     "type": "Button",
                     "id": "09b38225-79ed-461a-86a3-566264f86380",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "UseRightArm",
+                    "type": "Button",
+                    "id": "52096e63-38c8-4bbc-b5c7-a2ea9938a7b6",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -601,11 +610,22 @@
                 {
                     "name": "",
                     "id": "3b2cbb3f-3f2e-4225-834e-136b6e2fad8e",
-                    "path": "<Keyboard>/q",
+                    "path": "<Keyboard>/1",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "ArmTrigger",
+                    "action": "UseLeftArm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d33619b9-511d-41cd-9969-d4111d03510f",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "UseRightArm",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

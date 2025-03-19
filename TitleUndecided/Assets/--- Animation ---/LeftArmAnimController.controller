@@ -16,7 +16,7 @@ AnimatorStateTransition:
   serializedVersion: 3
   m_TransitionDuration: 0.25
   m_TransitionOffset: 0
-  m_ExitTime: 0.75
+  m_ExitTime: 0.85
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -31,7 +31,7 @@ AnimatorController:
   m_Name: LeftArmAnimController
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: ArmTrigger
+  - m_Name: UsedLeftArm
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -86,7 +86,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: ArmTrigger
+    m_ConditionEvent: UsedLeftArm
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 4655626958691213486}
@@ -116,7 +116,7 @@ AnimatorStateMachine:
     m_Position: {x: 320, y: 110, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 4655626958691213486}
-    m_Position: {x: 360, y: 220, z: 0}
+    m_Position: {x: 320, y: 200, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -134,8 +134,8 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: LeftArmGrab
-  m_Speed: 1
+  m_Name: UseLeftArm
+  m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -502700436129914659}

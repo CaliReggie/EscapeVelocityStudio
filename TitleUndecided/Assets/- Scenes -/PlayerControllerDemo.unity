@@ -25308,6 +25308,23 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &271180508460458238
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6691180760662554962}
+  - component: {fileID: 6852899806188931303}
+  m_Layer: 0
+  m_Name: PCDemoEventManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1001 &3044950405299601183
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25568,130 +25585,68 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 20dd83c54b1592a4db36441848eafc5d, type: 3}
---- !u!1001 &7312431287634941448
-PrefabInstance:
+--- !u!4 &6691180760662554962
+Transform:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 271180508460458238}
   serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4152636546859069274, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<SceneEventName>k__BackingField
-      value: MainLoad
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[0].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 174279889}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 174279889}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: LoadSceneWithGameStateSceneInfo
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: GameStateManager, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
-      value: 
-      objectReference: {fileID: 11400000, guid: a08e13f21969f474fbd8f925f168daf3,
-        type: 2}
-    - target: {fileID: 4206535309247307503, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: sceneEvents.Array.data[1].<OnCalled>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: GameStateSceneInfo, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 7402111010806789878, guid: 3223369eceb4495498188e169cb7f1af,
-        type: 3}
-      propertyPath: m_Name
-      value: PCDemoEventManager
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 3223369eceb4495498188e169cb7f1af, type: 3}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6852899806188931303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 271180508460458238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe746a56157ff964fb5bfe3aedd435e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneEvents:
+  - <SceneEventName>k__BackingField: MainLoad
+    <OnCalled>k__BackingField:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 174279889}
+          m_TargetAssemblyTypeName: GameStateManager, Assembly-CSharp
+          m_MethodName: LoadSceneWithGameStateSceneInfo
+          m_Mode: 2
+          m_Arguments:
+            m_ObjectArgument: {fileID: 11400000, guid: a08e13f21969f474fbd8f925f168daf3,
+              type: 2}
+            m_ObjectArgumentAssemblyTypeName: GameStateSceneInfo, Assembly-CSharp
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - <SceneEventName>k__BackingField: MainLoad
+    <OnCalled>k__BackingField:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 174279889}
+          m_TargetAssemblyTypeName: GameStateManager, Assembly-CSharp
+          m_MethodName: LoadSceneWithGameStateSceneInfo
+          m_Mode: 2
+          m_Arguments:
+            m_ObjectArgument: {fileID: 11400000, guid: a08e13f21969f474fbd8f925f168daf3,
+              type: 2}
+            m_ObjectArgumentAssemblyTypeName: GameStateSceneInfo, Assembly-CSharp
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1001 &7832030684094710404
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25755,11 +25710,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameInputManager
       objectReference: {fileID: 0}
-    - target: {fileID: 7522886990578314950, guid: 80d681f7de4bf8c43adc3d2fc00d2e2e,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -25773,7 +25723,7 @@ SceneRoots:
   - {fileID: 1353780689}
   - {fileID: 1806210347}
   - {fileID: 2030275774}
-  - {fileID: 7312431287634941448}
+  - {fileID: 6691180760662554962}
   - {fileID: 1846602622}
   - {fileID: 1215328371}
   - {fileID: 576641806}
