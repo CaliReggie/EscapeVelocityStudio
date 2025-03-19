@@ -188,15 +188,17 @@ public class Grappling: MonoBehaviour
         _rightSwingAction = playerInput.actions.FindAction(rightSwingActionName);
         _moveAction = playerInput.actions.FindAction(moveActionName);
         _jumpAction = playerInput.actions.FindAction(jumpActionName);
-    }
-
-    private void Start()
-    {
+        
         // if you don't set whatIsGrappleable to anything, it's automatically set to Default
         if (whatIsGrappleable.value == 0)
             whatIsGrappleable = LayerMask.GetMask("Default");
 
         ListSetup();
+    }
+
+    private void Start()
+    {
+        //Removed start setup to be ready for script refs
     }
 
     private void OnEnable()
@@ -505,9 +507,11 @@ public class Grappling: MonoBehaviour
             }
             
             _rb.AddForce(forceToAdd);
+            
+            UpdateJoints(distToPoint);
         }
         
-        UpdateJoints(distToPoint);
+        
     }
 
     private void UpdateJoints(float distanceFromPoint)
