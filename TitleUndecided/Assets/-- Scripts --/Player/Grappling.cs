@@ -364,7 +364,7 @@ public class Grappling: MonoBehaviour
     }
     private void StartSwing(int swingIndex)
     {
-        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.swinging))
+        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.swinging))
             return;
         
         // no Swinging point can be found

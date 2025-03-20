@@ -108,7 +108,7 @@ public class Dashing : MonoBehaviour
 
     private void Dash()
     {
-        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.dashing))
+        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.dashing))
             return;
 
         // cooldown implementation

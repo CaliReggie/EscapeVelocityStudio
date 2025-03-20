@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using TMPro;
 using PhysicsExtensions;
@@ -122,6 +123,8 @@ public class PlayerMovement : MonoBehaviour
     
     private MomentumExtension _momentumExtension;
     private bool _momentumExtensionEnabled;
+    
+    private Grappling _grappling;
 
     private float _startCollHeight;
     
@@ -135,6 +138,12 @@ public class PlayerMovement : MonoBehaviour
     
     private InputAction _crouchAction;
     
+    //Input
+    
+    private Vector2 _rawMoveInput;
+
+    private Vector3 _orientedMoveInput;
+    
     //Detection
     private RaycastHit _slopeHit; // variable needed for slopeCheck
     
@@ -142,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
     
     private bool _speedLimited;
     
-    private int _doubleJumpsLeft;
+    private int _multiJumpsLeft;
     
     private bool _readyToJump = true;
     
@@ -181,6 +190,8 @@ public class PlayerMovement : MonoBehaviour
             _momentumExtension = GetComponent<MomentumExtension>();
             _momentumExtensionEnabled = true;
         }
+        
+        _grappling = GetComponent<Grappling>();
         
         PlayerInput playerInput = GetComponentInParent<PlayerInput>();
         
@@ -239,20 +250,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        // print("slope" + OnSlope());
-
         // make sure to call all functions every frame
-        MyInput();
+        GetInput();
+        
         LimitVelocity();
+        
         HandleDrag();
-        StateHandler();
+        
+        HandleState();
 
         // shooting a raycast down from the middle of the PlayerParent and checking if it hits the ground
         Grounded = Physics.Raycast(transform.position, Vector3.down, BasePlayerHeight * 0.5f + 0.2f, WhatIsGround);
 
         // if you hit the ground again after double jumping, reset your double jumps
-        if (Grounded && _doubleJumpsLeft != airJumpsAllowed)
-            ResetDoubleJumps();
+        if (Grounded && _multiJumpsLeft != airJumpsAllowed)
+            ResetMultiJumps();
 
         DebugText();
     }
@@ -273,10 +285,10 @@ public class PlayerMovement : MonoBehaviour
 
     #region Input, Movement & Velocity Limiting
 
-    private void MyInput()
+    private void GetInput()
     {
         // get movement input
-        RawMoveInput = _moveAction.ReadValue<Vector2>();
+        _rawMoveInput = _moveAction.ReadValue<Vector2>();
 
         // whenever you press the jump key, you're Grounded and _readyToJump (which means jumping is not in cooldown),
         // you want to call the Jump() function
@@ -287,7 +299,7 @@ public class PlayerMovement : MonoBehaviour
             Jump();
 
             // This will set _readyToJump to true again after the cooldown is over
-            Invoke(nameof(ResetJump), jumpCooldown);
+            StartCoroutine(ResetJumpDelayed());
         }
 
         // if you press the jump key while being in the air -> perform a double jump
@@ -314,21 +326,21 @@ public class PlayerMovement : MonoBehaviour
         if (Restricted || InternallyRestricted) return;
 
         // calculate the direction you need to move in
-        OrientedMoveInput = Orientation.forward * RawMoveInput.y + Orientation.right * RawMoveInput.x;
+        _orientedMoveInput = Orientation.forward * _rawMoveInput.y + Orientation.right * _rawMoveInput.x;
 
         // To Add the movement force, just use Rigidbody.AddForce (with ForceMode.Force, because you are adding force continuously)
 
         // movement on a slope
-        if (OnSlope())
-            _rb.AddForce(moveForce * 7.5f * GetSlopeMoveDirection(OrientedMoveInput), ForceMode.Force);
+        if (IsOnSlope())
+            _rb.AddForce(moveForce * 7.5f * SlopeMoveDirection(_orientedMoveInput), ForceMode.Force);
 
         // movement on ground
         else if(Grounded)
-            _rb.AddForce(moveForce * 10f * OrientedMoveInput.normalized, ForceMode.Force);
+            _rb.AddForce(moveForce * 10f * _orientedMoveInput.normalized, ForceMode.Force);
 
         // movement in air
         else if(!Grounded)
-            _rb.AddForce(moveForce * 10f * airMultiplier * OrientedMoveInput.normalized, ForceMode.Force);
+            _rb.AddForce(moveForce * 10f * airMultiplier * _orientedMoveInput.normalized, ForceMode.Force);
     }
 
     /// this function is always called
@@ -350,7 +362,7 @@ public class PlayerMovement : MonoBehaviour
         }
         
         // if you move faster over the y axis than you are allowed...
-        if(MaxYSpeed != -1 && currYVel > MaxYSpeed)
+        if( MaxYSpeed != -1 && currYVel > MaxYSpeed)
         {
             //TODO: Better swing grav?
             //
@@ -370,17 +382,7 @@ public class PlayerMovement : MonoBehaviour
         // unlimited, // players speed is not being limited at all
         // limited, // limit speed to a specific value using EnableLimitedSpeed()
         // freeze, // PlayerParent can't move at all
-        // dashing,
-        // sliding,
-        // crouching,
-        // sprinting,
-        // walking,
-        // wallrunning,
-        // walljumping,
-        // climbing,
-        // swinging,
-        // air
-        
+
         // if you're walking or Sprinting, apply drag to your rigidbody in order to prevent slippery movement
         if (Grounded)
         {
@@ -438,7 +440,7 @@ public class PlayerMovement : MonoBehaviour
     private void DoubleJump()
     {
         // if you don't have any double jumps left, stop the function
-        if (_doubleJumpsLeft <= 0) return;
+        if (_multiJumpsLeft <= 0) return;
 
         // this is just for bug-fixing
         if (MoveMode == MovementMode.wallrunning || MoveMode == MovementMode.climbing) return;
@@ -448,7 +450,7 @@ public class PlayerMovement : MonoBehaviour
         // find out how large this velocity is
         float flatVelMag = flatVel.magnitude;
 
-        Vector3 inputDirection = Orientation.forward * RawMoveInput.y + Orientation.right * RawMoveInput.x;
+        Vector3 inputDirection = Orientation.forward * _rawMoveInput.y + Orientation.right * _rawMoveInput.x;
 
         // reset _rb velocity in the correct direction while maintaing speed
         // for example, you're jumping forward, then in the air, you turn around and quickly jump back
@@ -460,17 +462,24 @@ public class PlayerMovement : MonoBehaviour
         // make sure to use ForceMode.Impulse, since you're only adding force once
         _rb.AddForce(Orientation.up * jumpForce, ForceMode.Impulse);
 
-        _doubleJumpsLeft--;
+        _multiJumpsLeft--;
     }
-
+    
     private void ResetJump()
     {
         _readyToJump = true;
     }
-
-    public void ResetDoubleJumps()
+    
+    private IEnumerator ResetJumpDelayed()
     {
-        _doubleJumpsLeft = airJumpsAllowed;
+        yield return new WaitForSeconds(jumpCooldown);
+        
+        _readyToJump = true;
+    }
+
+    public void ResetMultiJumps()
+    {
+        _multiJumpsLeft = airJumpsAllowed;
     }
 
     private Vector3 velocityToSet;
@@ -488,10 +497,10 @@ public class PlayerMovement : MonoBehaviour
         EnableLimitedState(flatVel.magnitude);
 
         velocityToSet = velocity;
-        Invoke(nameof(SetVelocity), 0.05f);
-        Invoke(nameof(EnableMovementNextTouchDelayed), 0.01f);
-
-        Invoke(nameof(ResetRestrictions), maxRestrictedTime);
+        
+        StartCoroutine(nameof(SetVelocityDelayed), 0.05f);
+        StartCoroutine(nameof(EnableMovementNextTouchDelayed), 0.01f);
+        StartCoroutine(nameof(ResetRestrictionsDelayed), maxRestrictedTime);
     }
     
     public void JumpToPositionInTime(Vector3 targetPosition, float timeToReach, Vector3 startPosition = new Vector3(), float maxRestrictedTime = 1f)
@@ -506,24 +515,40 @@ public class PlayerMovement : MonoBehaviour
         Vector3 flatVel = new Vector3(velocity.x, 0f, velocity.z);
         EnableLimitedState(flatVel.magnitude);
 
-        GetComponent<Grappling>().CancelAllHooks();
+        _grappling.CancelAllHooks();
         
         _rb.linearDamping = 0;
         
         velocityToSet = velocity;
-        Invoke(nameof(SetVelocity), 0.05f);
-        Invoke(nameof(EnableMovementNextTouchDelayed), 0.01f);
-
-        Invoke(nameof(ResetRestrictions), maxRestrictedTime);
+        
+        StartCoroutine(nameof(SetVelocityDelayed), 0.05f);
+        StartCoroutine(nameof(EnableMovementNextTouchDelayed), 0.01f);
+        StartCoroutine(nameof(ResetRestrictionsDelayed), maxRestrictedTime);
     }
     
     private void SetVelocity()
     {
         _rb.linearVelocity = velocityToSet;
     }
-    private void EnableMovementNextTouchDelayed()
+    
+        
+    private IEnumerator SetVelocityDelayed(float delay)
     {
-        enableMovementOnNextTouch = true;
+        yield return new WaitForSeconds(delay);
+        
+        _rb.linearVelocity = velocityToSet;
+    }
+    
+    private void EnableMovementNextTouch()
+    {
+        _enableMovementOnNextTouch = true;
+    }
+    
+    private IEnumerator EnableMovementNextTouchDelayed(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        _enableMovementOnNextTouch = true;
     }
 
     public void ResetRestrictions()
@@ -535,6 +560,13 @@ public class PlayerMovement : MonoBehaviour
 
         DisableLimitedState();
     }
+    
+    private IEnumerator ResetRestrictionsDelayed(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        ResetRestrictions();
+    }
 
     #endregion
 
@@ -543,7 +575,7 @@ public class PlayerMovement : MonoBehaviour
     /// called when crouchKey is pressed down
     private void StartCrouch()
     {
-        if (!IsStateAllowed(MovementMode.crouching))
+        if (!SpeedAllowsState(MovementMode.crouching))
             return;
 
         //change collider size
@@ -578,7 +610,7 @@ public class PlayerMovement : MonoBehaviour
     // Also in a few states there needs to be done something extra (like in Freeze), then I just added that code in there
     MovementMode movementModeLastFrame;
     MovementMode previousMovementMode;
-    private void StateHandler()
+    private void HandleState()
     {
         // Mode - Freeze
         if (Freeze)
@@ -639,7 +671,7 @@ public class PlayerMovement : MonoBehaviour
         {
             MoveMode = MovementMode.sliding;
 
-            if (OnSlope() && _rb.linearVelocity.y < 0.2f)
+            if (IsOnSlope() && _rb.linearVelocity.y < 0.2f)
             {
                 _desiredMaxSpeed = slopeSlideMaxSpeed;
             }
@@ -728,7 +760,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_momentumExtensionEnabled)
         {
-            Debug.LogError("Trying to update _maxSpeed based on momentum but _momentumExtension is not enabled");
             return;
         }
 
@@ -736,7 +767,6 @@ public class PlayerMovement : MonoBehaviour
         {
             return;
         }
-            
 
         isIncreasingMaxSpeed = _desiredMaxSpeed > _maxSpeed;
         float speedChangeFactor = isIncreasingMaxSpeed ? increaseSpeedChangeFactor : decreaseSpeedChangeFactor;
@@ -756,7 +786,7 @@ public class PlayerMovement : MonoBehaviour
             if (_rb.linearVelocity.magnitude < _maxSpeed - 1)
                 return;
 
-            if (OnSlope())
+            if (IsOnSlope())
             {
                 float slopeAngle = Vector3.Angle(Vector3.up, _slopeHit.normal);
                 float slopeAngleIncrease = 1 + (slopeAngle / 90f) * 2f;
@@ -784,55 +814,14 @@ public class PlayerMovement : MonoBehaviour
 
     #endregion
 
-    #region Variables
-
-    public bool OnSlope()
-    {
-        // shoot a raycast down to check if you hit something
-        // the "out _slopeHit" bit makes sure that you store the information of the object you hit
-        if (Physics.Raycast(transform.position, Vector3.down, out _slopeHit, BasePlayerHeight * 0.5f + 0.5f, WhatIsGround))
-        {
-            // calculate the angle of the ground you're standing on (how steep it is)
-            float angle = Vector3.Angle(Vector3.up, _slopeHit.normal);
-            
-            // check if the angle is smaller than your maxSlopeAngle
-            // -> that means you're standing on a slope -> return true
-            return angle < maxSlopeAngle && angle != 0;
-        }
-
-        // if the raycast doesn't hit anything, just return false
-        return false;
-    }
-
-    public Vector3 GetSlopeMoveDirection(Vector3 direction)
-    {
-        // calcualte the direction you need to move relative to the slope you're standing on
-        return Vector3.ProjectOnPlane(direction, _slopeHit.normal).normalized;
-    }
-
-    #endregion
-
-    #region Moving Platforms
-
-    private Rigidbody movingPlatform;
-    public void AssignPlatform(Rigidbody platform)
-    {
-        movingPlatform = platform;
-    }
-    public void UnassignPlatform()
-    {
-        movingPlatform = null;
-    }
-
-    #endregion
-
     #region Collision Detection
 
-    private bool enableMovementOnNextTouch;
+    private bool _enableMovementOnNextTouch;
     private void OnCollisionEnter(Collision collision)
     {
         bool touch = false;
 
+        // old way replaced below
         // for (int i = 0; i < collision.contactCount; i++)
         // {
         //     if (collision.collider.gameObject.layer == 9 || collision.collider.gameObject.layer == 10)
@@ -849,12 +838,12 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        if (enableMovementOnNextTouch && touch)
+        if (_enableMovementOnNextTouch && touch)
         {
             // I don't know anymore lol
-            GetComponent<Grappling>().OnObjectTouch(); // this stops active grapples
+            _grappling.OnObjectTouch(); // this stops active grapples
             
-            enableMovementOnNextTouch = false;
+            _enableMovementOnNextTouch = false;
             ResetRestrictions();
         }
     }
@@ -862,19 +851,46 @@ public class PlayerMovement : MonoBehaviour
     #endregion
 
     #region Getters and Setters
+    
+    public bool IsOnSlope()
+    {
+        // shoot a raycast down to check if you hit something
+        // the "out _slopeHit" bit makes sure that you store the information of the object you hit
+        if (Physics.Raycast(transform.position, Vector3.down, out _slopeHit, BasePlayerHeight * 0.5f + 0.5f, WhatIsGround))
+        {
+            // calculate the angle of the ground you're standing on (how steep it is)
+            float angle = Vector3.Angle(Vector3.up, _slopeHit.normal);
+            
+            // check if the angle is smaller than your maxSlopeAngle
+            // -> that means you're standing on a slope -> return true
+            return angle < maxSlopeAngle && angle != 0;
+        }
 
-    public bool IsStateAllowed(MovementMode movementMode)
+        // if the raycast doesn't hit anything, just return false
+        return false;
+    }
+    
+    public Vector3 SlopeMoveDirection(Vector3 direction)
+    {
+        // calcualte the direction you need to move relative to the slope you're standing on
+        return Vector3.ProjectOnPlane(direction, _slopeHit.normal).normalized;
+    }
+
+    public bool SpeedAllowsState(MovementMode movementMode)
     {
         if (!_momentumExtensionEnabled)
             return true;
 
-        return _momentumExtension.IsStateAllowed(movementMode, _maxSpeed);
+        return _momentumExtension.SpeedAllowsState(movementMode, _maxSpeed);
     }
     
+    #endregion
+
+    #region Properties
+
     //State Handling
     
-    // these bools are activated from different scripts
-    // if for example the Wallrunning bool is set to true, the movement mode will change to MovementMode.Wallrunning#
+    // these bools are activated from different scripts and this one
     
     public bool Grounded { get; private set; }
     
@@ -893,14 +909,12 @@ public class PlayerMovement : MonoBehaviour
     public bool Wallrunning { get; set; }
     public bool Walljumping { get; set; }
     
-    public Vector2 RawMoveInput { get; private set; }
-    
-    public Vector3 OrientedMoveInput { get; private set; }
+    //General
     
     public float MaxYSpeed { get; set; }
-
+    
     #endregion
-
+    
     #region Text Displaying
 
     private void DebugText()

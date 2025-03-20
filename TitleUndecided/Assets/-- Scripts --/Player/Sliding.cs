@@ -148,7 +148,7 @@ public class Sliding : MonoBehaviour
     
     private void StartSlide()
     {
-        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.sliding))
+        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.sliding))
             return;
 
         if (!_pm.Grounded) return;
@@ -186,7 +186,7 @@ public class Sliding : MonoBehaviour
 
         // Mode 1 - Sliding Normal
         // slide time is limited
-        if(!_pm.OnSlope() || _rb.linearVelocity.y > -0.1f)
+        if(!_pm.IsOnSlope() || _rb.linearVelocity.y > -0.1f)
         {
             // add force in the direction of your input
             _rb.AddForce(inputDirection * force, ForceMode.Force);
@@ -200,7 +200,7 @@ public class Sliding : MonoBehaviour
         else
         {
             // add force in the direction of your keyboard input
-            _rb.AddForce(_pm.GetSlopeMoveDirection(inputDirection) * force, ForceMode.Force);
+            _rb.AddForce(_pm.SlopeMoveDirection(inputDirection) * force, ForceMode.Force);
         }
 
         // stop Sliding again if the timer runs out

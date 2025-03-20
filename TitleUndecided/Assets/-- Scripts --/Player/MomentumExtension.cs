@@ -77,8 +77,6 @@ public class MomentumExtension : MonoBehaviour
         }
         else
         {
-            Debug.LogError("MovementState not found");
-            
             speedChangeFactor = -1;
         }
 
@@ -105,8 +103,6 @@ public class MomentumExtension : MonoBehaviour
         }
         else
         {
-            Debug.LogError("MovementState not found");
-            
             speedChangeFactor = -1;
         }
 
@@ -118,7 +114,7 @@ public class MomentumExtension : MonoBehaviour
         return grounded ? momentumDecreaseFactorOnGround : momentumDecreaseFactorInAir;
     }
 
-    public bool IsStateAllowed(PlayerMovement.MovementMode movementMode, float currMomentum)
+    public bool SpeedAllowsState(PlayerMovement.MovementMode movementMode, float currMomentum)
     {
         MovementState movementState = GetMovementState(movementMode);
         bool stateAllowed = true;

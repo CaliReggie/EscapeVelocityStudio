@@ -360,14 +360,14 @@ public class WallRunning : MonoBehaviour
                 ResetWallJumpsDone();
 
                 if (resetJumpsOnNewWall)
-                    _pm.ResetDoubleJumps();
+                    _pm.ResetMultiJumps();
 
                 _wallRunTimer = maxWallRunTime;
                 _climbTimer = maxClimbTime;
             }
 
             if(resetJumpsOnEveryWall)
-                _pm.ResetDoubleJumps();
+                _pm.ResetMultiJumps();
         }
 
         // vaulting
@@ -451,7 +451,7 @@ public class WallRunning : MonoBehaviour
 
     private void StartWallRun()
     {
-        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.wallrunning))
+        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.wallrunning))
             return;
 
         // this will cause the PlayerMovement script to enter the MovementState.Wallrunning
@@ -537,7 +537,7 @@ public class WallRunning : MonoBehaviour
 
     private void StartClimbing()
     {
-        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.climbing))
+        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.climbing))
             return;
 
         // this will cause the PlayerMovement script to enter MovementState.Climbing
@@ -632,7 +632,7 @@ public class WallRunning : MonoBehaviour
     /// Inside of this function the decision between normal or precise wall/climb jumping is made
     private void WallJump()
     {
-        if (!_pm.IsStateAllowed(PlayerMovement.MovementMode.walljumping))
+        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.walljumping))
             return;
 
         if (!enablePrecisionMode)
