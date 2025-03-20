@@ -4434,13 +4434,7 @@ MonoBehaviour:
   <CamOrientation>k__BackingField: {fileID: 1981107739239566877}
   lookActionName: Look
   moveActionName: Move
-  firstPersonRenderMask:
-    serializedVersion: 2
-    m_Bits: 1109505
-  thirdPersonRenderMask:
-    serializedVersion: 2
-    m_Bits: 3206657
-  <CurrentCamType>k__BackingField: 2
+  currentCamType: 2
   keyAndMouseFirstPersonLookSpeedMult: 0.5
   gamepadFirstPersonLookSpeedMult: 1.25
   gamepadFirstPersonVerticalModifier: 0.5
@@ -4448,6 +4442,7 @@ MonoBehaviour:
   keyAndMouseThirdPersonFixedLookSpeedMult: 0.5
   gamepadThirdPersonFixedLookSpeedMult: 1.25
   gamepadThirdPersonFixedVerticalModifier: 0.5
+  sideChangeSpeed: 0.1
   baseFov: 100
   baseTilt: 0
 --- !u!114 &3460507232842117839

@@ -128,7 +128,7 @@ public class Dashing : MonoBehaviour
         _pm.Dashing = true;
 
         // increase the fov of the camera (graphical effect)
-        _playerCamScript.DoFov(dashFov, dashFOVChangeSpeed);
+        _playerCamScript.SetTargetFov(dashFov, dashFOVChangeSpeed);
 
         Transform forwardT;
 
@@ -176,7 +176,7 @@ public class Dashing : MonoBehaviour
         _pm.MaxYSpeed = -1;
 
         // reset the fov of your camera
-        _playerCamScript.DoFov(-360, dashFOVChangeSpeed);
+        _playerCamScript.SetTargetFov(-1, dashFOVChangeSpeed);
 
         // if you disabled it before, activate the gravity of the rigidbody again
         if (disableGravity)

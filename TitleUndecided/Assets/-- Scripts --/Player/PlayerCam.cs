@@ -81,14 +81,10 @@ public class PlayerCam : MonoBehaviour
     public string lookActionName = "Look";
     
     public string moveActionName = "Move";
-    
+
     [Header("General Cam Settings")]
-    
-    [SerializeField] private LayerMask firstPersonRenderMask = -1;
-    
-    [SerializeField] private LayerMask thirdPersonRenderMask = -1;
-    
-    [field: SerializeField] public ECamType CurrentCamType { get; private set; }
+
+    [SerializeField] private ECamType currentCamType;
     
     [Header("First Person Cam Settings")]
     
@@ -111,6 +107,11 @@ public class PlayerCam : MonoBehaviour
     
     [Range(0,1)]
     [SerializeField] private float gamepadThirdPersonFixedVerticalModifier = 0.5f;
+    
+    [Space]
+    
+    [Range(0.01f,0.25f)] 
+    [SerializeField] private float sideChangeSpeed = 0.1f;
 
     [Header("Cam Effects Settings")]
     
@@ -121,8 +122,6 @@ public class PlayerCam : MonoBehaviour
     [SerializeField] private float baseTilt = 0f;
     
     //Dynamic, Non Serialized Below
-
-    public event Action<ECamType> OnSwitchCamType;
     
     //Player References
     private Transform _orientation;
@@ -164,6 +163,16 @@ public class PlayerCam : MonoBehaviour
     const string GAMEPADSCHEMENAME = "Gamepad";
     
     const string KANDMSCHEMENAME = "Keyboard&Mouse";
+    
+    // Camera Effects
+    
+    private float _targetFov;
+    private float _targetFovIncrement;
+    
+    private float _targetTilt;
+    private float _targetTiltIncrement;
+
+    private float _targetSide;
 
     private void Awake()
     {
@@ -203,11 +212,8 @@ public class PlayerCam : MonoBehaviour
         
         _moveAction = playerInput.actions.FindAction(moveActionName);
         _lookAction = playerInput.actions.FindAction(lookActionName);
-    }
-    
-    private void Start()
-    {
-        SwitchCamType(CurrentCamType);
+        
+        SwitchCamType(currentCamType);
     }
     
     private void OnControlSchemeChanged(PlayerInput playerInput)
@@ -228,6 +234,12 @@ public class PlayerCam : MonoBehaviour
         
         _thirdFixedYRot = _orientation.eulerAngles.y;
         _thirdFixedXRot = _orientation.eulerAngles.x;
+        
+        //setting target effects to base
+        _targetFov = baseFov;
+        _targetTilt = baseTilt;
+        
+        _targetSide = _thirdPersonFixedCamFollow.CameraSide;
         
         //setting arm rots
         _startRotDirs = new List<Vector3>();
@@ -251,9 +263,9 @@ public class PlayerCam : MonoBehaviour
 
         GetInput();
         
-        ManageCamera();
+        UpdateCamera();
         
-        ManageHooks();
+        UpdateArms();
     }
     
     private void GetInput()
@@ -273,11 +285,13 @@ public class PlayerCam : MonoBehaviour
         {
             case ECamType.FirstPerson:
                 
-                CurrentCamType = ECamType.FirstPerson;
-                
-                RealCam.cullingMask = firstPersonRenderMask;
+                currentCamType = ECamType.FirstPerson;
                 
                 firstPersonCinCam.transform.position = CamOrientation.position;
+                
+                firstPersonCinCam.Lens.FieldOfView = baseFov;
+                
+                firstPersonCinCam.Lens.Dutch = baseTilt;
                 
                 firstPersonCinCam.gameObject.SetActive( true);
                 
@@ -285,9 +299,11 @@ public class PlayerCam : MonoBehaviour
             
             case ECamType.ThirdOrbit:
                 
-                CurrentCamType = ECamType.ThirdOrbit;
+                currentCamType = ECamType.ThirdOrbit;
                 
-                RealCam.cullingMask = thirdPersonRenderMask;
+                thirdPersonOrbitCinCam.Lens.FieldOfView = baseFov;
+                
+                thirdPersonOrbitCinCam.Lens.Dutch = baseTilt;
                 
                 thirdPersonOrbitCinCam.gameObject.SetActive( true);
                 
@@ -295,22 +311,22 @@ public class PlayerCam : MonoBehaviour
             
             case ECamType.ThirdFixed:
                 
-                CurrentCamType = ECamType.ThirdFixed;
+                currentCamType = ECamType.ThirdFixed;
                 
-                RealCam.cullingMask = thirdPersonRenderMask;
+                thirdPersonFixedCam.Lens.FieldOfView = baseFov;
+                
+                thirdPersonFixedCam.Lens.Dutch = baseTilt;
                 
                 thirdPersonFixedCam.gameObject.SetActive( true);
                 
                 break;
         }
-        
-        OnSwitchCamType?.Invoke(CurrentCamType);
     }
 
-    private void ManageCamera()
+    private void UpdateCamera()
     {
-        
-        switch (CurrentCamType)
+        //Managing location and rotation of the camera and orientation(s)
+        switch (currentCamType)
         {
             case ECamType.FirstPerson:
                 
@@ -383,9 +399,137 @@ public class PlayerCam : MonoBehaviour
                 break;
                 
         }
+        
+        //Managing Effects
+        
+        if (NeedFOVUpdate)
+        {
+            // Debug.Log("Current Fov: " + CurrentFov + " Target Fov: " + _targetFov);
+            
+            SetFOV(CurrentFov + _targetFovIncrement * Time.deltaTime);
+        }
+        
+        if (NeedTiltUpdate)
+        {
+            // Debug.Log("Current Tilt: " + CurrentTilt + " Target Tilt: " + _targetTilt);
+            
+            SetTilt(CurrentTilt + _targetTiltIncrement * Time.deltaTime);
+        }
+        
+        if (NeedSideUpdate)
+        {
+            // Debug.Log("Current Side: " + _thirdPersonFixedCamFollow.CameraSide + " Target Side: " + _targetSide);
+            
+            _thirdPersonFixedCamFollow.CameraSide = Mathf.Lerp(_thirdPersonFixedCamFollow.CameraSide, _targetSide, sideChangeSpeed);
+        }
     }
     
-    private void ManageHooks()
+    #region Fov, Tilt and CamShake
+
+    /// function called to change target fov of camera with end result and time to take
+    public void SetTargetFov(float endValue = -1, float transitionTime = 0)
+    {
+        //if end value is -1, set to base
+        if (endValue <= -1) endValue = baseFov;
+        
+        _targetFov = endValue;
+        
+        //if zero or less, just set to target
+        if (transitionTime <= 0)
+        {
+            SetFOV(_targetFov);
+        }
+        //otherwise, calculate increment for use in CamUpdate
+        else
+        {
+            _targetFovIncrement = (_targetFov - CurrentFov) / transitionTime;
+        }
+    }
+    
+    private void SetFOV(float fov)
+    {
+        
+        //Whether increasing or decreasing, clamp to avoid overshooting
+        fov = _targetFov >= CurrentFov ?
+            Mathf.Clamp(fov, CurrentFov, _targetFov) :
+            Mathf.Clamp(fov, _targetFov, CurrentFov);
+        
+        //Can simply get RealCamTrans and set fov to fov
+        switch (currentCamType)
+        {
+            case ECamType.FirstPerson:
+                firstPersonCinCam.Lens.FieldOfView = fov;
+                break;
+            case ECamType.ThirdOrbit:
+                thirdPersonOrbitCinCam.Lens.FieldOfView = fov;
+                break;
+            case ECamType.ThirdFixed:
+                thirdPersonFixedCam.Lens.FieldOfView = fov;
+                break;
+        }
+    }
+    
+    
+    public void SetTargetTilt(float endValue = -360, float transitionTime = 0)
+    { 
+        if (endValue <= -360) endValue = baseTilt;
+        
+        _targetTilt = endValue;
+        
+        if (transitionTime <= 0)
+        {
+            SetTilt(_targetTilt);
+        }
+        else
+        {
+            _targetTiltIncrement = (_targetTilt - CurrentTilt) / transitionTime;
+        }
+        
+        if (currentCamType == ECamType.ThirdFixed)
+        {
+            if (_targetTilt < baseTilt)
+            {
+                _targetSide = 1;
+            }
+            else if (_targetTilt > baseTilt)
+            {
+                _targetSide = 0;
+            }
+        }
+    }
+    
+    private void SetTilt(float tilt)
+    {
+        tilt = _targetTilt >= CurrentTilt ?
+            Mathf.Clamp(tilt, CurrentTilt, _targetTilt) :
+            Mathf.Clamp(tilt, _targetTilt, CurrentTilt);
+        
+        
+        switch (currentCamType)
+        {
+            case ECamType.FirstPerson:
+                
+                firstPersonCinCam.Lens.Dutch = tilt;
+                
+                break;
+            
+            case ECamType.ThirdOrbit:
+                
+                thirdPersonOrbitCinCam.Lens.Dutch = tilt;
+                
+                break;
+            
+            case ECamType.ThirdFixed:
+                
+                thirdPersonFixedCam.Lens.Dutch = tilt;
+                
+                break;
+        }
+    }
+
+    #endregion
+    
+    private void UpdateArms()
     {
         hookPrediction.rotation = Quaternion.Euler(CamOrientation.eulerAngles.x, CamOrientation.eulerAngles.y, 0);
         
@@ -409,199 +553,75 @@ public class PlayerCam : MonoBehaviour
         }
     }
 
-
-    // double click the field below to show all fov, tilt and RealCam shake code
-    // Note: For smooth transitions I use the free DoTween Asset!
-    #region Fov, Tilt and CamShake
-
-    /// function called when starting to wallrun or starting to dash
-    /// a simple function that just takes in an endValue, and then smoothly sets the cameras fov to this end value
-    public void DoFov(float endValue = -360, float transitionTime = -1)
+    #region Properties
+    
+    private float CurrentFov
     {
-        //stop coroutine if running
-        StopCoroutine(nameof(ChangeFOV));
-        
-        //if end value is -1, set to base
-        if (endValue == -360) endValue = baseFov;
-        
-        //if transition time is -1, instantly set fov, otherwise use time
-        if (transitionTime == -1)
+        get
         {
-            SetFOV(endValue);
-        }
-        else
-        {
-            //Start coroutine to change fov
-            StartCoroutine(ChangeFOV(endValue, transitionTime));
-        }
-    }
-    
-    private void SetFOV(float fov)
-    {
-        
-        //Can simply get RealCamTrans and set fov to fov
-        switch (CurrentCamType)
-        {
-            case ECamType.FirstPerson:
-                firstPersonCinCam.Lens.FieldOfView = fov;
-                break;
-            case ECamType.ThirdOrbit:
-                thirdPersonOrbitCinCam.Lens.FieldOfView = fov;
-                break;
-            case ECamType.ThirdFixed:
-                thirdPersonFixedCam.Lens.FieldOfView = fov;
-                break;
-        }
-    }
-    
-    private IEnumerator ChangeFOV(float endValue, float transitionTime)
-    {
-        CinemachineCamera cam = null;
-        
-        switch (CurrentCamType)
-        {
-            case ECamType.FirstPerson:
-                cam = firstPersonCinCam;
-                break;
-            case ECamType.ThirdOrbit:
-                cam = thirdPersonOrbitCinCam;
-                break;
-            case ECamType.ThirdFixed:
-                cam = thirdPersonFixedCam;
-                break;
-            default:
-                Debug.LogError("No RealCamTrans type set in ChangeFOV");
-                
-                yield break;
-        }
-        
-        float incrementAmount = (endValue - cam.Lens.FieldOfView) / transitionTime;
-        
-        float timeStop = Time.time + transitionTime;
-        
-        while (Time.time < timeStop)
-        {
-            cam.Lens.FieldOfView += incrementAmount * Time.deltaTime;
-            
-            yield return null;
-        }
-    }
-    
-    
-    public void DoTilt(float zTilt = -360, float transitionTime = -1)
-    { 
-        StopCoroutine(nameof(ChangeTilt));
-        
-        if (zTilt == -360) zTilt = baseTilt;
-        
-        if (transitionTime == -1)
-        {
-            SetTilt(zTilt);
-        }
-        else
-        {
-            //Start coroutine to change tilt
-            StartCoroutine(ChangeTilt(zTilt, transitionTime));
-        }
-    }
-    
-    private void SetTilt(float tilt)
-    {
-
-        switch (CurrentCamType)
-        {
-            case ECamType.FirstPerson:
-                firstPersonCinCam.Lens.Dutch = tilt;
-                break;
-            case ECamType.ThirdOrbit:
-                thirdPersonOrbitCinCam.Lens.Dutch = tilt;
-                break;
-            case ECamType.ThirdFixed:
-                
-                thirdPersonFixedCam.Lens.Dutch = tilt;
-                
-                //if tilting to new state, change side
-                if (tilt != baseTilt)
-                {
-                    _thirdPersonFixedCamFollow.CameraSide = tilt < 0 ? 1 : 0;
-                }
-                break;
-        }
-    }
-    
-    private IEnumerator ChangeTilt (float endValue, float transitionTime)
-    {
-        CinemachineCamera cam = null;
-
-        float targetFixedSide = _thirdPersonFixedCamFollow.CameraSide;
-        
-        switch (CurrentCamType)
-        {
-            case ECamType.FirstPerson:
-                cam = firstPersonCinCam;
-                break;
-            case ECamType.ThirdOrbit:
-                cam = thirdPersonOrbitCinCam;
-                break;
-            case ECamType.ThirdFixed:
-                
-                cam = thirdPersonFixedCam;
-                
-                if (endValue != baseTilt)
-                {
-                    targetFixedSide = endValue < 0 ? 1 : 0;
-                }
-                
-                break;
-            default:
-                Debug.LogError("No RealCamTrans type set in ChangeTilt");
-                
-                yield break;
-        }
-        
-        float tiltIncrement = (endValue - cam.Lens.Dutch) / transitionTime;
-        
-        float sideIncrement;
-        
-        //RealCamTrans range is slider 0-1, so we need to convert the target side to this range
-        sideIncrement = (targetFixedSide - _thirdPersonFixedCamFollow.CameraSide) / transitionTime;
-        
-        float timeStop = Time.time + transitionTime;
-        
-        while (Time.time < timeStop)
-        {
-            cam.Lens.Dutch += tiltIncrement * Time.deltaTime;
-            
-            if (CurrentCamType == ECamType.ThirdFixed)
+            switch (currentCamType)
             {
-                _thirdPersonFixedCamFollow.CameraSide += sideIncrement * Time.deltaTime;
+                case ECamType.FirstPerson:
+                    return firstPersonCinCam.Lens.FieldOfView;
+                case ECamType.ThirdOrbit:
+                    return thirdPersonOrbitCinCam.Lens.FieldOfView;
+                case ECamType.ThirdFixed:
+                    return thirdPersonFixedCam.Lens.FieldOfView;
+                default:
+                    return -1;
             }
-            
-            yield return null;
         }
     }
     
-    public void DoShake(float amplitude, float frequency)
+    private float CurrentTilt
     {
-        //Change
+        get
+        {
+            switch (currentCamType)
+            {
+                case ECamType.FirstPerson:
+                    return firstPersonCinCam.Lens.Dutch;
+                case ECamType.ThirdOrbit:
+                    return thirdPersonOrbitCinCam.Lens.Dutch;
+                case ECamType.ThirdFixed:
+                    return thirdPersonFixedCam.Lens.Dutch;
+                default:
+                    return -360;
+            }
+        }
     }
     
-    public void ResetShake()
+    private bool NeedFOVUpdate
     {
-        //Change
+        get
+        {
+            float diff = Mathf.Abs(CurrentFov - _targetFov);
+            
+            return diff > 0.01f;
+        }
+    }
+    
+    private bool NeedTiltUpdate
+    {
+        get
+        {
+            float diff = Mathf.Abs(CurrentTilt - _targetTilt);
+            
+            return diff > 0.01f;
+        }
+    }
+    
+    private bool NeedSideUpdate
+    {
+        get
+        {
+            if (currentCamType != ECamType.ThirdFixed) return false;
+            
+            float diff = Mathf.Abs(_thirdPersonFixedCamFollow.CameraSide - _targetSide);
+            
+            return diff > 0.01f;
+        }
     }
 
     #endregion
-}
-
-[Serializable]
-public class ArmRotationInfo
-{
-    public Transform ArmAim;
-    
-    public Quaternion StartRot;
-    
-    public Quaternion LowerAdditiveBounds;
-    
-    public Quaternion UpperAdditiveBounds;
 }

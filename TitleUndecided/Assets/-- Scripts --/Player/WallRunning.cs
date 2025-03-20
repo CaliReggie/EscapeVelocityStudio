@@ -463,13 +463,13 @@ public class WallRunning : MonoBehaviour
         _wallRemembered = false;
 
         // increase camera fov
-        _playerCamScript.DoFov(wallRunFOV, wallRunFOVChangeSpeed);
+        _playerCamScript.SetTargetFov(wallRunFOV, wallRunFOVChangeSpeed);
 
         RememberLastWall();
 
         // set camera tilt
-        if (_wallRight) _playerCamScript.DoTilt(wallRunTilt ,wallRunTiltChangeSpeed);
-        if(_wallLeft) _playerCamScript.DoTilt(-wallRunTilt, wallRunTiltChangeSpeed);
+        if (_wallRight) _playerCamScript.SetTargetTilt(wallRunTilt ,wallRunTiltChangeSpeed);
+        if(_wallLeft) _playerCamScript.SetTargetTilt(-wallRunTilt, wallRunTiltChangeSpeed);
     }
 
     private void WallRunningMovement()
@@ -527,8 +527,8 @@ public class WallRunning : MonoBehaviour
         _pm.MaxYSpeed = -1;
 
         // reset camera fov and tilt
-        _playerCamScript.DoFov(-360, wallRunFOVChangeSpeed);
-        _playerCamScript.DoTilt(-360, wallRunTiltChangeSpeed);
+        _playerCamScript.SetTargetFov(-1, wallRunFOVChangeSpeed);
+        _playerCamScript.SetTargetTilt(-360, wallRunTiltChangeSpeed);
     }
 
     #endregion

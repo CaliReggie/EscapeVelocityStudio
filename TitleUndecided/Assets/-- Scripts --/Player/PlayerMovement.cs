@@ -114,19 +114,11 @@ public class PlayerMovement : MonoBehaviour
     
     [field: SerializeField] public LayerMask WhatIsGround { get; private set; }
     
-    [Header("Camera Effects")]
-    
-    [SerializeField] private float camEffectResetSpeed = 0.1f;
-    
     //Dynamic, Non Serialized Below
     
     //References
     private Rigidbody _rb; // the players rigidbody
     private CapsuleCollider _playerColl;
-    
-    private PlayerCam _playerCamScript;
-    
-    private WallRunning _wallRunning;
     
     private MomentumExtension _momentumExtension;
     private bool _momentumExtensionEnabled;
@@ -181,9 +173,6 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         // get references
-        
-        _playerCamScript = GetComponent<PlayerCam>();
-        _wallRunning = GetComponent<WallRunning>();
         _rb = GetComponent<Rigidbody>();
         _playerColl = GetComponent<CapsuleCollider>();
         
@@ -213,8 +202,13 @@ public class PlayerMovement : MonoBehaviour
             WhatIsGround = LayerMask.GetMask("Default");
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        _moveAction.Enable();
+        _jumpAction.Enable();
+        _sprintAction.Enable();
+        _crouchAction.Enable();
+        
         // Freeze all rotation on the rigidbody, otherwise the PlayerParent falls over
         // (like you would expect from a capsule with round surface)
         _rb.freezeRotation = true;
@@ -233,14 +227,6 @@ public class PlayerMovement : MonoBehaviour
         Vector3 offset = transform.position - transform.parent.position;
         
         _rb.MovePosition(transform.parent.position + offset); // rigidbody needs to be moved specially to move GO
-    }
-
-    private void OnEnable()
-    {
-        _moveAction.Enable();
-        _jumpAction.Enable();
-        _sprintAction.Enable();
-        _crouchAction.Enable();
     }
     
     private void OnDisable()
@@ -534,8 +520,6 @@ public class PlayerMovement : MonoBehaviour
     private void SetVelocity()
     {
         _rb.linearVelocity = velocityToSet;
-        _playerCamScript.DoFov(-360, camEffectResetSpeed);
-        _playerCamScript.DoTilt(-360, camEffectResetSpeed);
     }
     private void EnableMovementNextTouchDelayed()
     {
@@ -547,8 +531,6 @@ public class PlayerMovement : MonoBehaviour
         if (InternallyRestricted)
         {
             InternallyRestricted = false;
-            _playerCamScript.DoFov(-360, camEffectResetSpeed);
-            _playerCamScript.DoTilt(-360, camEffectResetSpeed);
         }
 
         DisableLimitedState();
