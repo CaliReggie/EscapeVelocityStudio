@@ -9,31 +9,32 @@ public class MomentumExtension : MonoBehaviour
     [Header("Momentum General Settings")]
     
     [Range(0f,10f)] [SerializeField] private float momentumIncreaseFactor = 1;
-    [Range(0f, 10f)] [SerializeField] private float momentumDecreaseFactorOnGround = 2;
+    [Range(0f, 10f)] [SerializeField] private float momentumDecreaseFactorOnGround = 2.5f;
     [Range(0f, 10f)] [SerializeField] private float momentumDecreaseFactorInAir = 0.5f;
     
-    [Range(0f, 10f)] [field: SerializeField] public float MinimalMomentum { get; private set; } = 3f;
+    [Range(0f, 10f)] [field: SerializeField] public float MinimalMomentum { get; private set; } = 0f;
 
     [Header("State Settings")]
     
     [SerializeField] private List<MovementState> movementStates = new List<MovementState>()
     {
-        new MovementState("Walking", PlayerMovement.MovementMode.walking, 1, 1),
-        new MovementState("Sprinting",PlayerMovement.MovementMode.sprinting, 1, 1),
-        new MovementState("Crouching", PlayerMovement.MovementMode.crouching, 1, 1),
-        new MovementState("Swinging", PlayerMovement.MovementMode.swinging, 1, 1),
-        new MovementState("Sliding", PlayerMovement.MovementMode.sliding, 2, 1),
-        new MovementState("Wallrunning", PlayerMovement.MovementMode.wallrunning, 1, 1),
-        new MovementState("Walljumping", PlayerMovement.MovementMode.walljumping, 1, 1),
-        new MovementState("Climbing", PlayerMovement.MovementMode.climbing, 1, 1),
-        new MovementState("Dashing", PlayerMovement.MovementMode.dashing, -1, 10)
+        new MovementState("Walking", PlayerMovement.MovementMode.walking, -1, 10, 0, 100),
+        new MovementState("Sprinting",PlayerMovement.MovementMode.sprinting, 10, 10, 0, 100),
+        new MovementState("Crouching", PlayerMovement.MovementMode.crouching, -1, 10, 0, 4),
+        new MovementState("Sliding", PlayerMovement.MovementMode.sliding, 10, 5, 4, 100),
+        new MovementState("Wallrunning", PlayerMovement.MovementMode.wallrunning, 10, 5, 1, 100),
+        new MovementState("Walljumping", PlayerMovement.MovementMode.walljumping, -1, 5,1, 100),
+        new MovementState("Climbing", PlayerMovement.MovementMode.climbing, 1, 1, 1, 100),
+        new MovementState("Dashing", PlayerMovement.MovementMode.dashing, -1, 10, 1, 100),
+        new MovementState("Swinging", PlayerMovement.MovementMode.swinging, -1, 5, 0, 100),
+        new MovementState("Air", PlayerMovement.MovementMode.air, -1, 5, 0, 100),
     };
 
     [SerializeField] private List<MovementState> hardcodedMovementStates = new List<MovementState>()
     {
-        new MovementState("Unlimited", PlayerMovement.MovementMode.unlimited, -1, -1),
-        new MovementState("Limited", PlayerMovement.MovementMode.limited, -1, 1),
-        new MovementState("Freeze", PlayerMovement.MovementMode.freeze, -1, -1)
+        new MovementState("Unlimited", PlayerMovement.MovementMode.unlimited, -1, -1, 0 , 100),
+        new MovementState("Limited", PlayerMovement.MovementMode.limited, -1, 1, 0, 100),
+        new MovementState("Freeze", PlayerMovement.MovementMode.freeze, -1, -1, 0, 100)
     };
 
     private MovementState GetMovementState(PlayerMovement.MovementMode movementMode)
@@ -146,16 +147,19 @@ public class MovementState
     [Tooltip("-1 means instant speed change")]
     [field: SerializeField] public float SpeedBuilddownFactor { get; private set; }
 
-    [field: SerializeField] [Range(0f, 100f)] public float MinNeededMomentum { get; private set; } = 0f;
+    [field: SerializeField] [Range(0f, 100f)] public float MinNeededMomentum { get; private set; }
     
-    [field: SerializeField] [Range(0f, 100f)] public float MaxAllowedMomentum { get; private set; } = 100f;
+    [field: SerializeField] [Range(0f, 100f)] public float MaxAllowedMomentum { get; private set; }
 
-    public MovementState(string stateName, PlayerMovement.MovementMode movementMode, float speedBuildupFactor, float speedBuilddownFactor)
+    public MovementState(string stateName, PlayerMovement.MovementMode movementMode, float speedBuildupFactor, float speedBuilddownFactor, float minNeededMomentum, float maxAllowedMomentum)
     {
         StateName = stateName;
         MovementMode = movementMode;
         SpeedBuildupFactor = speedBuildupFactor;
         SpeedBuilddownFactor = speedBuilddownFactor;
+        MinNeededMomentum = minNeededMomentum;
+        MaxAllowedMomentum = maxAllowedMomentum;
+        
     }
 
 

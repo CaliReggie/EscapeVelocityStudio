@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -14,16 +15,13 @@ public class Sliding : MonoBehaviour
     
     [SerializeField] private float slideCooldown = 0.5f;
     
-    [SerializeField] private float minSlideTime = 0.2f;
-    [SerializeField] private float maxSlideTime = 0.75f; // how long the slide maximally lasts
-    
     [Header("Force Settings")]
     
-    [SerializeField] private bool useDynamicSlideForce = true; //if true, PlayerParent momentum on slide equal to that of when pressed
+    [SerializeField] private bool dynamicInitialForce = true;
     
-    [SerializeField] private float slideForce = 200f; // Flat slide force applied whenever pressed
+    [SerializeField] private float initialForce = 10f;
     
-    [SerializeField] private float dynamicSlideForce = 200f; // Additive force based on PlayerParent momentum
+    [SerializeField] private float additiveForce = 200f;
 
     [Header("Behaviour Settings")]
     
@@ -31,12 +29,11 @@ public class Sliding : MonoBehaviour
 
     [SerializeField] private float slideColliderCenterY = -0.5f;
     
-    [SerializeField] private bool reverseCoyoteTime = true; //held in air triggers when Grounded
+    [SerializeField] private bool reverseCoyoteTime = true; //pressed in air triggers when Grounded
     
     //Dynamic, Non-Serialized Below
     
     //References
-    private Transform _orientation; // Orientation object inside the PlayerParent
     private Rigidbody _rb;
     private PlayerMovement _pm; // script reference to the PlayerMovement script
     
@@ -49,29 +46,17 @@ public class Sliding : MonoBehaviour
     
     private float _startCollCenterY;
     
-    //Timing
-    private float _slideTimer;
-    
-    //Inputs
-    private float _horizontalInput;
-    private float _verticalInput;
-    
     private Vector3 _startInputDirection;
     
     //State
     private bool _bufferSlide;
     private bool _readyToSlide = true;
-    private bool _stopSlideAsap;
-    
-    // Dynamic Slide Force
-    private float _dynamicStartForce;
 
     private void Awake()
     {
         // get references
         _rb             = GetComponent<Rigidbody>();
         _pm             = GetComponent<PlayerMovement>();
-        _orientation    = _pm.Orientation;
         _playerColl = GetComponent<CapsuleCollider>();
         
         PlayerInput playerInput = GetComponentInParent<PlayerInput>();
@@ -101,16 +86,21 @@ public class Sliding : MonoBehaviour
 
     private void Update()
     {
-        // get the W,A,S,D keyboard inputs
-        _horizontalInput = Input.GetAxisRaw("Horizontal");
-        _verticalInput = Input.GetAxisRaw("Vertical");
-
         // if you press down the slide key while moving and not crouching,
         // try to start Sliding, can be denied by movement extension
-        if (_slideAction.triggered && (_horizontalInput != 0 || _verticalInput != 0) && !_pm.Crouching)
+        if (_slideAction.triggered && (_pm.RawMoveInput != Vector2.zero) && !_pm.Crouching)
         {
             if (reverseCoyoteTime) _bufferSlide = true;
+            
             else if (_pm.Grounded && _readyToSlide) _bufferSlide = true;
+        }
+        
+        // slide buffering
+        if (_bufferSlide && _pm.Grounded && _readyToSlide)
+        {
+            StartSlide();
+            
+            _bufferSlide = false;
         }
 
         // if you release the slide key while Sliding -> StopSlide
@@ -118,26 +108,17 @@ public class Sliding : MonoBehaviour
         {
             if (reverseCoyoteTime) _bufferSlide = false;
 
-            if (_pm.Sliding) _stopSlideAsap = true;
-        }
-
-        // slide buffering
-        if (_bufferSlide && _pm.Grounded && _readyToSlide)
-        {
-            StartSlide();
-            _bufferSlide = false;
-        }
-
-        // unslide if slide key was released and minSlideTime exceeded
-        if (_stopSlideAsap && maxSlideTime - _slideTimer > minSlideTime)
-        {
-            _stopSlideAsap = false;
             StopSlide();
+            
+            return;
         }
-
-        // unsliding if no longer Grounded
+        
+        // un sliding if no longer Grounded
         if (_pm.Sliding && !_pm.Grounded)
+        {
             StopSlide();
+        }
+            
     }
 
     private void FixedUpdate()
@@ -162,37 +143,29 @@ public class Sliding : MonoBehaviour
         
         _playerColl.center = new Vector3(_playerColl.center.x, slideColliderCenterY, _playerColl.center.z);
         
-        // store the start dynamic force
-        _dynamicStartForce = _rb.linearVelocity.magnitude;
+        // if dynamic, initial force is current vel plus initial force, otherwise just initial force
+        Vector3 startForce = dynamicInitialForce ? 
+            _rb.linearVelocity + _rb.linearVelocity.normalized * initialForce : 
+            _rb.linearVelocity.normalized * initialForce;
         
         // after shrinking, you'll be a bit in the air, so add downward force to hit the ground again
         // you don't really notice this while playing
-        _rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
-
-        // set the _slideTimer
-        _slideTimer = maxSlideTime;
-
-        // idk, feels weird but the idea would be ok I guess
-        // _startInputDirection = Orientation.forward * _pm._verticalInput + Orientation.right * _pm._horizontalInput;
+        startForce += Vector3.down * 5f;
+        
+        // add the force
+        _rb.AddForce(startForce, ForceMode.Impulse);
     }
 
     private void SlidingMovement()
     {
-        // calculate the direction of your keyboard input relative to the players Orientation (where the PlayerParent is looking)
-        Vector3 inputDirection = Vector3.Normalize(_orientation.forward * _verticalInput + _orientation.right * _horizontalInput);
-        
-        // slide force calculated based on the dynamic force or the non-dynamic force
-        float force = useDynamicSlideForce ? _dynamicStartForce + dynamicSlideForce : slideForce;
+        Vector3 moveInput = _pm.OrientedMoveInput;
 
         // Mode 1 - Sliding Normal
         // slide time is limited
         if(!_pm.IsOnSlope() || _rb.linearVelocity.y > -0.1f)
         {
             // add force in the direction of your input
-            _rb.AddForce(inputDirection * force, ForceMode.Force);
-
-            // count down timer
-            _slideTimer -= Time.deltaTime;
+            _rb.AddForce(moveInput * additiveForce, ForceMode.Force);
         }
 
         // Mode 2 - Sliding down slopes
@@ -200,11 +173,8 @@ public class Sliding : MonoBehaviour
         else
         {
             // add force in the direction of your keyboard input
-            _rb.AddForce(_pm.SlopeMoveDirection(inputDirection) * force, ForceMode.Force);
+            _rb.AddForce(_pm.SlopeMoveDirection(moveInput) * additiveForce, ForceMode.Force);
         }
-
-        // stop Sliding again if the timer runs out
-        if (_slideTimer <= 0) StopSlide();
     }
 
     private void StopSlide()
@@ -216,11 +186,18 @@ public class Sliding : MonoBehaviour
         
         _playerColl.center = new Vector3(_playerColl.center.x, _startCollCenterY, _playerColl.center.z);
 
-        Invoke(nameof(ResetSlide), slideCooldown);
+        StartCoroutine(ResetSlideDelayed(slideCooldown));
     }
 
     private void ResetSlide()
     {
+        _readyToSlide = true;
+    }
+    
+    private IEnumerator ResetSlideDelayed(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
         _readyToSlide = true;
     }
 }

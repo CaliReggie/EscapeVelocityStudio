@@ -113,7 +113,6 @@ public class Grappling: MonoBehaviour
     
     [SerializeField] private bool enableSwingingWithForces = true;
     
-    [FormerlySerializedAs("lateralThrustForce")]
     [Space]
     
     [SerializeField] private float directionalThrustForce = 2500;

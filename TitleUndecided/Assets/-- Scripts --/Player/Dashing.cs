@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 
 [RequireComponent(typeof(PlayerMovement))]
@@ -98,31 +100,27 @@ public class Dashing : MonoBehaviour
     private void Update()
     {
         // if you press the dash key -> call Dash() function
-        if (_dashAction.triggered)
-            Dash();
+        if (_dashAction.triggered) Dash();
 
         // cooldown timer
-        if (_dashCdTimer > 0)
-            _dashCdTimer -= Time.deltaTime;
+        if (_dashCdTimer > 0) _dashCdTimer -= Time.deltaTime;
     }
 
     private void Dash()
     {
-        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.dashing))
-            return;
+        if (!_pm.SpeedAllowsState(PlayerMovement.MovementMode.dashing)) return;
 
         // cooldown implementation
         if (_dashCdTimer > 0) return;
-        else _dashCdTimer = dashCd;
+        
+        _dashCdTimer = dashCd;
 
         _pm.ResetRestrictions();
 
         // if maxUpwardVel set to default (-1), don't limit the players upward velocity
-        if (maxUpwardVel == -1)
-            _pm.MaxYSpeed = -1;
+        if (maxUpwardVel == -1) _pm.MaxYSpeed = -1;
 
-        else
-            _pm.MaxYSpeed = maxUpwardVel;
+        else _pm.MaxYSpeed = maxUpwardVel;
 
         // this will cause the PlayerMovement script to change to MovementMode.Dashing
         _pm.Dashing = true;
@@ -133,10 +131,8 @@ public class Dashing : MonoBehaviour
         Transform forwardT;
 
         // decide wheter you want to use the RealCamTrans or the playersOrientation as forward direction
-        if (useCameraForward)
-            forwardT = _realCamTrans;
-        else
-            forwardT = _orientation;
+        if (useCameraForward) forwardT  = _realCamTrans;
+        else forwardT = _orientation;
 
         // call the GetDirection() function below to calculate the direction
         Vector3 direction = GetDirection(forwardT);
@@ -150,20 +146,23 @@ public class Dashing : MonoBehaviour
 
         // add the dash force (deayed)
         delayedForceToApply = force;
-        Invoke(nameof(DelayedDashForce), 0.025f);
+        StartCoroutine(nameof(DelayedDashForce), 0.025f);
 
         // make sure the dash stops after the dashDuration is over
-        Invoke(nameof(ResetDash), dashDuration);
+        StartCoroutine(nameof(ResetDashDelayed), dashDuration);
     }
 
     private Vector3 delayedForceToApply;
-    private void DelayedDashForce()
+    
+    private IEnumerator DelayedDashForce(float delay)
     {
+        yield return new WaitForSeconds(delay);
+        
         // reset velocity based on settings
         if (resetVel)
             _rb.linearVelocity = Vector3.zero;
         else if (resetYVel)
-            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.y);
+            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
         _rb.AddForce(delayedForceToApply, ForceMode.Impulse);
     }
@@ -179,15 +178,29 @@ public class Dashing : MonoBehaviour
         _playerCamScript.SetTargetFov(-1, dashFOVChangeSpeed);
 
         // if you disabled it before, activate the gravity of the rigidbody again
-        if (disableGravity)
-            _rb.useGravity = true;
+        if (disableGravity) _rb.useGravity = true;
+    }
+    
+    private IEnumerator ResetDashDelayed(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        _pm.Dashing = false;
+
+        // make sure players MaxYSpeed is no longer limited
+        _pm.MaxYSpeed = -1;
+
+        // reset the fov of your camera
+        _playerCamScript.SetTargetFov(-1, dashFOVChangeSpeed);
+
+        // if you disabled it before, activate the gravity of the rigidbody again
+        if (disableGravity) _rb.useGravity = true;
     }
 
     private Vector3 GetDirection(Transform forwardT)
     {
         // get the W,A,S,D input
-        float x = Input.GetAxisRaw("Horizontal");
-        float z = Input.GetAxisRaw("Vertical");
+        Vector2 input = _pm.RawMoveInput;
 
         // 2 Vector3 for the forward and right velocity
         Vector3 forwardV = Vector3.zero;
@@ -195,27 +208,27 @@ public class Dashing : MonoBehaviour
 
         // forward
         // if W is pressed and you're allowed to dash forwards, activate the forwardVelocity
-        if (z > 0 && allowForwardDirection)
+        if (input.y > 0 && allowForwardDirection)
             forwardV = forwardT.forward;
 
         // back
         // if S is pressed and you're allowed to dash backwards, activate the backwardVelocity
-        if (z < 0 && allowBackDirection)
+        if (input.y < 0 && allowBackDirection)
             forwardV = -forwardT.forward;
 
         // right
         // if D is pressed and you're allowed to dash sideways, activate the right velocity
-        if (x > 0 && allowSidewaysDirection)
+        if (input.x > 0 && allowSidewaysDirection)
             rightV = forwardT.right;
 
         // left
         // if A is pressed and you're allowed to dash sideways, activate the left velocity
-        if (x < 0 && allowSidewaysDirection)
+        if (input.x < 0 && allowSidewaysDirection)
             rightV = -forwardT.right;
 
         // no input (forward)
         // If there's no input but Dashing forward is allowed, activate the forwardVelocity
-        if (x == 0 && z == 0 && allowForwardDirection)
+        if (input == Vector2.zero && allowForwardDirection)
              forwardV = forwardT.forward;
 
         // forward only allowed direction

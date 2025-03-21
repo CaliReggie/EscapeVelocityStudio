@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -155,15 +156,15 @@ public class LedgeGrabbing : MonoBehaviour
 
     private void LedgeJump()
     {
-        // print("ledge jump");
-
         ExitLedgeHold();
 
-        Invoke(nameof(DelayedForce), 0.05f);
+        StartCoroutine(nameof(DelayedForce), 0.05f);
     }
-
-    private void DelayedForce()
+    
+    private IEnumerator DelayedForce(float delay)
     {
+        yield return new WaitForSeconds(delay);
+        
         Vector3 forceToAdd = _realCamTrans.forward * ledgeJumpForwardForce + _orientation.up * ledgeJumpUpForce;
         _rb.linearVelocity = Vector3.zero;
         _rb.AddForce(forceToAdd, ForceMode.Impulse);
@@ -172,9 +173,7 @@ public class LedgeGrabbing : MonoBehaviour
     private void EnterLedgeHold()
     {
         if (ExitingLedge) return;
-
-        // print("entered ledge hold");
-
+        
         _mainWr.LedgeGrabbing = true;
         _holding = true;
 
@@ -207,12 +206,10 @@ public class LedgeGrabbing : MonoBehaviour
             // _rb.velocity = _directionToLedge.normalized * moveToLedgeSpeed;
 
             if (_rb.linearVelocity.magnitude < moveToLedgeSpeed)
-                _rb.AddForce(directionToLedge.normalized * moveToLedgeSpeed * 1000f * Time.deltaTime);
+                _rb.AddForce(Time.deltaTime * moveToLedgeSpeed * 1000f *  directionToLedge.normalized);
 
             // The current problem is that I can't set the velocity from here, I can only add force
             // -> but then the force is mainly upwards :D
-
-            // print("moving to ledge");
         }
 
         // Hold onto ledge
@@ -221,7 +218,6 @@ public class LedgeGrabbing : MonoBehaviour
             if (_pm.UnlimitedSpeed) _pm.UnlimitedSpeed = false;
             if (!_pm.Freeze) _pm.Freeze = true;
             //_rb.velocity = Vector3.zero;
-            // print("hanging on ledge");
         }
     }
 
@@ -241,11 +237,18 @@ public class LedgeGrabbing : MonoBehaviour
         _rb.useGravity = true;
 
         StopAllCoroutines();
-        Invoke(nameof(ResetLastLedge), 1f);
+        StartCoroutine(ResetLastEdgeDelayed(1));
     }
 
     private void ResetLastLedge()
     {
+        _lastLedge = null;
+    }
+    
+    private IEnumerator ResetLastEdgeDelayed(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
         _lastLedge = null;
     }
 

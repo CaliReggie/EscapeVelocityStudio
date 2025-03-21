@@ -39,6 +39,9 @@ public class WallRunning : MonoBehaviour
     [Header("Wall Run Forces")]
     
     [SerializeField] private float wallRunForce = 200f; // forward wallRunForce, Note: maxSpeed while Wallrunning is defined in PlayerMovement
+    
+    [SerializeField] private float wallJumpUpForce = 10f; 
+    
     [SerializeField] private float wallJumpSideForce = 10f; // sidewards force of your wall jump (pushes you away from the wall when jumping)
     
     [Space]
@@ -47,11 +50,7 @@ public class WallRunning : MonoBehaviour
     
     [SerializeField] private float gravityCounterForce = 28f; // the higher the value, the lower the effect of gravity while Wallrunning
     
-    [SerializeField] private float wallJumpUpForce = 10f; // upward force of your wall jump
-    
-    [Space]
-    
-    [SerializeField] private float wallrunClimbSpeed = 4f; // how fast you can move on the y axis when Wallrunning diagonally
+    // [SerializeField] private float wallrunClimbSpeed = 4f; // how fast you can move on the y axis when Wallrunning diagonally
     
     [Header("Wall Run Behaviour")]
     
@@ -131,8 +130,8 @@ public class WallRunning : MonoBehaviour
     /// just set them to public and change them inside of Unity
     private float _doubleRayCheckDistance = 0.1f;
     private float _wallDistanceSide = 0.7f;
-    private float _wallDistanceFront = 1f;
-    private float _wallDistanceBack = 1f;
+    private float _wallDistanceFront = 0.7f;
+    private float _wallDistanceBack = 0.7f;
 
     private float _minJumpHeight = 2f; // the minimal height the PlayerParent needs to have in order to wallRun
 
@@ -201,8 +200,8 @@ public class WallRunning : MonoBehaviour
     private State _state; // this variable stores the current State
     
     //bools that signal _state of the PlayerParent input
-    private bool _upwardsRunning;
-    private bool _downwardsRunning;
+    // private bool _upwardsRunning;
+    // private bool _downwardsRunning;
     private float _horizontalInput;
     private float _verticalInput;
     
@@ -491,10 +490,10 @@ public class WallRunning : MonoBehaviour
         _rb.AddForce(wallForward * wallRunForce, ForceMode.Force);
 
         // upwards/downwards force
-        if (_upwardsRunning)
-            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, wallrunClimbSpeed, _rb.linearVelocity.z);
-        if (_downwardsRunning)
-            _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, -wallrunClimbSpeed, _rb.linearVelocity.z);
+        // if (_upwardsRunning)
+        //     _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, wallrunClimbSpeed, _rb.linearVelocity.z);
+        // if (_downwardsRunning)
+        //     _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, -wallrunClimbSpeed, _rb.linearVelocity.z);
 
         // push to wall force
         if (!(_wallLeft && _horizontalInput > 0) && !(_wallRight && _horizontalInput < 0))

@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using PhysicsExtensions;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -90,28 +91,28 @@ public class PlayerMovement : MonoBehaviour
     [field: SerializeField] public float MaxJumpRange { get; private set; } = 5.5f;
     [field: SerializeField] public float MaxJumpHeight { get; private set; } = 2f;
 
+    [FormerlySerializedAs("walkMaxSpeed")]
     [Header("Speed handling")]
     
     // these variables define how fast your PlayerParent can move while being in the specific movemt mode
-    [SerializeField] private float walkMaxSpeed = 4f;
-    [SerializeField] private float sprintMaxSpeed = 8f;
-    [SerializeField] private float crouchMaxSpeed = 2f;
-    [SerializeField] private float slideMaxSpeed = 10f;
-    [SerializeField] private float slopeSlideMaxSpeed = 35f;
-    [SerializeField] private float wallRunMaxSpeed = 10f;
-    [SerializeField] private float wallJumpMaxSpeed = 12f;
-    [SerializeField] private float climbMaxSpeed = 4f;
-    [SerializeField] private float dashMaxSpeed = 30f;
-    [SerializeField] private float swingMaxSpeed = 35f;
+    [SerializeField] private float walkTargetSpeed = 4f;
+    [SerializeField] private float sprintTargetSpeed = 8f;
+    [SerializeField] private float crouchTargetSpeed = 2f;
+    [SerializeField] private float slopeSlideTargetSpeed = 35f;
+    [SerializeField] private float wallRunTargetSpeed = 12f;
+    [SerializeField] private float wallJumpTargetSpeed = 12f;
+    [SerializeField] private float climbTargetSpeed = 4f;
+    [SerializeField] private float dashTargetSpeed = 30f;
+    [SerializeField] private float swingTargetSpeed = 35f;
     
     [Space]
     
-    [SerializeField] private float speedIncreaseMultiplier = 1.5f; // how fast the _maxSpeed changes
-    [SerializeField] private float slopeIncreaseMultiplier = 2.5f; // how fast the _maxSpeed changes on a slope
+    [SerializeField] private float speedChangeMultiplier = 1f; // how fast the _maxSpeed changes
+    [SerializeField] private float slopeIncreaseMultiplier = 5f; // how fast the _maxSpeed changes on a slope
 
     [Header("Detection")]
 
-    [SerializeField] private float maxSlopeAngle = 40f; // how steep the slopes you walk on can be
+    [SerializeField] private float maxSlopeAngle = 45f; // how steep the slopes you walk on can be
     
     [field: SerializeField] public LayerMask WhatIsGround { get; private set; }
     
@@ -137,12 +138,7 @@ public class PlayerMovement : MonoBehaviour
     private InputAction _sprintAction;
     
     private InputAction _crouchAction;
-    
-    //Input
-    
-    private Vector2 _rawMoveInput;
 
-    private Vector3 _orientedMoveInput;
     
     //Detection
     private RaycastHit _slopeHit; // variable needed for slopeCheck
@@ -274,6 +270,9 @@ public class PlayerMovement : MonoBehaviour
     /// if you call it in void Update, a PlayerParent with 120FPS could move twice as fast as someone with just 60FPS
     private void FixedUpdate()
     {
+        // calculate the direction you need to move in
+        OrientedMoveInput = Orientation.forward * RawMoveInput.y + Orientation.right * RawMoveInput.x;
+        
         // if you're walking, Sprinting, Crouching or in the air, the MovePlayer function, which takes care of all basic movement, should be active
         // this also makes sure that you can't move left or right while Dashing for example
         if (MoveMode == MovementMode.walking || MoveMode == MovementMode.sprinting || MoveMode == MovementMode.crouching || MoveMode == MovementMode.air)
@@ -288,7 +287,7 @@ public class PlayerMovement : MonoBehaviour
     private void GetInput()
     {
         // get movement input
-        _rawMoveInput = _moveAction.ReadValue<Vector2>();
+        RawMoveInput = _moveAction.ReadValue<Vector2>();
 
         // whenever you press the jump key, you're Grounded and _readyToJump (which means jumping is not in cooldown),
         // you want to call the Jump() function
@@ -325,22 +324,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Restricted || InternallyRestricted) return;
 
-        // calculate the direction you need to move in
-        _orientedMoveInput = Orientation.forward * _rawMoveInput.y + Orientation.right * _rawMoveInput.x;
-
         // To Add the movement force, just use Rigidbody.AddForce (with ForceMode.Force, because you are adding force continuously)
 
         // movement on a slope
         if (IsOnSlope())
-            _rb.AddForce(moveForce * 7.5f * SlopeMoveDirection(_orientedMoveInput), ForceMode.Force);
+            _rb.AddForce(moveForce * 7.5f * SlopeMoveDirection(OrientedMoveInput), ForceMode.Force);
 
         // movement on ground
         else if(Grounded)
-            _rb.AddForce(moveForce * 10f * _orientedMoveInput.normalized, ForceMode.Force);
+            _rb.AddForce(moveForce * 10f * OrientedMoveInput.normalized, ForceMode.Force);
 
         // movement in air
         else if(!Grounded)
-            _rb.AddForce(moveForce * 10f * airMultiplier * _orientedMoveInput.normalized, ForceMode.Force);
+            _rb.AddForce(moveForce * 10f * airMultiplier * OrientedMoveInput.normalized, ForceMode.Force);
     }
 
     /// this function is always called
@@ -383,18 +379,11 @@ public class PlayerMovement : MonoBehaviour
         // limited, // limit speed to a specific value using EnableLimitedSpeed()
         // freeze, // PlayerParent can't move at all
 
-        // if you're walking or Sprinting, apply drag to your rigidbody in order to prevent slippery movement
+        // if you're walking, sprinting, or crouching avoid slippery movement
         if (Grounded)
         {
             switch (MoveMode)
             {
-                case MovementMode.dashing:
-                case MovementMode.sliding:
-                    
-                    _rb.linearDamping = groundDrag * 0.5f;
-                    
-                    break;
-                
                 case MovementMode.crouching:
                 case MovementMode.sprinting:
                 case MovementMode.walking:
@@ -450,7 +439,7 @@ public class PlayerMovement : MonoBehaviour
         // find out how large this velocity is
         float flatVelMag = flatVel.magnitude;
 
-        Vector3 inputDirection = Orientation.forward * _rawMoveInput.y + Orientation.right * _rawMoveInput.x;
+        Vector3 inputDirection = Orientation.forward * RawMoveInput.y + Orientation.right * RawMoveInput.x;
 
         // reset _rb velocity in the correct direction while maintaing speed
         // for example, you're jumping forward, then in the air, you turn around and quickly jump back
@@ -491,10 +480,8 @@ public class PlayerMovement : MonoBehaviour
         if (startPosition == Vector3.zero) startPosition = transform.position;
 
         Vector3 velocity = PhysicsExtension.CalculateJumpVelocity(startPosition, targetPosition, trajectoryHeight);
-
-        // enter limited state
-        Vector3 flatVel = new Vector3(velocity.x, 0f, velocity.z);
-        EnableLimitedState(flatVel.magnitude);
+        
+        EnableLimitedState(velocity.magnitude);
 
         velocityToSet = velocity;
         
@@ -510,10 +497,8 @@ public class PlayerMovement : MonoBehaviour
         if (startPosition == Vector3.zero) startPosition = transform.position;
 
         Vector3 velocity = PhysicsExtension.CalculateJumpVelocityWithTime(startPosition, targetPosition, timeToReach);
-
-        // enter limited state
-        Vector3 flatVel = new Vector3(velocity.x, 0f, velocity.z);
-        EnableLimitedState(flatVel.magnitude);
+        
+        EnableLimitedState(velocity.magnitude);
 
         _grappling.CancelAllHooks();
         
@@ -635,6 +620,7 @@ public class PlayerMovement : MonoBehaviour
         else if (_speedLimited)
         {
             MoveMode = MovementMode.limited;
+            
             _desiredMaxSpeed = _currentLimitedSpeed;
         }
 
@@ -642,28 +628,28 @@ public class PlayerMovement : MonoBehaviour
         else if (Dashing)
         {
             MoveMode = MovementMode.dashing;
-            _desiredMaxSpeed = dashMaxSpeed;
+            _desiredMaxSpeed = dashTargetSpeed;
         }
 
         // SubMode - WallJumping
         else if (Walljumping)
         {
             MoveMode = MovementMode.walljumping;
-            _desiredMaxSpeed = wallJumpMaxSpeed;
+            _desiredMaxSpeed = wallJumpTargetSpeed;
         }
 
         // Mode - Wallrunning
         else if (Wallrunning)
         { 
             MoveMode = MovementMode.wallrunning;
-            _desiredMaxSpeed = wallRunMaxSpeed;
+            _desiredMaxSpeed = wallRunTargetSpeed;
         }
 
         // Mode - Climbing
         else if (Climbing)
         {
             MoveMode = MovementMode.climbing;
-            _desiredMaxSpeed = climbMaxSpeed;
+            _desiredMaxSpeed = climbTargetSpeed;
         }
 
         // Mode - Sliding
@@ -673,11 +659,11 @@ public class PlayerMovement : MonoBehaviour
 
             if (IsOnSlope() && _rb.linearVelocity.y < 0.2f)
             {
-                _desiredMaxSpeed = slopeSlideMaxSpeed;
+                _desiredMaxSpeed = slopeSlideTargetSpeed;
             }
             else
             {
-                _desiredMaxSpeed = slideMaxSpeed;
+                _desiredMaxSpeed = 0;
             }
                 
         }
@@ -686,28 +672,28 @@ public class PlayerMovement : MonoBehaviour
         else if (Crouching && Grounded)
         {
             MoveMode = MovementMode.crouching;
-            _desiredMaxSpeed = crouchMaxSpeed;
+            _desiredMaxSpeed = crouchTargetSpeed;
         }
 
         // Mode - Sprint
         else if (Grounded && Sprinting)
         {
             MoveMode = MovementMode.sprinting;
-            _desiredMaxSpeed = sprintMaxSpeed;
+            _desiredMaxSpeed = sprintTargetSpeed;
         }
 
         // Mode - Walk
         else if (Grounded)
         {
             MoveMode = MovementMode.walking;
-            _desiredMaxSpeed = walkMaxSpeed;
+            _desiredMaxSpeed = walkTargetSpeed;
         }
 
         // Mode - Swinging
         else if (Swinging)
         {
             MoveMode = MovementMode.swinging;
-            _desiredMaxSpeed = swingMaxSpeed;
+            _desiredMaxSpeed = swingTargetSpeed;
         }
 
         // Mode - Air
@@ -715,8 +701,7 @@ public class PlayerMovement : MonoBehaviour
         {
             MoveMode = MovementMode.air;
 
-            _desiredMaxSpeed = sprintMaxSpeed;
-                
+            _desiredMaxSpeed = sprintTargetSpeed;
         }
         
         // minimum momentum
@@ -731,12 +716,9 @@ public class PlayerMovement : MonoBehaviour
             // update increase and decrease speedChangeFactors
             if (_momentumExtensionEnabled)
             {
-                if (MoveMode != MovementMode.air)
-                {
-                    increaseSpeedChangeFactor = _momentumExtension.GetIncreaseSpeedChangeFactor(MoveMode);
+                increaseSpeedChangeFactor = _momentumExtension.GetIncreaseSpeedChangeFactor(MoveMode);
                     
-                    decreaseSpeedChangeFactor = _momentumExtension.GetDecreaseSpeedChangeFactor(MoveMode);
-                }
+                decreaseSpeedChangeFactor = _momentumExtension.GetDecreaseSpeedChangeFactor(MoveMode);
             }
         }
 
@@ -791,14 +773,23 @@ public class PlayerMovement : MonoBehaviour
                 float slopeAngle = Vector3.Angle(Vector3.up, _slopeHit.normal);
                 float slopeAngleIncrease = 1 + (slopeAngle / 90f) * 2f;
 
-                _maxSpeed += Time.deltaTime * speedIncreaseMultiplier * slopeIncreaseMultiplier * slopeAngleIncrease * speedChangeFactor;
+                _maxSpeed += Time.deltaTime * speedChangeMultiplier * slopeIncreaseMultiplier * slopeAngleIncrease * speedChangeFactor;
             }
             else
-                _maxSpeed += Time.deltaTime * speedIncreaseMultiplier * speedChangeFactor;
+                _maxSpeed += Time.deltaTime * speedChangeMultiplier * speedChangeFactor;
         }
-        else
+        else //when wanting to decrease
         {
-            _maxSpeed -= Time.deltaTime * speedIncreaseMultiplier * speedChangeFactor;
+            // if real velocity is below max speed, decrease straight to current velocity
+            if (_rb.linearVelocity.magnitude < _maxSpeed)
+            {
+                _maxSpeed = _rb.linearVelocity.magnitude;
+            }
+            //otherwise decrease at desired rate
+            else
+            {
+                _maxSpeed -= Time.deltaTime * speedChangeMultiplier * speedChangeFactor;
+            }
         }
     }
 
@@ -810,6 +801,7 @@ public class PlayerMovement : MonoBehaviour
     private void DisableLimitedState()
     {
         _speedLimited = false;
+        _maxSpeed     = _currentLimitedSpeed;
     }
 
     #endregion
@@ -912,6 +904,10 @@ public class PlayerMovement : MonoBehaviour
     //General
     
     public float MaxYSpeed { get; set; }
+    
+    public Vector2 RawMoveInput {get ; private set;}
+
+    public Vector3 OrientedMoveInput { get; private set; }
     
     #endregion
     

@@ -4482,7 +4482,7 @@ MonoBehaviour:
   moveForce: 12
   airMultiplier: 0.4
   groundDrag: 5
-  jumpForce: 13
+  jumpForce: 16
   jumpCooldown: 0.25
   crouchColliderHeight: 1
   crouchColliderCenterY: -0.5
@@ -4490,23 +4490,21 @@ MonoBehaviour:
   airJumpsAllowed: 0
   <MaxJumpRange>k__BackingField: 5.5
   <MaxJumpHeight>k__BackingField: 2
-  walkMaxSpeed: 4
-  sprintMaxSpeed: 8
-  crouchMaxSpeed: 2
-  slideMaxSpeed: 10
-  slopeSlideMaxSpeed: 35
-  wallRunMaxSpeed: 10
-  wallJumpMaxSpeed: 12
-  climbMaxSpeed: 4
-  dashMaxSpeed: 22.5
-  swingMaxSpeed: 35
-  speedIncreaseMultiplier: 1
+  walkTargetSpeed: 4
+  sprintTargetSpeed: 8
+  crouchTargetSpeed: 2
+  slopeSlideTargetSpeed: 35
+  wallRunTargetSpeed: 12
+  wallJumpTargetSpeed: 12
+  climbTargetSpeed: 4
+  dashTargetSpeed: 30
+  swingTargetSpeed: 35
+  speedChangeMultiplier: 1
   slopeIncreaseMultiplier: 5
   maxSlopeAngle: 45
   <WhatIsGround>k__BackingField:
     serializedVersion: 2
     m_Bits: 1024
-  camEffectResetSpeed: 0.1
 --- !u!114 &5965718284427126071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4532,7 +4530,7 @@ MonoBehaviour:
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Sprinting
     <MovementMode>k__BackingField: 6
-    <SpeedBuildupFactor>k__BackingField: 4
+    <SpeedBuildupFactor>k__BackingField: 10
     <SpeedBuilddownFactor>k__BackingField: 10
     <MinNeededMomentum>k__BackingField: 0
     <MaxAllowedMomentum>k__BackingField: 100
@@ -4544,13 +4542,13 @@ MonoBehaviour:
     <MaxAllowedMomentum>k__BackingField: 4
   - <StateName>k__BackingField: Swinging
     <MovementMode>k__BackingField: 11
-    <SpeedBuildupFactor>k__BackingField: 17.5
+    <SpeedBuildupFactor>k__BackingField: -1
     <SpeedBuilddownFactor>k__BackingField: 5
     <MinNeededMomentum>k__BackingField: 0
     <MaxAllowedMomentum>k__BackingField: 100
   - <StateName>k__BackingField: Sliding
     <MovementMode>k__BackingField: 4
-    <SpeedBuildupFactor>k__BackingField: 100
+    <SpeedBuildupFactor>k__BackingField: 10
     <SpeedBuilddownFactor>k__BackingField: 5
     <MinNeededMomentum>k__BackingField: 4
     <MaxAllowedMomentum>k__BackingField: 100
@@ -4576,6 +4574,12 @@ MonoBehaviour:
     <MovementMode>k__BackingField: 3
     <SpeedBuildupFactor>k__BackingField: -1
     <SpeedBuilddownFactor>k__BackingField: 10
+    <MinNeededMomentum>k__BackingField: 1
+    <MaxAllowedMomentum>k__BackingField: 100
+  - <StateName>k__BackingField: Air
+    <MovementMode>k__BackingField: 12
+    <SpeedBuildupFactor>k__BackingField: -1
+    <SpeedBuilddownFactor>k__BackingField: 5
     <MinNeededMomentum>k__BackingField: 0
     <MaxAllowedMomentum>k__BackingField: 100
   hardcodedMovementStates:
@@ -4611,11 +4615,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slideActionName: Crouch
   slideCooldown: 0.25
-  minSlideTime: 0.1
-  maxSlideTime: 0.75
-  useDynamicSlideForce: 1
-  slideForce: 200
-  dynamicSlideForce: 200
+  dynamicInitialForce: 0
+  initialForce: 5
+  additiveForce: 15
   slideColliderHeight: 1
   slideColliderCenterY: -0.5
   reverseCoyoteTime: 1
@@ -4631,35 +4633,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f351021955f8834d8de720f3da4cb50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enablePrecisionMode: 1
+  enablePrecisionMode: 0
   wallJumpActionName: Jump
   whatIsWall:
     serializedVersion: 2
     m_Bits: 1536
   minWallNormalAngleChange: 15
   wallRunForce: 200
-  wallJumpSideForce: 9
+  wallJumpUpForce: 15
+  wallJumpSideForce: 7
   useGravity: 1
   gravityCounterForce: 28
-  wallJumpUpForce: 10
-  wallrunClimbSpeed: 4
   maxWallRunTime: 2
-  wallJumpDuration: 0.5
+  wallJumpDuration: 0.3
   doJumpOnEndOfTimer: 0
   resetJumpsOnNewWall: 1
   resetJumpsOnEveryWall: 0
   allowedWallJumps: 1
-  climbJumpUpForce: 10
-  climbJumpBackForce: 5
+  climbJumpUpForce: 12.5
+  climbJumpBackForce: 3
   maxClimbYSpeed: 10
   backWallJumpUpForce: 5
   backWallJumpForwardForce: 12
-  maxClimbTime: 0.75
+  maxClimbTime: 1.5
   minFrontWallAngle: 80
   maxWallLookAngle: 30
   allowedClimbJumps: 1
   vaultDetectionLength: 1.2
-  maxVaultClimbYSpeed: 10
+  maxVaultClimbYSpeed: 6
   topReached: 0
   wallRunFOV: 110
   wallRunFOVChangeSpeed: 0.2
@@ -4678,9 +4679,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dashActionName: Dash
-  dashForce: 22
+  dashForce: 15
   dashUpwardForce: 0
-  maxUpwardVel: 15
+  maxUpwardVel: -1
   dashDuration: 0.25
   dashCd: 1.5
   useCameraForward: 1
@@ -4689,7 +4690,7 @@ MonoBehaviour:
   allowSidewaysDirection: 1
   disableGravity: 1
   resetYVel: 1
-  resetVel: 1
+  resetVel: 0
   dashFov: 125
   dashFOVChangeSpeed: 0.2
 --- !u!114 &6203304367677133244
@@ -4780,8 +4781,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a6fd9718ded6f445be682a00c5a1bea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showMarkerSphere: 0
-  debuggingEnabled: 0
+  showMarkerSphere: 1
+  debuggingEnabled: 1
   <MarkerSphere>k__BackingField: {fileID: 2623530894546235191}
   markerSphereRenderer: {fileID: 294500666847184937}
 --- !u!1 &6366089962580002061
