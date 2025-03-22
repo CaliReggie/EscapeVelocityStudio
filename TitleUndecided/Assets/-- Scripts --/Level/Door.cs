@@ -3,7 +3,6 @@ using UnityEngine;
 public class Door : MonoBehaviour
 {
     [Header("Inscribed")]
-    public bool isEnter;
     public int lastLevelNumber;
     public int nextLevelNumber;
     public MeshRenderer doorMesh;
@@ -15,7 +14,7 @@ public class Door : MonoBehaviour
     void OnTriggerEnter(Collider coll) {
         BoxCollider box = GetComponent<BoxCollider>();
         if (coll.gameObject.layer == LayerMask.NameToLayer("whatIsPlayer")) {
-            if (!isEnter) {
+            if (gameObject.name == "Exit") {
                 doorMesh.enabled = true;
                 doorColl.enabled = true;
                 box.enabled = false;
