@@ -30,7 +30,6 @@ public class Grappling: MonoBehaviour
     }
     
     [Header("Hook Rig References")]
-    
     [SerializeField] private List<Transform> gunTips;
     
     [SerializeField] private List<Transform> pointAimers;
@@ -265,7 +264,11 @@ public class Grappling: MonoBehaviour
     private void MyInput()
     {
         //due to modifiers on input for k&m, we want to always read if grapple is pressed first
-        
+        //checks if the equippable is set to grappling
+        if (PlayerStateManager.GetEquippable() != Equippables.Grapple)
+        {
+            return;
+        }
         if (_leftGrappleAction.triggered)
         {
             StartGrapple(0);

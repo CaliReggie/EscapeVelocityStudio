@@ -608,7 +608,7 @@
                 {
                     "name": "",
                     "id": "5d840200-809e-4638-9773-a437b5a9f264",
-                    "path": "<Keyboard>/r",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",

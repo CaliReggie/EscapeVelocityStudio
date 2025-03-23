@@ -17,9 +17,25 @@ public class TeleportDisk : Disk
     protected override void DiskEnd()
     {
         frozen = true;
-        Rigidbody rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeAll;
         GetComponent<Collider>().enabled = false;
         ricochet = false;
+    }
+
+    protected override void TimeCheck()
+    {
+        if (lifeSpan + startTime < Time.time)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    protected void OnDestroy()
+    {
+        if (AttackHandler.S.teleportTarget == this.gameObject)
+        {
+            AttackHandler.S.teleportTarget = null;
+            AttackHandler.S.activeTeleport = false;
+        }
     }
 }

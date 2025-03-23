@@ -1,8 +1,8 @@
 using UnityEngine;
-
+using System.Collections.Generic;
 public class WeaponDefinitions : MonoBehaviour
 {
-    public Weapon[] weapons;
+    public List<Weapon> weapons;
     public T GetWeapon<T>()
     {
         foreach (Weapon w in weapons)

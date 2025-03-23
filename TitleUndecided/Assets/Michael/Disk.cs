@@ -10,11 +10,11 @@ public class Disk : Weapon
     public int maxRicochetCount = 0;
     public float rayDist = 0.6f;
     public LayerMask ricochetMask;
-    private GameObject recentHitObject;
-    private float recentHitTime;
-    private float startTime;
-    private Rigidbody rb;
-    private int ricochetCount = 0;
+    protected GameObject recentHitObject;
+    protected float recentHitTime;
+    protected float startTime;
+    protected Rigidbody rb;
+    protected int ricochetCount = 0;
     
 
     protected virtual void Awake()
@@ -57,25 +57,27 @@ public class Disk : Weapon
 
     protected virtual void OnCollisionEnter(Collision collision)
     {
-        
-        if (!Utils.IsLayerInLayerMask(collision.gameObject.layer, ricochetMask))
+        if (recentHitObject == collision.collider.gameObject && ((Time.time - recentHitTime) < 0.25f))
         {
             return;
-        }
-        else if (ricochet)
+        } 
+        CheckForEnemy(collision);
+        if (Utils.IsLayerInLayerMask(collision.gameObject.layer, ricochetMask))
         {
-            if (recentHitObject == collision.collider.gameObject && ((Time.time - recentHitTime) < 0.25f))
+            if (ricochet)
             {
-                return;
-            } 
-            Debug.Log("Collision Hit: " + collision.collider.gameObject.name);
-            Ricochet(collision.contacts[0].normal);
+                
+                Ricochet(collision.contacts[0].normal);
+            }
+            else
+            {
+                DiskEnd();
+            }
         }
         else
         {
             DiskEnd();
         }
-        
     }
 
     protected virtual void RayRicochetCheck()
@@ -86,9 +88,12 @@ public class Disk : Weapon
             {
                 return;
             }
-            Debug.Log("Raycast Hit: " + hit.collider.gameObject.name);
             Ricochet(hit.normal);
             recentHitObject = hit.collider.gameObject;
+            if (Utils.IsLayerInLayerMask(hit.collider.gameObject.layer, enemyMask))
+            {
+                hit.collider.gameObject.GetComponent<Enemy>().TakeDamage(damageAmt);
+            }
         }
     }
 
