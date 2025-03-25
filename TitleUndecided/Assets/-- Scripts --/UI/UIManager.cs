@@ -20,11 +20,13 @@ public class UIManager : MonoBehaviour
     
     [field: SerializeField] public TextMeshProUGUI PredictionStateText { get; private set; }
 
-    [Header("UI Page References")] 
+    [Header("Child References")]
     
     [SerializeField] private GameObject mainMenuPage;
     
     [SerializeField] private GameObject playerHUDPage;
+    
+    [SerializeField] private EquippableWheel equippableWheel;
     
     [SerializeField] private GameObject pausePage;
         
@@ -171,6 +173,11 @@ public class UIManager : MonoBehaviour
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
     }
     
+    public void CALL_UNPAUSE()
+    {
+        GameStateManager.Instance.EnterGameState(EGameState.Game, GameStateManager.Instance.GameStateSO.GameState);
+    }
+    
     public void CALL_SCENE_RELOAD()
     {
         GameStateManager.Instance.ReloadScene();
@@ -186,4 +193,6 @@ public class UIManager : MonoBehaviour
     {
         GameStateManager.Instance.QUIT_GAME();
     }
+    
+    public EquippableWheel EquippableWheel => equippableWheel;
 }

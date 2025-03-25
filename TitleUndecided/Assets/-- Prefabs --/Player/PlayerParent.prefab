@@ -4039,7 +4039,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7bc5d7bd2fb5af4db974f6e930be86a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pauseAction: Cancel
+  pauseAction: Pause
+  equipWheelUseAction: EquipWheelUse
+  equipWheelNavigateAction: EquipWheelNavigate
+  playerActionMap: Player
+  uiActionMap: UI
 --- !u!1 &6203304367693416329
 GameObject:
   m_ObjectHideFlags: 0
