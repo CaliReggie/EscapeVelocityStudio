@@ -37,10 +37,7 @@ public class PlayerStateManager : MonoBehaviour
         }
         currentEquipable = equippables[nextIndex];
     }
-    public static void SetEquippable(Equippables equippable)
-    {
-        currentEquipable = equippable;
-    }
+    
 
     public static Equippables GetEquippable()
     {
@@ -50,6 +47,8 @@ public class PlayerStateManager : MonoBehaviour
     public static void SetAttackingEquipable(Equippables equippable)
     {
         attackingEquipable = equippable;
+        
+        Debug.Log("Attacking Equipable: " + attackingEquipable);
     }
 
     public static Equippables GetAttackingEquipable()

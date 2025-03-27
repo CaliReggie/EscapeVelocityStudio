@@ -1772,6 +1772,37 @@ Transform:
   - {fileID: 5491390386798140642}
   m_Father: {fileID: 2111540919871168470}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2349722211975158966
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 763109090479771220}
+  m_Layer: 13
+  m_Name: FirePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &763109090479771220
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2349722211975158966}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6203304367071852722}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2354660496658929658
 GameObject:
   m_ObjectHideFlags: 0
@@ -5078,6 +5109,7 @@ Transform:
   - {fileID: 3368465903630644188}
   - {fileID: 2420075510826332685}
   - {fileID: 686690557260470736}
+  - {fileID: 763109090479771220}
   m_Father: {fileID: 6203304368605208358}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6203304367071852721
@@ -5291,7 +5323,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 3206657
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -5514,6 +5546,9 @@ GameObject:
   - component: {fileID: 6203304367677133244}
   - component: {fileID: 6203304368605208349}
   - component: {fileID: 6203304368605208351}
+  - component: {fileID: 2507988591605856812}
+  - component: {fileID: 7895353961724532978}
+  - component: {fileID: 5894557084373864763}
   m_Layer: 13
   m_Name: Player
   m_TagString: Player
@@ -5962,6 +5997,54 @@ MonoBehaviour:
   debuggingEnabled: 1
   <MarkerSphere>k__BackingField: {fileID: 2623530894546235191}
   markerSphereRenderer: {fileID: 294500666847184937}
+--- !u!114 &2507988591605856812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6203304368605208357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bb72d0661e63084ea1a2e62436c2404, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weapons:
+  - {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc, type: 3}
+  - {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908, type: 3}
+  - {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663, type: 3}
+--- !u!114 &7895353961724532978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6203304368605208357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a2bc453ae0fd1444862bc2d42ed8d35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  definitions: {fileID: 2507988591605856812}
+  attackInputName: CustomAttack
+  teleportInputName: CustomTeleport
+  swapInputName: CustomSwap
+  spawnPoint: {fileID: 763109090479771220}
+  realCam: {fileID: 6203304367693416329}
+  activeTeleport: 0
+  teleportTarget: {fileID: 0}
+--- !u!114 &5894557084373864763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6203304368605208357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eb9cbfbf7aecaf4c8856e93d2914ac9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6366089962580002061
 GameObject:
   m_ObjectHideFlags: 0

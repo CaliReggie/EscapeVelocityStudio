@@ -80,6 +80,8 @@ public class EquippableWheel : MonoBehaviour
                     CorrespondingImage(slot.slotEquipType).color = equippedColor; // Set selected slot to equipped color
                     
                     CurrentEquippable = slot.slotEquipType; // Set current equippable to selected slot
+                    
+                    PlayerStateManager.SetAttackingEquipable(CurrentEquippable); // Set attacking equippable to selected slot
                 }
                 else
                 {

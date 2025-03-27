@@ -361,7 +361,7 @@ public class Grappling: MonoBehaviour
                 // print("hit: " + hit.point);
 
                 _predictionHits[i] = directHit.point == Vector3.zero ? hit : directHit;
-            }
+            }   
         }
     }
     private void StartSwing(int swingIndex)
