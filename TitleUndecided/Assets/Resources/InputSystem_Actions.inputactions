@@ -177,15 +177,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "CustomSwap",
-                    "type": "Button",
-                    "id": "0eb13b3b-8274-4a61-b7bd-95bbe1cdc144",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "UseLeftArm",
                     "type": "Button",
                     "id": "09b38225-79ed-461a-86a3-566264f86380",
@@ -627,7 +618,7 @@
                     "name": "",
                     "id": "5d840200-809e-4638-9773-a437b5a9f264",
                     "path": "<Mouse>/leftButton",
-                    "interactions": "",
+                    "interactions": "Tap",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "CustomAttack",
@@ -642,17 +633,6 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "CustomTeleport",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e783c6aa-3219-450c-8a36-2665d3afb873",
-                    "path": "<Keyboard>/y",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "CustomSwap",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

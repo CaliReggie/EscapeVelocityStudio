@@ -2320,9 +2320,7 @@ GameObject:
   - component: {fileID: 4293039872414571895}
   - component: {fileID: 213838945542793298}
   - component: {fileID: 8108493637115994882}
-  - component: {fileID: 2896799957897611034}
   - component: {fileID: 8274378368607636066}
-  - component: {fileID: 5948908373922769849}
   m_Layer: 13
   m_Name: Player
   m_TagString: Player
@@ -2771,22 +2769,6 @@ MonoBehaviour:
   debuggingEnabled: 1
   <MarkerSphere>k__BackingField: {fileID: 3726146104150276719}
   markerSphereRenderer: {fileID: 8127590051814279715}
---- !u!114 &2896799957897611034
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2423555426836969729}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bb72d0661e63084ea1a2e62436c2404, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weapons:
-  - {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc, type: 3}
-  - {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908, type: 3}
-  - {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663, type: 3}
 --- !u!114 &8274378368607636066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2799,26 +2781,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a2bc453ae0fd1444862bc2d42ed8d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  definitions: {fileID: 2896799957897611034}
   attackInputName: CustomAttack
   teleportInputName: CustomTeleport
-  swapInputName: CustomSwap
   spawnPoint: {fileID: 5290765560810545488}
   realCam: {fileID: 2422500916532058912}
+  equippableDefinitions:
+  - <EquippableType>k__BackingField: 0
+    <AssociatedWeapon>k__BackingField: {fileID: 0}
+    <WeaponRefreshDuration>k__BackingField: 0
+  - <EquippableType>k__BackingField: 1
+    <AssociatedWeapon>k__BackingField: {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 0
+  - <EquippableType>k__BackingField: 2
+    <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 0
+  - <EquippableType>k__BackingField: 4
+    <AssociatedWeapon>k__BackingField: {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 0
   activeTeleport: 0
   teleportTarget: {fileID: 0}
---- !u!114 &5948908373922769849
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2423555426836969729}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eb9cbfbf7aecaf4c8856e93d2914ac9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2576812627001205598
 GameObject:
   m_ObjectHideFlags: 0
@@ -5525,6 +5509,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseAction: Cancel
+  equipWheelUseAction: EquipWheelUse
+  equipWheelNavigateAction: EquipWheelNavigate
+  playerActionMap: Player
+  uiActionMap: UI
 --- !u!1 &7245105021132181693
 GameObject:
   m_ObjectHideFlags: 0

@@ -26,7 +26,8 @@ public class UIManager : MonoBehaviour
     
     [SerializeField] private GameObject playerHUDPage;
     
-    [SerializeField] private EquippableWheel equippableWheel;
+    [FormerlySerializedAs("equippableWheel")]
+    [SerializeField] private UISelectWheel uiSelectWheel;
     
     [SerializeField] private GameObject pausePage;
         
@@ -194,5 +195,5 @@ public class UIManager : MonoBehaviour
         GameStateManager.Instance.QUIT_GAME();
     }
     
-    public EquippableWheel EquippableWheel => equippableWheel;
+    public UISelectWheel UISelectWheel => uiSelectWheel;
 }

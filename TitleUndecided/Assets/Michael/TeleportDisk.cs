@@ -32,10 +32,10 @@ public class TeleportDisk : Disk
 
     protected void OnDestroy()
     {
-        if (AttackHandler.S.teleportTarget == this.gameObject)
+        if (PlayerEquipabbles.S.teleportTarget == this.gameObject)
         {
-            AttackHandler.S.teleportTarget = null;
-            AttackHandler.S.activeTeleport = false;
+            PlayerEquipabbles.S.teleportTarget = null;
+            PlayerEquipabbles.S.activeTeleport = false;
         }
     }
 }

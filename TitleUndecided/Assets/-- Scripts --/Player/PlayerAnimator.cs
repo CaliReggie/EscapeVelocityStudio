@@ -59,12 +59,6 @@ public class PlayerAnimator : MonoBehaviour
 
     #endregion
 
-    #region Getters and Setters
-
-    //Something
-
-    #endregion
-
     #region Properties
 
     public bool HasAnimator => animator != null;

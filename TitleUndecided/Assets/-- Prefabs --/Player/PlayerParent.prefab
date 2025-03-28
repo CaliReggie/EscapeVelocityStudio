@@ -5546,9 +5546,7 @@ GameObject:
   - component: {fileID: 6203304367677133244}
   - component: {fileID: 6203304368605208349}
   - component: {fileID: 6203304368605208351}
-  - component: {fileID: 2507988591605856812}
   - component: {fileID: 7895353961724532978}
-  - component: {fileID: 5894557084373864763}
   m_Layer: 13
   m_Name: Player
   m_TagString: Player
@@ -5997,22 +5995,6 @@ MonoBehaviour:
   debuggingEnabled: 1
   <MarkerSphere>k__BackingField: {fileID: 2623530894546235191}
   markerSphereRenderer: {fileID: 294500666847184937}
---- !u!114 &2507988591605856812
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6203304368605208357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bb72d0661e63084ea1a2e62436c2404, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weapons:
-  - {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc, type: 3}
-  - {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908, type: 3}
-  - {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663, type: 3}
 --- !u!114 &7895353961724532978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6025,7 +6007,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a2bc453ae0fd1444862bc2d42ed8d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  definitions: {fileID: 2507988591605856812}
+  equippableDefinitions:
+  - <EquippableType>k__BackingField: 0
+    <AssociatedWeapon>k__BackingField: {fileID: 0}
+    <WeaponRefreshDuration>k__BackingField: 0
+  - <EquippableType>k__BackingField: 1
+    <AssociatedWeapon>k__BackingField: {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 0
+  - <EquippableType>k__BackingField: 2
+    <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 0
+  - <EquippableType>k__BackingField: 4
+    <AssociatedWeapon>k__BackingField: {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 0
   attackInputName: CustomAttack
   teleportInputName: CustomTeleport
   swapInputName: CustomSwap
@@ -6033,18 +6030,6 @@ MonoBehaviour:
   realCam: {fileID: 6203304367693416329}
   activeTeleport: 0
   teleportTarget: {fileID: 0}
---- !u!114 &5894557084373864763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6203304368605208357}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3eb9cbfbf7aecaf4c8856e93d2914ac9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6366089962580002061
 GameObject:
   m_ObjectHideFlags: 0

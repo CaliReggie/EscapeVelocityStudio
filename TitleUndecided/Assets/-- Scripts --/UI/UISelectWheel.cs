@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class EquippableWheel : MonoBehaviour
+public class UISelectWheel : MonoBehaviour
 {
     [Header("References")]
 
@@ -40,29 +40,43 @@ public class EquippableWheel : MonoBehaviour
     
     [SerializeField] private List<EquipWheelSlot> wheelSlots;
     
-    [Header("Dynamic")]
+    //Dynamic, or Non-Serialized Below
     
-    [Tooltip("Also here to serialize")]
-    [SerializeField] private bool placeholder2;
+    private EquipWheelSlot _selectedSlot;
     
-    [field: SerializeField] public InputAction EquipWheelAction { get; set; }
+    private List<Transform> _animatingSlots;
+    
+    public InputAction EquipWheelAction { get; set; }
 
-    [field: SerializeField] public Equippables CurrentEquippable { get; set; } = Equippables.None;
-    
-    private List<Transform> _changingSlots;
-
-    private void OnEnable()
+    private void Awake()
     {
-        if (wheelSlots != null && wheelSlots.Count <= 0)
+        if (wheelSlots == null)
         {
             Debug.LogError("No wheel slots assigned to the wheel, disabling wheel.");
             
             enabled = false;
+        }
+        else if (wheelSlots.Count == 0)
+        {
+            Debug.LogError("No wheel slots assigned to the wheel, disabling wheel.");
             
-            return;
+            enabled = false;
+        }
+    }
+
+    private void OnEnable()
+    {
+        Equippables currentEquippable = PlayerEquipabbles.S.CurrentEquippable.EquippableType;
+        
+        foreach (EquipWheelSlot slot in wheelSlots) // Showing equipped color if something is equipped
+        {
+            if (slot.slotEquipType == currentEquippable)
+            {
+                CorrespondingImage(slot.slotEquipType).color = equippedColor;
+            }
         }
         
-        _changingSlots = new List<Transform>();
+        _animatingSlots = new List<Transform>();
     }
 
     private void OnDisable()
@@ -72,40 +86,31 @@ public class EquippableWheel : MonoBehaviour
         foreach (EquipWheelSlot slot in wheelSlots) // Resetting slots
         {
             slot.Reset(resetScale);
+            
+            CorrespondingImage(slot.slotEquipType).color = normalColor;
 
-            if (SelectedSlot != null )
+            if (_selectedSlot != null && _selectedSlot == slot) // If we have a selected slot, ensure it's equipped
             {
-                if (slot == SelectedSlot)
-                {
-                    CorrespondingImage(slot.slotEquipType).color = equippedColor; // Set selected slot to equipped color
-                    
-                    CurrentEquippable = slot.slotEquipType; // Set current equippable to selected slot
-                    
-                    PlayerStateManager.SetAttackingEquipable(CurrentEquippable); // Set attacking equippable to selected slot
-                }
-                else
-                {
-                    CorrespondingImage(slot.slotEquipType).color = normalColor; // Set other slots to normal color
-                }
+                PlayerEquipabbles.S.EquipByType(slot.slotEquipType);
             }
         }
         
-        _changingSlots.Clear();
+        _animatingSlots.Clear();
         
-        SelectedSlot = null;
+        _selectedSlot = null;
     }
 
     private void Update()
     {
         GetInput();
         
-        if (SlotsActive())
+        if (SlotsAnimating())
         {
             foreach (EquipWheelSlot slot in wheelSlots)
             {
-                if (_changingSlots.Contains(slot.slotTransform))
+                if (_animatingSlots.Contains(slot.slotTransform))
                 {
-                    if (slot == SelectedSlot)
+                    if (slot == _selectedSlot)
                     {
                         ChangeSlotSize(slot, selectedScale, slot.activeTimeLeft, changeDuration);
                     }
@@ -143,11 +148,11 @@ public class EquippableWheel : MonoBehaviour
             {
                 if (angle >= minAngle && angle <= maxAngle)
                 {
-                    if (SelectedSlot != null)
+                    if (_selectedSlot != null)
                     {
-                        if (slot == SelectedSlot) return;
+                        if (slot == _selectedSlot) return;
                         
-                        DeselectSlot(SelectedSlot);
+                        DeselectSlot(_selectedSlot);
                         
                         SelectSlot(slot);
                     }
@@ -161,11 +166,11 @@ public class EquippableWheel : MonoBehaviour
             {
                 if (angle >= minAngle || angle <= maxAngle)
                 {
-                    if (SelectedSlot != null)
+                    if (_selectedSlot != null)
                     {
-                        if (slot == SelectedSlot) return;
+                        if (slot == _selectedSlot) return;
                         
-                        DeselectSlot(SelectedSlot);
+                        DeselectSlot(_selectedSlot);
                         
                         SelectSlot(slot);
                     }
@@ -180,9 +185,9 @@ public class EquippableWheel : MonoBehaviour
 
     private void SelectSlot(EquipWheelSlot slot)
     {
-        _changingSlots.Add(slot.slotTransform);
+        _animatingSlots.Add(slot.slotTransform);
         
-        SelectedSlot = slot;
+        _selectedSlot = slot;
         
         slot.activeTimeLeft = changeDuration;
         
@@ -191,13 +196,13 @@ public class EquippableWheel : MonoBehaviour
     
     private void DeselectSlot(EquipWheelSlot slot)
     {
-        SelectedSlot = null;
+        _selectedSlot = null;
         
-        _changingSlots.Add(slot.slotTransform);
+        _animatingSlots.Add(slot.slotTransform);
         
         slot.activeTimeLeft = changeDuration;
         
-        if (slot.slotEquipType != CurrentEquippable)
+        if (slot.slotEquipType != PlayerEquipabbles.S.CurrentEquippable.EquippableType)
         {
             CorrespondingImage(slot.slotEquipType).color = normalColor; // Set to normal color if not equipped
         } 
@@ -247,16 +252,14 @@ public class EquippableWheel : MonoBehaviour
         {
             slot.activeTimeLeft = 0;
             
-            _changingSlots.Remove(slot.slotTransform);
+            _animatingSlots.Remove(slot.slotTransform);
         }
     }
     
-    private bool SlotsActive()
+    private bool SlotsAnimating()
     {
-        return _changingSlots.Count > 0;
+        return _animatingSlots.Count > 0;
     }
-    
-    private EquipWheelSlot SelectedSlot { get; set; }
 }
 
 [Serializable]

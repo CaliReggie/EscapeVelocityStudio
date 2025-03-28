@@ -58,7 +58,7 @@ public class PlayerUIInput : MonoBehaviour
         
         _equippableWheelNavigateAction.Enable();
         
-        _uiManager.EquippableWheel.EquipWheelAction = _equippableWheelNavigateAction;
+        _uiManager.UISelectWheel.EquipWheelAction = _equippableWheelNavigateAction;
     }
     
     private void OnDisable()
@@ -92,20 +92,20 @@ public class PlayerUIInput : MonoBehaviour
     
     private void Update()
     {
-        if (_pauseAction.triggered)
+        if (_pauseAction.triggered && !_gameStateManager.Paused)
         {
             _gameStateManager.EnterGameState(EGameState.Pause, GameStateManager.Instance.GameStateSO.GameState);
         }
         
-        if (_equippableWheelUseAction.triggered)
+        if (_equippableWheelUseAction.triggered && PlayerEquipabbles.S.IsUnlocked)
         {
-            _uiManager.EquippableWheel.gameObject.SetActive(true);
+            _uiManager.UISelectWheel.gameObject.SetActive(true);
         }
         
         // Turn off if wheel is active and not being used
-        if (_uiManager.EquippableWheel.gameObject.activeSelf && !_equippableWheelUseAction.IsPressed())
+        if (_uiManager.UISelectWheel.gameObject.activeSelf && !_equippableWheelUseAction.IsPressed())
         {
-            _uiManager.EquippableWheel.gameObject.SetActive(false);
+            _uiManager.UISelectWheel.gameObject.SetActive(false);
         }
     }
     

@@ -1,7 +1,6 @@
 using UnityEngine;
 public abstract class Weapon : MonoBehaviour
 {
-    public Equippables equippableType;
     public float lockedInAttackDur;
     public LayerMask enemyMask;
     public float damageAmt = 5f;
@@ -13,5 +12,4 @@ public abstract class Weapon : MonoBehaviour
             collision.gameObject.GetComponent<Enemy>().TakeDamage(damageAmt);
         }
     }
-
 }
