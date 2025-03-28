@@ -588,7 +588,7 @@ MonoBehaviour:
   <PredictionStateText>k__BackingField: {fileID: 2115561546525328009}
   mainMenuPage: {fileID: 1966012001297330206}
   playerHUDPage: {fileID: 503212601592426096}
-  equippableWheel: {fileID: 5315878188884141760}
+  uiSelectWheel: {fileID: 5315878188884141760}
   pausePage: {fileID: 1814497729169742344}
   iconHolder: {fileID: 7784579094770397817}
 --- !u!1 &1381942701074430287
@@ -1186,8 +1186,8 @@ MonoBehaviour:
   normalScale: 2
   selectedScale: 2.25
   changeDuration: 0.2
-  selectedColor: {r: 1, g: 0, b: 0, a: 1}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0, b: 0, a: 1}
   equippedColor: {r: 0, g: 1, b: 0, a: 1}
   wheelSlots:
   - slotTransform: {fileID: 8252315561240771697}
@@ -1206,17 +1206,6 @@ MonoBehaviour:
     slotAngleRange: {x: 245, y: 295}
     slotEquipType: 4
     activeTimeLeft: 0
-  placeholder2: 0
-  <EquipWheelAction>k__BackingField:
-    m_Name: Equip Wheel
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 0aba402e-9eb0-4e46-beb8-4d5a34ca4631
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings: []
-    m_Flags: 0
-  <CurrentEquippable>k__BackingField: 5
 --- !u!1 &4478103956088120284
 GameObject:
   m_ObjectHideFlags: 0

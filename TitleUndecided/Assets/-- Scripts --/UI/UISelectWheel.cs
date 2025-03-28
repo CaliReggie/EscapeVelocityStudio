@@ -19,8 +19,7 @@ public class UISelectWheel : MonoBehaviour
     
     [field: SerializeField] public Image MeleeSelect { get; private set; }
     
-    
-    [Header("Selection Visual Settings")]
+    [Header("Animation Settings")]
     
     [SerializeField] private float normalScale;
     
@@ -28,11 +27,11 @@ public class UISelectWheel : MonoBehaviour
     
     [SerializeField] private float changeDuration;
     
-    [SerializeField] private Color selectedColor = Color.red;
-    
-    [Header("Equipped Visual Settings")]
+    [Header("Color Settings")]
     
     [SerializeField] private Color normalColor = Color.white;
+    
+    [SerializeField] private Color selectedColor = Color.red;
     
     [SerializeField] private Color equippedColor = Color.green;
     
