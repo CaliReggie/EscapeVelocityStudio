@@ -1178,11 +1178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da8de9bdf27b7084593d39778ae0e590, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placeholder: 0
-  <GrappleSelect>k__BackingField: {fileID: 773687253393988071}
-  <CombatDiscSelect>k__BackingField: {fileID: 3252248495651446176}
-  <UtilDiscSelect>k__BackingField: {fileID: 975132134149612395}
-  <MeleeSelect>k__BackingField: {fileID: 7945848314880850392}
   normalScale: 2
   selectedScale: 2.25
   changeDuration: 0.2
@@ -1191,20 +1186,24 @@ MonoBehaviour:
   equippedColor: {r: 0, g: 1, b: 0, a: 1}
   wheelSlots:
   - slotTransform: {fileID: 8252315561240771697}
+    slotImage: {fileID: 773687253393988071}
     slotAngleRange: {x: 335, y: 25}
-    slotEquipType: 0
+    slotEquipClass: 1
     activeTimeLeft: 0
   - slotTransform: {fileID: 6214949823823448897}
+    slotImage: {fileID: 3252248495651446176}
     slotAngleRange: {x: 65, y: 115}
-    slotEquipType: 1
+    slotEquipClass: 2
     activeTimeLeft: 0
   - slotTransform: {fileID: 5875981594746301853}
+    slotImage: {fileID: 975132134149612395}
     slotAngleRange: {x: 155, y: 205}
-    slotEquipType: 2
+    slotEquipClass: 3
     activeTimeLeft: 0
   - slotTransform: {fileID: 9039172415773999584}
+    slotImage: {fileID: 7945848314880850392}
     slotAngleRange: {x: 245, y: 295}
-    slotEquipType: 4
+    slotEquipClass: 4
     activeTimeLeft: 0
 --- !u!1 &4478103956088120284
 GameObject:
@@ -2180,7 +2179,7 @@ GameObject:
   - component: {fileID: 1093712986059278647}
   - component: {fileID: 3252248495651446176}
   m_Layer: 5
-  m_Name: CombatDiscSelect
+  m_Name: CombatDiskSelect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2737,7 +2736,7 @@ GameObject:
   - component: {fileID: 2846344955310246179}
   - component: {fileID: 975132134149612395}
   m_Layer: 5
-  m_Name: UtilDiscSelect
+  m_Name: UtilityDiskSelect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

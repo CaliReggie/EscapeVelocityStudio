@@ -2975,9 +2975,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2420075510826332685}
-  - component: {fileID: 4537202550018547123}
   m_Layer: 13
-  m_Name: HookArms
+  m_Name: EquippableArms
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3000,25 +2999,6 @@ Transform:
   - {fileID: 5592847375053868286}
   m_Father: {fileID: 6203304367071852722}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4537202550018547123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3689240862755107386}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad3af6dd0d09eb343a240834542d1c79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leftArmAnimator: {fileID: 4837035466455312607}
-  rightArmAnimator: {fileID: 212691844605605346}
-  leftAnimRigTarget: {fileID: 4966416011803389496}
-  rightAnimRigTarget: {fileID: 4971051853094325676}
-  playerInput: {fileID: 5764976879232728685}
-  leftUseArmAction: UseLeftArm
-  rightUseArmAction: UseRightArm
 --- !u!1 &3708467545092604230
 GameObject:
   m_ObjectHideFlags: 0
@@ -5662,13 +5642,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6203304368605208357}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17ce43e6af4e1194183a5f89a6d2141f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 0}
-  movementStyle: 0
+  playerAnimator: {fileID: 0}
+  leftArmAnimator: {fileID: 4837035466455312607}
+  rightArmAnimator: {fileID: 212691844605605346}
+  leftUseArmAction: UseLeftArm
+  rightUseArmAction: UseRightArm
 --- !u!114 &6203304368605208344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6007,27 +5990,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a2bc453ae0fd1444862bc2d42ed8d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  attackInputName: CustomAttack
+  teleportInputName: CustomTeleport
+  spawnPoint: {fileID: 763109090479771220}
+  realCam: {fileID: 6203304367693416329}
   equippableDefinitions:
-  - <EquippableType>k__BackingField: 0
+  - <EquippableClass>k__BackingField: 1
     <AssociatedWeapon>k__BackingField: {fileID: 0}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableType>k__BackingField: 1
+  - <EquippableClass>k__BackingField: 2
     <AssociatedWeapon>k__BackingField: {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableType>k__BackingField: 2
+  - <EquippableClass>k__BackingField: 3
     <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableType>k__BackingField: 4
+  - <EquippableClass>k__BackingField: 4
     <AssociatedWeapon>k__BackingField: {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
-  attackInputName: CustomAttack
-  teleportInputName: CustomTeleport
-  swapInputName: CustomSwap
-  spawnPoint: {fileID: 763109090479771220}
-  realCam: {fileID: 6203304367693416329}
   activeTeleport: 0
   teleportTarget: {fileID: 0}
 --- !u!1 &6366089962580002061

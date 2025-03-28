@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6755a1c6e0d78840b612997087f4308, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  equippableType: 4
+  weaponType: 3
   lockedInAttackDur: 0.25
   enemyMask:
     serializedVersion: 2

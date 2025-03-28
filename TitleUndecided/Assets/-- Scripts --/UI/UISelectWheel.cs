@@ -6,19 +6,6 @@ using UnityEngine.InputSystem;
 
 public class UISelectWheel : MonoBehaviour
 {
-    [Header("References")]
-
-    [Tooltip("Here so Unity serlializes the field, but not used in code. Click away.")]
-    [SerializeField] private bool placeholder;
-    
-    [field: SerializeField] public Image GrappleSelect { get; private set; }
-    
-    [field: SerializeField] public Image CombatDiscSelect { get; private set; }
-    
-    [field: SerializeField] public Image UtilDiscSelect { get; private set; }
-    
-    [field: SerializeField] public Image MeleeSelect { get; private set; }
-    
     [Header("Animation Settings")]
     
     [SerializeField] private float normalScale;
@@ -65,13 +52,13 @@ public class UISelectWheel : MonoBehaviour
 
     private void OnEnable()
     {
-        Equippables currentEquippable = PlayerEquipabbles.S.CurrentEquippable.EquippableType;
+        EEquippableClass currentEquippableClass = PlayerEquipabbles.S.CurrentEquippable.EquippableClass;
         
         foreach (EquipWheelSlot slot in wheelSlots) // Showing equipped color if something is equipped
         {
-            if (slot.slotEquipType == currentEquippable)
+            if (slot.slotEquipClass == currentEquippableClass)
             {
-                CorrespondingImage(slot.slotEquipType).color = equippedColor;
+                slot.slotImage.color = equippedColor;
             }
         }
         
@@ -86,11 +73,11 @@ public class UISelectWheel : MonoBehaviour
         {
             slot.Reset(resetScale);
             
-            CorrespondingImage(slot.slotEquipType).color = normalColor;
+            slot.slotImage.color = normalColor;
 
             if (_selectedSlot != null && _selectedSlot == slot) // If we have a selected slot, ensure it's equipped
             {
-                PlayerEquipabbles.S.EquipByType(slot.slotEquipType);
+                PlayerEquipabbles.S.EquipByClass(slot.slotEquipClass);
             }
         }
         
@@ -190,7 +177,7 @@ public class UISelectWheel : MonoBehaviour
         
         slot.activeTimeLeft = changeDuration;
         
-        CorrespondingImage(slot.slotEquipType).color = selectedColor;
+        slot.slotImage.color = selectedColor;
     }
     
     private void DeselectSlot(EquipWheelSlot slot)
@@ -201,39 +188,13 @@ public class UISelectWheel : MonoBehaviour
         
         slot.activeTimeLeft = changeDuration;
         
-        if (slot.slotEquipType != PlayerEquipabbles.S.CurrentEquippable.EquippableType)
+        if (slot.slotEquipClass != PlayerEquipabbles.S.CurrentEquippable.EquippableClass)
         {
-            CorrespondingImage(slot.slotEquipType).color = normalColor; // Set to normal color if not equipped
+            slot.slotImage.color = normalColor; // Set to normal color if not equipped
         } 
         else
         {
-            CorrespondingImage(slot.slotEquipType).color = equippedColor; // Keep equipped color if it is
-        }
-    }
-    
-    private Image CorrespondingImage(Equippables type)
-    {
-        switch (type)
-        {
-            case Equippables.Grapple:
-                
-                return GrappleSelect;
-            
-            case Equippables.Disk:
-                
-                return CombatDiscSelect;
-            
-            case Equippables.TeleportDisk:
-            case Equippables.StickyDisk:
-                
-                return UtilDiscSelect;
-            
-            case Equippables.Melee:
-                
-                return MeleeSelect;
-            
-            default:
-                return null;
+            slot.slotImage.color = equippedColor; // Keep equipped color if it is
         }
     }
 
@@ -266,11 +227,13 @@ public class EquipWheelSlot
 {
     public Transform slotTransform;
     
+    public Image slotImage;
+    
     [Tooltip("The minimum and maximum degrees of selection starting with 0 degrees being upward, and 360 meeting" +
              " back at 0.")] //For example, 315 to 45 would be the top quarter of the wheel.
     public Vector2 slotAngleRange;
     
-    public Equippables slotEquipType;
+    public EEquippableClass slotEquipClass;
     
     [HideInInspector] public float activeTimeLeft;
     

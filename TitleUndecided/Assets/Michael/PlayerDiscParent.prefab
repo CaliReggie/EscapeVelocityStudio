@@ -2436,13 +2436,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2423555426836969729}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17ce43e6af4e1194183a5f89a6d2141f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 0}
-  movementStyle: 0
+  playerAnimator: {fileID: 0}
+  leftArmAnimator: {fileID: 2664921708756819325}
+  rightArmAnimator: {fileID: 7126025033561569833}
+  leftUseArmAction: UseLeftArm
+  rightUseArmAction: UseRightArm
 --- !u!114 &3911764125327433205
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2786,18 +2789,18 @@ MonoBehaviour:
   spawnPoint: {fileID: 5290765560810545488}
   realCam: {fileID: 2422500916532058912}
   equippableDefinitions:
-  - <EquippableType>k__BackingField: 0
+  - <EquippableClass>k__BackingField: 1
     <AssociatedWeapon>k__BackingField: {fileID: 0}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableType>k__BackingField: 1
+  - <EquippableClass>k__BackingField: 2
     <AssociatedWeapon>k__BackingField: {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableType>k__BackingField: 2
+  - <EquippableClass>k__BackingField: 3
     <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableType>k__BackingField: 4
+  - <EquippableClass>k__BackingField: 4
     <AssociatedWeapon>k__BackingField: {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
@@ -3685,7 +3688,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5289473107190990410}
-  - component: {fileID: 3077690375790168679}
   m_Layer: 13
   m_Name: HookArms
   m_TagString: Untagged
@@ -3710,25 +3712,6 @@ Transform:
   - {fileID: 5816503827125509315}
   m_Father: {fileID: 7532454653664970642}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3077690375790168679
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4645792858498967863}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad3af6dd0d09eb343a240834542d1c79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leftArmAnimator: {fileID: 2664921708756819325}
-  rightArmAnimator: {fileID: 7126025033561569833}
-  leftAnimRigTarget: {fileID: 6165988647520022740}
-  rightAnimRigTarget: {fileID: 2625444083659266073}
-  playerInput: {fileID: 8345654052890477578}
-  leftUseArmAction: UseLeftArm
-  rightUseArmAction: UseRightArm
 --- !u!1 &4870618360837929702
 GameObject:
   m_ObjectHideFlags: 0

@@ -265,7 +265,7 @@ public class Grappling: MonoBehaviour
     {
         //due to modifiers on input for k&m, we want to always read if grapple is pressed first
         //checks if the equippable is set to grappling
-        if (PlayerEquipabbles.S.CurrentEquippable.EquippableType != Equippables.Grapple)
+        if (PlayerEquipabbles.S.CurrentEquippable.EquippableClass != EEquippableClass.Grapple)
         {
             return;
         }

@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.InputSystem;
 
 public enum EPlayerAnimationState
 {
@@ -16,52 +17,79 @@ public enum EPlayerAnimationState
     Swing
 }
 
+public enum EEquippableAnimationState
+{
+    Idle,
+    InUse
+}
+
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerAnimator : MonoBehaviour
 {
-    private enum EMovementStyle
-    {
-        Strafe,
-        Forward
-    }
     
     [Header("Animator References")]
     
-    [SerializeField] private Animator animator;
+    [SerializeField] private Animator playerAnimator;
     
-    [Header("Animation Behaviours")]
+    [SerializeField] private Animator leftArmAnimator;
     
-    [SerializeField] private EMovementStyle movementStyle;
+    [SerializeField] private Animator rightArmAnimator;
     
-    //Dynamic, Non-Serialized Below
+    [Header("Player References")]
+    
+    [SerializeField] private string leftUseArmAction;
+    
+    [SerializeField] private string rightUseArmAction;
+    
+    //Dynamic, or Non-Serialized Below
     
     //Player References
-    private Rigidbody _rb;
     
-    private PlayerCam _playerCamScript;
+    private InputAction _leftUseArmActionReference;
     
-    private PlayerMovement _pm;
+    private InputAction _rightUseArmActionReference;
     
-    private EPlayerAnimationState _currentState;
+    //Anim variable hashes
+    
+    private int _useLeftAnimID = Animator.StringToHash("UsedLeftArm");
+    
+    private int _useRightAnimID = Animator.StringToHash("UsedRightArm");
 
     private void Awake()
     {
         //get references
-        _rb = GetComponent<Rigidbody>();
-        _pm = GetComponent<PlayerMovement>();
-        _playerCamScript = GetComponent<PlayerCam>();
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
+        
+        _leftUseArmActionReference = playerInput.actions[leftUseArmAction];
+        
+        _rightUseArmActionReference = playerInput.actions[rightUseArmAction];
     }
-
-
-    #region Animation Variable Hashes
-
-    private readonly int _something = Animator.StringToHash("Something");
-
-    #endregion
-
-    #region Properties
-
-    public bool HasAnimator => animator != null;
-
-    #endregion
+    
+    private void OnEnable()
+    {
+        _leftUseArmActionReference.Enable();
+        
+        _rightUseArmActionReference.Enable();
+    }
+    
+    private void OnDisable()
+    {
+        _leftUseArmActionReference.Disable();
+        
+        _rightUseArmActionReference.Disable();
+    }
+    
+    private void Update()
+    {
+        //if action triggered, set trigger
+        if (_leftUseArmActionReference.triggered)
+        {
+            leftArmAnimator.SetTrigger(_useLeftAnimID);
+        }
+        
+        if (_rightUseArmActionReference.triggered)
+        {
+            rightArmAnimator.SetTrigger(_useRightAnimID);
+        }
+    }
 }

@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4927286572826526651}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.058774665, y: 0.9396157, z: 0.2083485, w: 0.26506364}
+  m_LocalRotation: {x: -0.013845925, y: 0.60866886, z: 0.010624355, w: 0.79323244}
   m_LocalPosition: {x: 84.4, y: 15.335, z: -19.858}
   m_LocalScale: {x: 0.5, y: 0.05, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -151,6 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb2956a5246a41f439984108cec3507f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  weaponType: 1
   lockedInAttackDur: 0.5
   enemyMask:
     serializedVersion: 2

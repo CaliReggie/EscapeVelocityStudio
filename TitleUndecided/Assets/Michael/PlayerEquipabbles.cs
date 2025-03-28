@@ -13,6 +13,15 @@ public enum Equippables
     None,
 }
 
+public enum EEquippableClass
+{
+    None,
+    Grapple,
+    CombatDisk,
+    UtilityDisk,
+    Melee
+}
+
 public class PlayerEquipabbles : MonoBehaviour
 {
     public static PlayerEquipabbles S;
@@ -33,6 +42,8 @@ public class PlayerEquipabbles : MonoBehaviour
     
     [Header("Equippable Definitions")]
     
+    [Tooltip("Definitions for types and stats of equippables. If a definition is grapple, " +
+             "ignore the weapon and refresh duration fields")]
     [SerializeField] private Equippable[] equippableDefinitions;
     
     //Dynamic, or Non-Serialized Below
@@ -59,7 +70,7 @@ public class PlayerEquipabbles : MonoBehaviour
     {
         if (S != null)
         {
-            Debug.LogError("Attack Handler already Set");
+            Debug.LogError("UseCurrentEquippable Handler already Set");
         }
         else
         {
@@ -74,7 +85,7 @@ public class PlayerEquipabbles : MonoBehaviour
         
         _teleportAction = _playerInput.actions.FindAction(teleportInputName);
         
-        EquipByType(Equippables.Grapple);
+        EquipByClass(EEquippableClass.Grapple);
     }
 
     void Update()
@@ -83,7 +94,7 @@ public class PlayerEquipabbles : MonoBehaviour
         
         if (_attackAction.triggered && (Time.time > CurrentEquippable.TimeRefreshed)) //Allow if triggered and refreshed
         {
-            Attack();
+            UseCurrentEquippable();
         }
 
         if (_teleportAction.triggered)
@@ -95,34 +106,37 @@ public class PlayerEquipabbles : MonoBehaviour
         }
     }
     
-    public void Attack()
+    public void UseCurrentEquippable()
     {
-        Weapon attackingWeapon = null;
+        Weapon correspondingWeapon = CurrentEquippable.AssociatedWeapon;
         
-        switch (CurrentEquippable.EquippableType)
+        if (CurrentEquippable.EquippableClass == EEquippableClass.Grapple || correspondingWeapon is null)
         {
-            case Equippables.Disk: 
+            //Grapple
+            return;
+        }
+
+        switch (correspondingWeapon.weaponType)
+        {
+            case EEquippableWeaponType.DamageDisk:
                 Disk disk = Equippable.FindWeaponFromEquippables<Disk>(equippableDefinitions);
-                attackingWeapon = disk;
                 GameObject diskIns = Instantiate(disk.gameObject, spawnPoint.position, Quaternion.identity);
                 disk.transform.forward = realCam.transform.forward;
                 Rigidbody rb = diskIns.GetComponent<Rigidbody>();
                 rb.AddForce(realCam.transform.forward * disk.speed, ForceMode.Impulse);
                 break;
-            case Equippables.StickyDisk:
-                break;
-            case Equippables.TeleportDisk:
+            case EEquippableWeaponType.TeleportDisk:
                 TeleportDisk teleportDisk = Equippable.FindWeaponFromEquippables<TeleportDisk>(equippableDefinitions);
-                attackingWeapon = teleportDisk;
                 teleportTarget = Instantiate(teleportDisk.gameObject, spawnPoint.position, Quaternion.identity);
                 teleportDisk.transform.forward = realCam.transform.forward;
                 Rigidbody teleportRb = teleportTarget.GetComponent<Rigidbody>();
                 teleportRb.AddForce(realCam.transform.forward * teleportDisk.speed, ForceMode.Impulse);
                 activeTeleport = true;
                 break;
-            case Equippables.Melee:
+            
+            case EEquippableWeaponType.Melee:
+                
                 MeleeAttack meleeAttack = Equippable.FindWeaponFromEquippables<MeleeAttack>(equippableDefinitions);
-                attackingWeapon = meleeAttack;
                 GameObject meleeIns = Instantiate(meleeAttack.gameObject, _playerMovement.PlayerObj.transform);
                 float lookVertAngle = realCam.transform.localRotation.eulerAngles.x;
                 if (lookVertAngle > 180)
@@ -132,13 +146,13 @@ public class PlayerEquipabbles : MonoBehaviour
                 lookVertAngle = Mathf.Clamp(lookVertAngle, -30f, 30f);
                 meleeIns.transform.localRotation = Quaternion.Euler(0f, 90f - meleeAttack.totalRotation / 2.0f, -lookVertAngle);
                 break;
+            case EEquippableWeaponType.StickyDisk:
+                break;
         }
-        if (attackingWeapon is not null)
-        {
-            _timeUnlocked = Time.time + CurrentEquippable.LockOnUseDuration;
+        
+         _timeUnlocked = Time.time + CurrentEquippable.LockOnUseDuration;
             
-            CurrentEquippable.OnUsed();
-        }
+         CurrentEquippable.OnUsed();
     }
     public void Teleport()
     {
@@ -148,9 +162,9 @@ public class PlayerEquipabbles : MonoBehaviour
         S.activeTeleport = false;
     }
     
-    public void EquipByType(Equippables type)
+    public void EquipByClass(EEquippableClass equipClass)
     {
-        Equippable equippable = Array.Find(equippableDefinitions, e => e.EquippableType == type);
+        Equippable equippable = Array.Find(equippableDefinitions, e => e.EquippableClass == equipClass);
         
         if (equippable is null) return;
         
@@ -165,8 +179,8 @@ public class PlayerEquipabbles : MonoBehaviour
 [Serializable]
 public class Equippable
 {
-    [Tooltip("The type of equippable this is, works with equip types in UI Wheel")]
-    [field: SerializeField] public Equippables EquippableType { get; private set; }
+    [Tooltip("The type of equippable class this is, works with equip types in UI Wheel")]
+    [field: SerializeField] public EEquippableClass EquippableClass { get; private set; }
     
     [Tooltip("Do not use if equip type is Grapple")]
     [field: SerializeField] public Weapon AssociatedWeapon { get; private set; }
