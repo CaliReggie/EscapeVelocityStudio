@@ -2,20 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
-
-public enum Equippables
-{
-    Grapple,
-    Disk,
-    TeleportDisk,
-    StickyDisk,
-    Melee,
-    None,
-}
-
 public enum EEquippableClass
 {
-    None,
     Grapple,
     CombatDisk,
     UtilityDisk,
@@ -40,11 +28,20 @@ public class PlayerEquipabbles : MonoBehaviour
     
     public GameObject realCam;
     
-    [Header("Equippable Definitions")]
+    [Header("Equippable Definition Pool")]
     
     [Tooltip("Definitions for types and stats of equippables. If a definition is grapple, " +
-             "ignore the weapon and refresh duration fields")]
+             "ignore the weaponType and refresh duration fields")]
     [SerializeField] private Equippable[] equippableDefinitions;
+    
+    //This is where we could set the preferences for what gets equipped depending on the class the UI selects
+    [Header("Equippable Pool Preferences")]
+    
+    public EEquippableWeapon combatClassPreference = EEquippableWeapon.DamageDisk;
+    
+    public EEquippableWeapon utilityClassPreference = EEquippableWeapon.TeleportDisk;
+    
+    public EEquippableWeapon meleeClassPreference = EEquippableWeapon.Melee;
     
     //Dynamic, or Non-Serialized Below
     
@@ -118,14 +115,14 @@ public class PlayerEquipabbles : MonoBehaviour
 
         switch (correspondingWeapon.weaponType)
         {
-            case EEquippableWeaponType.DamageDisk:
+            case EEquippableWeapon.DamageDisk:
                 Disk disk = Equippable.FindWeaponFromEquippables<Disk>(equippableDefinitions);
                 GameObject diskIns = Instantiate(disk.gameObject, spawnPoint.position, Quaternion.identity);
                 disk.transform.forward = realCam.transform.forward;
                 Rigidbody rb = diskIns.GetComponent<Rigidbody>();
                 rb.AddForce(realCam.transform.forward * disk.speed, ForceMode.Impulse);
                 break;
-            case EEquippableWeaponType.TeleportDisk:
+            case EEquippableWeapon.TeleportDisk:
                 TeleportDisk teleportDisk = Equippable.FindWeaponFromEquippables<TeleportDisk>(equippableDefinitions);
                 teleportTarget = Instantiate(teleportDisk.gameObject, spawnPoint.position, Quaternion.identity);
                 teleportDisk.transform.forward = realCam.transform.forward;
@@ -134,7 +131,7 @@ public class PlayerEquipabbles : MonoBehaviour
                 activeTeleport = true;
                 break;
             
-            case EEquippableWeaponType.Melee:
+            case EEquippableWeapon.Melee:
                 
                 MeleeAttack meleeAttack = Equippable.FindWeaponFromEquippables<MeleeAttack>(equippableDefinitions);
                 GameObject meleeIns = Instantiate(meleeAttack.gameObject, _playerMovement.PlayerObj.transform);
@@ -146,7 +143,7 @@ public class PlayerEquipabbles : MonoBehaviour
                 lookVertAngle = Mathf.Clamp(lookVertAngle, -30f, 30f);
                 meleeIns.transform.localRotation = Quaternion.Euler(0f, 90f - meleeAttack.totalRotation / 2.0f, -lookVertAngle);
                 break;
-            case EEquippableWeaponType.StickyDisk:
+            case EEquippableWeapon.StickyDisk:
                 break;
         }
         
@@ -162,9 +159,51 @@ public class PlayerEquipabbles : MonoBehaviour
         S.activeTeleport = false;
     }
     
-    public void EquipByClass(EEquippableClass equipClass)
+    public void EquipByClass(EEquippableClass targetClass)
     {
-        Equippable equippable = Array.Find(equippableDefinitions, e => e.EquippableClass == equipClass);
+        //iterating and looking for equippable with same class and matching weapon if not grapple
+        Equippable equippable = null;
+        
+        foreach (Equippable e in equippableDefinitions)
+        {
+            if (e.EquippableClass == targetClass)
+            {
+                switch (targetClass)
+                {
+                    case EEquippableClass.Grapple:
+                        
+                        equippable = e;
+                        
+                        break;
+                    
+                    case EEquippableClass.CombatDisk:
+                        
+                        if (e.AssociatedWeapon.weaponType == combatClassPreference)
+                        {
+                            equippable = e;
+                        }
+                        
+                        break;
+                    
+                    case EEquippableClass.UtilityDisk:
+                        
+                        if (e.AssociatedWeapon.weaponType == utilityClassPreference)
+                        {
+                            equippable = e;
+                        }
+                        
+                        break;
+                    case EEquippableClass.Melee:
+                        
+                        if (e.AssociatedWeapon.weaponType == meleeClassPreference)
+                        {
+                            equippable = e;
+                        }
+                        
+                        break;
+                }
+            }
+        }
         
         if (equippable is null) return;
         
@@ -201,7 +240,7 @@ public class Equippable
         TimeRefreshed = Time.time + WeaponRefreshDuration;
     }
     
-    //For if you want to make a weapon refresh besides process of waiting
+    //For if you want to make a weaponType refresh besides process of waiting
     public void Refresh()
     {
         TimeRefreshed = Time.time;

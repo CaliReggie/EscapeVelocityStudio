@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public enum EEquippableWeaponType
+public enum EEquippableWeapon
 {
     DamageDisk,
     TeleportDisk,
@@ -9,7 +10,7 @@ public enum EEquippableWeaponType
 }
 public abstract class Weapon : MonoBehaviour
 {
-    public EEquippableWeaponType weaponType;
+    public EEquippableWeapon weaponType;
     public float lockedInAttackDur;
     public LayerMask enemyMask;
     public float damageAmt = 5f;

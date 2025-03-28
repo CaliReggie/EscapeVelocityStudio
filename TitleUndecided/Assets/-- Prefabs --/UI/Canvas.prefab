@@ -1188,22 +1188,22 @@ MonoBehaviour:
   - slotTransform: {fileID: 8252315561240771697}
     slotImage: {fileID: 773687253393988071}
     slotAngleRange: {x: 335, y: 25}
-    slotEquipClass: 1
+    slotEquipClass: 0
     activeTimeLeft: 0
   - slotTransform: {fileID: 6214949823823448897}
     slotImage: {fileID: 3252248495651446176}
     slotAngleRange: {x: 65, y: 115}
-    slotEquipClass: 2
+    slotEquipClass: 1
     activeTimeLeft: 0
   - slotTransform: {fileID: 5875981594746301853}
     slotImage: {fileID: 975132134149612395}
     slotAngleRange: {x: 155, y: 205}
-    slotEquipClass: 3
+    slotEquipClass: 2
     activeTimeLeft: 0
   - slotTransform: {fileID: 9039172415773999584}
     slotImage: {fileID: 7945848314880850392}
     slotAngleRange: {x: 245, y: 295}
-    slotEquipClass: 4
+    slotEquipClass: 3
     activeTimeLeft: 0
 --- !u!1 &4478103956088120284
 GameObject:

@@ -5995,21 +5995,24 @@ MonoBehaviour:
   spawnPoint: {fileID: 763109090479771220}
   realCam: {fileID: 6203304367693416329}
   equippableDefinitions:
-  - <EquippableClass>k__BackingField: 1
+  - <EquippableClass>k__BackingField: 0
     <AssociatedWeapon>k__BackingField: {fileID: 0}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableClass>k__BackingField: 2
+  - <EquippableClass>k__BackingField: 1
     <AssociatedWeapon>k__BackingField: {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableClass>k__BackingField: 3
+  - <EquippableClass>k__BackingField: 2
     <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
-  - <EquippableClass>k__BackingField: 4
+  - <EquippableClass>k__BackingField: 3
     <AssociatedWeapon>k__BackingField: {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
+  combatClassPreference: 0
+  utilityClassPreference: 1
+  meleeClassPreference: 3
   activeTeleport: 0
   teleportTarget: {fileID: 0}
 --- !u!1 &6366089962580002061
