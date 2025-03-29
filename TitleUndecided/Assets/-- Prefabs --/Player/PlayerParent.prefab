@@ -5624,7 +5624,7 @@ MonoBehaviour:
   <CamOrientation>k__BackingField: {fileID: 1981107739239566877}
   lookActionName: Look
   moveActionName: Move
-  currentCamType: 2
+  currentCamType: 0
   keyAndMouseFirstPersonLookSpeedMult: 0.5
   gamepadFirstPersonLookSpeedMult: 1.25
   gamepadFirstPersonVerticalModifier: 0.5
