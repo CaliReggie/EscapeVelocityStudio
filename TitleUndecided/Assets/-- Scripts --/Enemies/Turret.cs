@@ -8,35 +8,38 @@ public class Turret : MonoBehaviour
     public Transform playerpos;
     public float distancetoplayer;
     public float dist = 10f;
-    
+
     private Vector3 movedWall;
     private Vector3 movedBase;
     private Vector3 movedBarrel;
     private float maxBarrelRotLeft;
     private float maxBarrelRotRight;
+
     void Start()
     {
         movewall = GameObject.Find("movewall");
         Barrel = GameObject.Find("barrel");
         Base = GameObject.Find("base");
-        movedWall = new Vector3(movewall.transform.position.x, movewall.transform.position.y, movewall.transform.position.z - 1.1f);
-        movedBase = new Vector3(movewall.transform.position.x , Base.transform.position.y, Base.transform.position.z);
-        movedBarrel = new Vector3(Barrel.transform.position.x + 1.6f, Barrel.transform.position.y, Barrel.transform.position.z);
+        movedWall = new Vector3(movewall.transform.position.x, movewall.transform.position.y,
+            movewall.transform.position.z - 1.1f);
+        movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
+        movedBarrel = new Vector3(Barrel.transform.position.x + 1.6f, Barrel.transform.position.y,
+            Barrel.transform.position.z);
         maxBarrelRotLeft = Barrel.transform.rotation.z - 60f;
         maxBarrelRotRight = Barrel.transform.rotation.z + 60f;
 
 
     }
-    
+
     void Update()
     {
         distancetoplayer = Vector3.Distance(transform.position, playerpos.position);
         if (distancetoplayer < dist)
         {
             TurrentInit();
-            
+
         }
-        
+
     }
 
     public void TurrentInit()
@@ -50,23 +53,26 @@ public class Turret : MonoBehaviour
                 StartCoroutine(Lerpers.LerpTransform(Barrel.transform, movedBarrel, Lerpers.OutQuad(0.3f)));
                 if (Barrel.transform.position == movedBarrel)
                 {
-                    TurretShoot();
-                    
+                    RotateBarrel();
+
                 }
-                
+
             }
-            
+
         }
 
     }
 
-    public void TurretShoot()
+    void RotateBarrel()
+    
     {
-        while (Barrel.transform.rotation.z < maxBarrelRotRight && Barrel.transform.rotation.z > maxBarrelRotLeft)
+        Vector3 playerZOnly = new Vector3(Barrel.transform.position.x, Barrel.transform.position.y, playerpos.position.z);
+        Barrel.transform.LookAt(playerZOnly);
+        if (Barrel.transform.rotation.z > maxBarrelRotRight && Barrel.transform.rotation.z < maxBarrelRotLeft)
         {
             Barrel.transform.LookAt(playerpos.position);
-            
         }
         
     }
+    
 }
