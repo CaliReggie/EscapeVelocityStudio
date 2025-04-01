@@ -37,6 +37,9 @@ public class Turret : MonoBehaviour
     
     //Non serialized or private below
     private bool ranonce = false;
+    private Vector3 wallPosition;
+    private Vector3 basePosition;
+    private Vector3 barrelPosition;
     private Vector3 movedWall;
     private Vector3 movedBase;
     private Vector3 movedBarrel;
@@ -51,6 +54,9 @@ public class Turret : MonoBehaviour
         movewall = GameObject.Find("movewall");
         Barrel = GameObject.Find("barrel");
         Base = GameObject.Find("base");
+        wallPosition = movewall.transform.position;
+        basePosition = Base.transform.position;
+        barrelPosition = Barrel.transform.position;
         movedWall = new Vector3(movewall.transform.position.x, movewall.transform.position.y,
             movewall.transform.position.z - 1.1f);
         movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
@@ -66,6 +72,10 @@ public class Turret : MonoBehaviour
         {
             TurrentInit();
 
+        }
+        else
+        {
+            TurretRetract();
         }
 
     }
@@ -188,5 +198,21 @@ public class Turret : MonoBehaviour
             return target;
         }
     }
-    
+
+    void TurretRetract()
+    {
+        StartCoroutine(Lerpers.LerpTransform(Base.transform, basePosition, Lerpers.OutQuad(0.5f)));
+        if (Base.transform.position == basePosition)
+        {
+            StartCoroutine(Lerpers.LerpTransform(Barrel.transform, barrelPosition, Lerpers.OutQuad(0.2f)));
+            if (Barrel.transform.position == barrelPosition)
+            {
+                StartCoroutine(Lerpers.LerpTransform(movewall.transform, wallPosition, Lerpers.OutQuad(0.5f)));
+                
+            }
+
+        }
+ 
+    }
+
 }
