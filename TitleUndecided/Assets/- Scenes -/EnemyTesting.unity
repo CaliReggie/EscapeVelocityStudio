@@ -1536,7 +1536,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1141410896}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: -0.5}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0.501, y: -0.0000000018626451, z: -0.012959936}
   m_LocalScale: {x: 0.18917575, y: 0.17742407, z: 0.92087686}
   m_ConstrainProportionsScale: 0
@@ -1546,7 +1546,7 @@ Transform:
   - {fileID: 453757103}
   - {fileID: 796523321}
   m_Father: {fileID: 1048634069}
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 270}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!65 &1141410898
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1758,14 +1758,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b4be3f81a6d8c643890bbe08591d5a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lookSpeed: 0.3
-  Barrel: {fileID: 0}
-  Base: {fileID: 0}
+  Barrel: {fileID: 1141410896}
+  Base: {fileID: 392817861}
   playerpos: {fileID: 1609477529}
-  distancetoplayer: 0
   dist: 10
-  viewRange: {x: 45, y: 45}
-  startingRot: {x: 0, y: 0, z: 0}
+  viewRadius: {x: 180, y: 45}
+  lookSpeed: 0.3
+  returnsToStartRot: 1
+  distancetoplayer: 0
+  startingRot: {x: 0, y: 0, z: 0, w: 0}
+  currentTargetRot: {x: 0, y: 0, z: 0, w: 0}
 --- !u!4 &1259918409
 Transform:
   m_ObjectHideFlags: 0
