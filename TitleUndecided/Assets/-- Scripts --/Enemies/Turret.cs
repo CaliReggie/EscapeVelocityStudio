@@ -18,7 +18,7 @@ public class Turret : MonoBehaviour
     
     public float dist = 10f;
 
-    public Vector2 viewRadius = new Vector2(45f, 45f);
+    public Vector2 viewRadius = new Vector2(135f, 45f);
     
     [Range(0, 1)] public float lookSpeed = 0.3f;
     
@@ -30,10 +30,11 @@ public class Turret : MonoBehaviour
     
     public float distancetoplayer;
     
-    public Quaternion startingRot;
+    public Quaternion startingRotation;
     
-    [FormerlySerializedAs("targetRot")]
-    public Quaternion currentTargetRot;
+    public Vector3 currentRotation;
+    
+    public Quaternion targetRotation;
     
     //Non serialized or private below
     private bool ranonce = false;
@@ -88,7 +89,7 @@ public class Turret : MonoBehaviour
             if (!ranonce)
             {
 
-                startingRot = Barrel.transform.rotation;
+                startingRotation = Barrel.transform.rotation;
 
                 ranonce = true;
             }
@@ -106,7 +107,7 @@ public class Turret : MonoBehaviour
         }
     }
 
-    void RotateBarrel()
+void RotateBarrel()
     {
         Vector3 targetDir = playerpos.transform.position - Barrel.transform.position;
         
@@ -114,88 +115,85 @@ public class Turret : MonoBehaviour
         
         Vector3 targetRotEuler = targetDirRot.eulerAngles;
         
-        targetRotEuler = ClampEuler(startingRot.eulerAngles, targetRotEuler, viewRadius / 2);
+        if (returnsToStartRot)
+        {
+            targetRotEuler = ClampEulerRot(startingRotation.eulerAngles, targetRotEuler, viewRadius / 2,
+                false);
+        }
+        else 
+        {
+            targetRotEuler = ClampEulerRot(startingRotation.eulerAngles, targetRotEuler, viewRadius / 2,
+                true, currentRotation);
+        }
         
-        currentTargetRot = Quaternion.Euler(targetRotEuler);
+        targetRotation = Quaternion.Euler(targetRotEuler);
         
-        Barrel.transform.rotation = Quaternion.Slerp(Barrel.transform.rotation, currentTargetRot, lookSpeed);
+        Barrel.transform.rotation = Quaternion.Slerp(Barrel.transform.rotation, targetRotation, lookSpeed);
+        
+        currentRotation = Barrel.transform.rotation.eulerAngles;
         
         return;
         
-        float ClampAngle(float angle, float minAngle, float maxAngle)
+        float EulerAngle(float dirOne, float dirTwo)
         {
-            angle = Mathf.Repeat(angle, 360f); 
+            float angle = dirTwo - dirOne;
+            
+            angle = Mathf.Repeat(angle, 360f);
             
             if (angle > 180f) {angle -= 360f;} 
+            
+            return angle;
+        }
+        
+        float ClampAngleToCurrent(float dirOne, float dirTwo, float minAngle, float maxAngle, float current)
+        {
+            float angle = EulerAngle(dirOne, dirTwo);
             
             bool isBetween = angle > minAngle && angle < maxAngle;
             
             angle = Mathf.Clamp(angle, minAngle, maxAngle);
             
-            if (isBetween) {return angle;}
+            if (isBetween) { return dirOne + angle; }
+            
             else
             {
-                if (returnsToStartRot)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return angle;
-                }
+                return current;
             }
         }
         
-        // float NewClampAngle(float dirOne, float dirTwo, float minAngle, float maxAngle, float fallbackAngle = -180)
-        // {
-        //     float angle = dirTwo - dirOne;
-        //     
-        //     angle = Mathf.Repeat(angle, 360f); 
-        //     
-        //     if (angle > 180f) {angle -= 360f;} 
-        //     
-        //     bool isBetween = angle > minAngle && angle < maxAngle;
-        //     
-        //     angle = Mathf.Clamp(angle, minAngle, maxAngle);
-        //     
-        //     if (isBetween) {return dirOne + angle;}
-        //     else
-        //     {
-        //         if (fallbackAngle <= -180)
-        //         {
-        //             return dirOne;
-        //         }
-        //         else
-        //         {
-        //             return fallbackAngle;
-        //         }
-        //     }
-        // }
-        
-        Vector3 ClampEuler(Vector3 startRot, Vector3 targetRot, Vector2 limits)
+        float ClampAngleToBase(float dirOne, float dirTwo, float minAngle, float maxAngle)
         {
-            Vector3 start = startRot;
+            float angle = EulerAngle(dirOne, dirTwo);
             
-            Vector3 target = targetRot;
+            bool isBetween = angle > minAngle && angle < maxAngle;
             
-            target.x = ClampAngle(target.x - start.x, -limits.y, limits.y) + start.x;
+            angle = Mathf.Clamp(angle, minAngle, maxAngle);
             
-            target.y = ClampAngle(target.y - start.y, -limits.x, limits.x) + start.y;
+            if (isBetween) { return dirOne + angle; }
+            else { return dirOne; }
+        }
+        
+        Vector3 ClampEulerRot(Vector3 baseEuler, Vector3 targetEuler, Vector2 limits, bool clampToCurrent, 
+            Vector3 current = default)
+        {
+            Vector3 a = baseEuler;
             
-            // if (returnsToStartRot)
-            // {
-            //     target.x = NewClampAngle(start.x, target.x, -limits.y, limits.y);
-            //
-            //     target.y = NewClampAngle(start.x, target.x , -limits.x, limits.x);
-            // }
-            // else
-            // {
-            //     target.x = NewClampAngle(start.x, target.x, -limits.y, limits.y, Barrel.transform.rotation.eulerAngles.x);
-            //
-            //     target.y = NewClampAngle(start.x, target.x , -limits.x, limits.x, Barrel.transform.rotation.eulerAngles.y);
-            // }
+            Vector3 b = targetEuler;
             
-            return target;
+            if (clampToCurrent)
+            {
+                b.x = ClampAngleToCurrent(a.x, b.x, -limits.y, limits.y, current.x);
+            
+                b.y = ClampAngleToCurrent(a.y, b.y , -limits.x, limits.x, current.y);
+            }
+            else
+            {
+                b.x = ClampAngleToBase(a.x, b.x, -limits.y, limits.y);
+            
+                b.y = ClampAngleToBase(a.y, b.y , -limits.x, limits.x);
+            }
+            
+            return b;
         }
     }
 
