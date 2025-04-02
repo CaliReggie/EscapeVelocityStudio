@@ -63,7 +63,15 @@ public class CarterTurret : MonoBehaviour
         barrelPosition = Barrel.transform.position;
         movedWall = movewall.transform.position - movewall.transform.forward * 1.1f;
         movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
-        movedBarrel = Barrel.transform.position + Base.transform.right * 1.6f;
+        float yRot = Barrel.transform.eulerAngles.y;
+        if (Mathf.Approximately(yRot, 0f) || Mathf.Approximately(yRot, 180f))
+        {
+            movedBarrel = Barrel.transform.position + Barrel.transform.forward * 0.2f;
+        }
+        else
+        {
+            movedBarrel = Barrel.transform.position + Barrel.transform.forward * 1.6f;
+        }
     }
     
 
