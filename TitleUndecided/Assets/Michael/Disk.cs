@@ -15,7 +15,8 @@ public class Disk : Weapon
     protected float startTime;
     protected Rigidbody rb;
     protected int ricochetCount = 0;
-    
+    public bool homing;
+    public GameObject currentTarget;
 
     protected virtual void Awake()
     {
@@ -115,5 +116,22 @@ public class Disk : Weapon
     {
         Destroy(gameObject);
     }
-    
+    public virtual void EnemyInRange(GameObject target)
+    {
+        if (currentTarget == null)
+        {
+            currentTarget = target;
+        }
+        transform.forward = Vector3.Slerp(transform.forward, target.transform.position - transform.position, 10 * Time.deltaTime);
+        float currentSpeed = rb.linearVelocity.magnitude;
+        rb.linearVelocity = transform.forward * currentSpeed;
+    }
+
+    public virtual void EnemyOutRange(GameObject target)
+    {
+        if (currentTarget == target)
+        {
+            currentTarget = null;
+        }
+    }
 }

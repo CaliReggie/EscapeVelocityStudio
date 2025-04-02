@@ -2222,7 +2222,7 @@ GameObject:
   - component: {fileID: 8100683747862903763}
   - component: {fileID: 1231737499675846396}
   - component: {fileID: 8625274449780451119}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: rightHookPointPrediction
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4741,7 +4741,7 @@ GameObject:
   - component: {fileID: 7886669834817850940}
   - component: {fileID: 7638515717365332753}
   - component: {fileID: 9073018330577898806}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: leftHookPointPrediction
   m_TagString: Untagged
   m_Icon: {fileID: 0}
