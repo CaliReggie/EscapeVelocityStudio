@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.Serialization;
+using System.Collections;
 
 public class Turret : MonoBehaviour
 {
@@ -44,6 +45,8 @@ public class Turret : MonoBehaviour
     private Vector3 movedWall;
     private Vector3 movedBase;
     private Vector3 movedBarrel;
+    private bool outOfBarrel = false;
+    private bool inbarrel = true;
     
   
 
@@ -58,23 +61,26 @@ public class Turret : MonoBehaviour
         wallPosition = movewall.transform.position;
         basePosition = Base.transform.position;
         barrelPosition = Barrel.transform.position;
-        movedWall = new Vector3(movewall.transform.position.x, movewall.transform.position.y,
-            movewall.transform.position.z - 1.1f);
+        movedWall = movewall.transform.position + movewall.transform.back * 1.1f;
         movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
-        movedBarrel = new Vector3(Barrel.transform.position.x + 1.6f, Barrel.transform.position.y,
-            Barrel.transform.position.z);
+        movedBarrel = Barrel.transform.position + Base.transform.forward * 1.6f;
     }
     
 
     void Update()
     {
         distancetoplayer = Vector3.Distance(transform.position, playerpos.position);
-        if (distancetoplayer < dist)
+        if (outOfBarrel)
+        {
+            RotateBarrel();
+        }
+        if (distancetoplayer < dist && inbarrel)
         {
             TurrentInit();
 
         }
-        else
+        
+        if (distancetoplayer > dist && outOfBarrel)
         {
             TurretRetract();
         }
@@ -100,7 +106,9 @@ public class Turret : MonoBehaviour
                 StartCoroutine(Lerpers.LerpTransform(Barrel.transform, movedBarrel, Lerpers.OutQuad(0.3f)));
                 if (Barrel.transform.position == movedBarrel)
                 {
-                    RotateBarrel();
+                    inbarrel = false;
+                    outOfBarrel = true;
+                    
                 }
 
             }
@@ -206,7 +214,9 @@ void RotateBarrel()
             if (Barrel.transform.position == barrelPosition)
             {
                 StartCoroutine(Lerpers.LerpTransform(movewall.transform, wallPosition, Lerpers.OutQuad(0.5f)));
-                
+                inbarrel = true;
+                outOfBarrel = false;
+
             }
 
         }
