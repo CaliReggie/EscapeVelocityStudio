@@ -63,7 +63,7 @@ public class CarterTurret : MonoBehaviour
         barrelPosition = Barrel.transform.position;
         movedWall = movewall.transform.position - movewall.transform.forward * 1.1f;
         movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
-        movedBarrel = Barrel.transform.position + Base.transform.forward * 1.6f;
+        movedBarrel = Barrel.transform.position + Base.transform.right * 1.6f;
     }
     
 
