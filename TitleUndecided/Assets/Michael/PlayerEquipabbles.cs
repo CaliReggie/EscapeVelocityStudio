@@ -17,7 +17,7 @@ public class PlayerEquipabbles : MonoBehaviour
     [Header("Input References")]
     
     public string attackInputName = "CustomAttack";
-    
+    public string attackSecondaryInputName = "CustomSecondaryAttack";
     public string teleportInputName = "CustomTeleport";
 
     [Header("Player References")]
@@ -60,9 +60,11 @@ public class PlayerEquipabbles : MonoBehaviour
     private PlayerInput _playerInput;
     
     private InputAction _attackAction;
-    
+    private InputAction _attackSecondaryAction;
     private InputAction _teleportAction;
-    
+
+    private static event Action UseEquipmentEvent;
+    private static event Action UseEquipmentSecondaryEvent;
     void Awake()
     {
         if (S != null)
@@ -79,6 +81,8 @@ public class PlayerEquipabbles : MonoBehaviour
         _playerInput = GetComponentInParent<PlayerInput>();
         
         _attackAction = _playerInput.actions.FindAction(attackInputName);
+
+        _attackSecondaryAction = _playerInput.actions.FindAction(attackSecondaryInputName);
         
         _teleportAction = _playerInput.actions.FindAction(teleportInputName);
         
@@ -91,7 +95,8 @@ public class PlayerEquipabbles : MonoBehaviour
         
         if (_attackAction.triggered && (Time.time > CurrentEquippable.TimeRefreshed)) //Allow if triggered and refreshed
         {
-            UseCurrentEquippable();
+            UseEquipmentEvent?.Invoke();
+            //UseCurrentEquippable();
         }
 
         if (_teleportAction.triggered)
@@ -130,7 +135,6 @@ public class PlayerEquipabbles : MonoBehaviour
                 teleportRb.AddForce(realCam.transform.forward * teleportDisk.speed, ForceMode.Impulse);
                 activeTeleport = true;
                 break;
-            
             case EEquippableWeapon.Melee:
                 
                 MeleeAttack meleeAttack = Equippable.FindWeaponFromEquippables<MeleeAttack>(equippableDefinitions);
@@ -150,6 +154,51 @@ public class PlayerEquipabbles : MonoBehaviour
          _timeUnlocked = Time.time + CurrentEquippable.LockOnUseDuration;
             
          CurrentEquippable.OnUsed();
+    }
+
+    private void DiskAttack()
+    {
+        Disk disk = Equippable.FindWeaponFromEquippables<Disk>(equippableDefinitions);
+        GameObject diskIns = Instantiate(disk.gameObject, spawnPoint.position, Quaternion.identity);
+        disk.transform.forward = realCam.transform.forward;
+        Rigidbody rb = diskIns.GetComponent<Rigidbody>();
+        rb.AddForce(realCam.transform.forward * disk.speed, ForceMode.Impulse);
+    }
+    private void DiskAttackSecondary()
+    {
+        
+    }
+    private void DiskUtility()
+    {
+        TeleportDisk teleportDisk = Equippable.FindWeaponFromEquippables<TeleportDisk>(equippableDefinitions);
+        teleportTarget = Instantiate(teleportDisk.gameObject, spawnPoint.position, Quaternion.identity);
+        teleportDisk.transform.forward = realCam.transform.forward;
+        Rigidbody teleportRb = teleportTarget.GetComponent<Rigidbody>();
+        teleportRb.AddForce(realCam.transform.forward * teleportDisk.speed, ForceMode.Impulse);
+        activeTeleport = true;
+    }
+
+    private void DiskUtilitySecondary()
+    {
+        
+    }
+
+    private void MeleeAttack()
+    {
+        MeleeAttack meleeAttack = Equippable.FindWeaponFromEquippables<MeleeAttack>(equippableDefinitions);
+        GameObject meleeIns = Instantiate(meleeAttack.gameObject, _playerMovement.PlayerObj.transform);
+        float lookVertAngle = realCam.transform.localRotation.eulerAngles.x;
+        if (lookVertAngle > 180)
+        {
+            lookVertAngle -= 360;
+        }
+        lookVertAngle = Mathf.Clamp(lookVertAngle, -30f, 30f);
+        meleeIns.transform.localRotation = Quaternion.Euler(0f, 90f - meleeAttack.totalRotation / 2.0f, -lookVertAngle);
+    }
+
+    private void MeleeAttackSecondary()
+    {
+        
     }
     public void Teleport()
     {
@@ -210,8 +259,36 @@ public class PlayerEquipabbles : MonoBehaviour
         CurrentEquippable = equippable;
     }
     
-    public Equippable CurrentEquippable {get; private set; }
-    
+    private Equippable _currentEquippable;
+
+    public Equippable CurrentEquippable
+    {
+        get => _currentEquippable;
+        private set
+        {
+            _currentEquippable = value;
+            switch (_currentEquippable.EquippableClass)
+            {
+                case EEquippableClass.Grapple:
+                    UseEquipmentEvent = null;
+                    UseEquipmentSecondaryEvent = null;
+                    break;
+                case EEquippableClass.CombatDisk:
+                    UseEquipmentEvent = DiskAttack;
+                    UseEquipmentSecondaryEvent = DiskAttackSecondary;
+                    break;
+                case EEquippableClass.UtilityDisk:
+                    UseEquipmentEvent = DiskUtility;
+                    UseEquipmentSecondaryEvent = DiskUtilitySecondary;
+                    break;
+                case EEquippableClass.Melee:
+                    UseEquipmentEvent = MeleeAttack;
+                    UseEquipmentSecondaryEvent = MeleeAttackSecondary;
+                    break;
+            }
+        }
+    }
+
     public bool IsUnlocked => Time.time >= _timeUnlocked;
 }
 
@@ -259,4 +336,5 @@ public class Equippable
         
         return null;
     }
+    
 }
