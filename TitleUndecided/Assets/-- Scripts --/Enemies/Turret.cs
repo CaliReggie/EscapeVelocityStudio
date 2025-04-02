@@ -61,9 +61,9 @@ public class Turret : MonoBehaviour
         wallPosition = movewall.transform.position;
         basePosition = Base.transform.position;
         barrelPosition = Barrel.transform.position;
-        movedWall = movewall.transform.position + movewall.transform.back * 1.1f;
+        movedWall = movewall.transform.position - movewall.transform.forward * 1.1f;
         movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
-        movedBarrel = Barrel.transform.position + Base.transform.forward * 1.6f;
+        movedBarrel = Barrel.transform.position + Base.transform.right * 1.6f;
     }
     
 
