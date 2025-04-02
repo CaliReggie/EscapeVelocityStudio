@@ -1,35 +1,70 @@
 using UnityEngine;
+using UnityEngine.ProBuilder;
+using UnityEngine.Serialization;
 
 public class Turret : MonoBehaviour
 {
+    [Header("References")]
+    
     public static GameObject movewall;
+    
     public GameObject Barrel;
+    
     public GameObject Base;
+    
     public Transform playerpos;
-    public float distancetoplayer;
+    
+    [Header("Detection Settings")]
+    
     public float dist = 10f;
 
+    public Vector2 viewRadius = new Vector2(135f, 45f);
+    
+    [Range(0, 1)] public float lookSpeed = 0.3f;
+    
+    [Header("Behaviour Settings")]
+    
+    public bool returnsToStartRot = true;
+    
+    [Header("Dynamic")]
+    
+    public float distancetoplayer;
+    
+    public Quaternion startingRotation;
+    
+    public Vector3 currentRotation;
+    
+    public Quaternion targetRotation;
+    
+    //Non serialized or private below
+    private bool ranonce = false;
+    private Vector3 wallPosition;
+    private Vector3 basePosition;
+    private Vector3 barrelPosition;
     private Vector3 movedWall;
     private Vector3 movedBase;
     private Vector3 movedBarrel;
-    private float maxBarrelRotLeft;
-    private float maxBarrelRotRight;
+    
+  
 
     void Start()
     {
+        // viewRadius.x = Mathf.Clamp(viewRadius.x, 0, 179);
+        // viewRadius.y = Mathf.Clamp(viewRadius.y, 0, 179);
+        
         movewall = GameObject.Find("movewall");
         Barrel = GameObject.Find("barrel");
         Base = GameObject.Find("base");
+        wallPosition = movewall.transform.position;
+        basePosition = Base.transform.position;
+        barrelPosition = Barrel.transform.position;
         movedWall = new Vector3(movewall.transform.position.x, movewall.transform.position.y,
             movewall.transform.position.z - 1.1f);
         movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
         movedBarrel = new Vector3(Barrel.transform.position.x + 1.6f, Barrel.transform.position.y,
             Barrel.transform.position.z);
-        maxBarrelRotLeft = Barrel.transform.rotation.z - 60f;
-        maxBarrelRotRight = Barrel.transform.rotation.z + 60f;
-
-
     }
+    
 
     void Update()
     {
@@ -39,6 +74,10 @@ public class Turret : MonoBehaviour
             TurrentInit();
 
         }
+        else
+        {
+            TurretRetract();
+        }
 
     }
 
@@ -47,6 +86,14 @@ public class Turret : MonoBehaviour
         StartCoroutine(Lerpers.LerpTransform(movewall.transform, movedWall, Lerpers.OutQuad(1f)));
         if (movewall.transform.position == movedWall)
         {
+            if (!ranonce)
+            {
+
+                startingRotation = Barrel.transform.rotation;
+
+                ranonce = true;
+            }
+            
             StartCoroutine(Lerpers.LerpTransform(Base.transform, movedBase, Lerpers.OutQuad(0.7f)));
             if (Base.transform.position == movedBase)
             {
@@ -54,25 +101,116 @@ public class Turret : MonoBehaviour
                 if (Barrel.transform.position == movedBarrel)
                 {
                     RotateBarrel();
-
                 }
 
             }
-
         }
-
     }
 
-    void RotateBarrel()
-    
+void RotateBarrel()
     {
-        Vector3 playerZOnly = new Vector3(Barrel.transform.position.x, Barrel.transform.position.y, playerpos.position.z);
-        Barrel.transform.LookAt(playerZOnly);
-        if (Barrel.transform.rotation.z > maxBarrelRotRight && Barrel.transform.rotation.z < maxBarrelRotLeft)
+        Vector3 targetDir = playerpos.transform.position - Barrel.transform.position;
+        
+        Quaternion targetDirRot = Quaternion.LookRotation(targetDir);
+        
+        Vector3 targetRotEuler = targetDirRot.eulerAngles;
+        
+        if (returnsToStartRot)
         {
-            Barrel.transform.LookAt(playerpos.position);
+            targetRotEuler = ClampEulerRot(startingRotation.eulerAngles, targetRotEuler, viewRadius / 2,
+                false);
+        }
+        else 
+        {
+            targetRotEuler = ClampEulerRot(startingRotation.eulerAngles, targetRotEuler, viewRadius / 2,
+                true, currentRotation);
         }
         
+        targetRotation = Quaternion.Euler(targetRotEuler);
+        
+        Barrel.transform.rotation = Quaternion.Slerp(Barrel.transform.rotation, targetRotation, lookSpeed);
+        
+        currentRotation = Barrel.transform.rotation.eulerAngles;
+        
+        return;
+        
+        float EulerAngle(float dirOne, float dirTwo)
+        {
+            float angle = dirTwo - dirOne;
+            
+            angle = Mathf.Repeat(angle, 360f);
+            
+            if (angle > 180f) {angle -= 360f;} 
+            
+            return angle;
+        }
+        
+        float ClampAngleToCurrent(float dirOne, float dirTwo, float minAngle, float maxAngle, float current)
+        {
+            float angle = EulerAngle(dirOne, dirTwo);
+            
+            bool isBetween = angle > minAngle && angle < maxAngle;
+            
+            angle = Mathf.Clamp(angle, minAngle, maxAngle);
+            
+            if (isBetween) { return dirOne + angle; }
+            
+            else
+            {
+                return current;
+            }
+        }
+        
+        float ClampAngleToBase(float dirOne, float dirTwo, float minAngle, float maxAngle)
+        {
+            float angle = EulerAngle(dirOne, dirTwo);
+            
+            bool isBetween = angle > minAngle && angle < maxAngle;
+            
+            angle = Mathf.Clamp(angle, minAngle, maxAngle);
+            
+            if (isBetween) { return dirOne + angle; }
+            else { return dirOne; }
+        }
+        
+        Vector3 ClampEulerRot(Vector3 baseEuler, Vector3 targetEuler, Vector2 limits, bool clampToCurrent, 
+            Vector3 current = default)
+        {
+            Vector3 a = baseEuler;
+            
+            Vector3 b = targetEuler;
+            
+            if (clampToCurrent)
+            {
+                b.x = ClampAngleToCurrent(a.x, b.x, -limits.y, limits.y, current.x);
+            
+                b.y = ClampAngleToCurrent(a.y, b.y , -limits.x, limits.x, current.y);
+            }
+            else
+            {
+                b.x = ClampAngleToBase(a.x, b.x, -limits.y, limits.y);
+            
+                b.y = ClampAngleToBase(a.y, b.y , -limits.x, limits.x);
+            }
+            
+            return b;
+        }
     }
-    
+
+    void TurretRetract()
+    {
+        StartCoroutine(Lerpers.LerpTransform(Base.transform, basePosition, Lerpers.OutQuad(0.5f)));
+        if (Base.transform.position == basePosition)
+        {
+            StartCoroutine(Lerpers.LerpTransform(Barrel.transform, barrelPosition, Lerpers.OutQuad(0.2f)));
+            if (Barrel.transform.position == barrelPosition)
+            {
+                StartCoroutine(Lerpers.LerpTransform(movewall.transform, wallPosition, Lerpers.OutQuad(0.5f)));
+                
+            }
+
+        }
+ 
+    }
+
 }
