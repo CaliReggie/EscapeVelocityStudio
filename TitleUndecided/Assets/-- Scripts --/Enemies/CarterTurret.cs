@@ -12,6 +12,8 @@ public class CarterTurret : MonoBehaviour
     public GameObject Barrel;
     
     public GameObject Base;
+    public GameObject bullet;
+    public Transform shotpoint;
     
     public Transform playerpos;
     
@@ -30,6 +32,8 @@ public class CarterTurret : MonoBehaviour
     [Header("Dynamic")]
     
     public float distancetoplayer;
+
+    private float fireSpeed = 1f;
     
     public Quaternion startingRotation;
     
@@ -47,6 +51,9 @@ public class CarterTurret : MonoBehaviour
     private Vector3 movedBarrel;
     private bool outOfBarrel = false;
     private bool inbarrel = true;
+    public bool canShoot = false;
+    public bool In = false;
+    
     
   
 
@@ -93,6 +100,12 @@ public class CarterTurret : MonoBehaviour
             TurretRetract();
         }
 
+        if (!In && canShoot)
+        {
+            Shoot(); 
+        }
+        
+
     }
 
     public void TurrentInit()
@@ -116,7 +129,10 @@ public class CarterTurret : MonoBehaviour
                 {
                     inbarrel = false;
                     outOfBarrel = true;
-                    
+                    In = false;
+                    canShoot = true;
+                    //if(canShoot) Shoot();
+
                 }
 
             }
@@ -217,18 +233,36 @@ void RotateBarrel()
     {
         StartCoroutine(Lerpers.LerpTransform(Base.transform, basePosition, Lerpers.OutQuad(0.5f)));
         if (Base.transform.position == basePosition)
-        {
-            StartCoroutine(Lerpers.LerpTransform(Barrel.transform, barrelPosition, Lerpers.OutQuad(0.2f)));
-            if (Barrel.transform.position == barrelPosition)
-            {
-                StartCoroutine(Lerpers.LerpTransform(movewall.transform, wallPosition, Lerpers.OutQuad(0.5f)));
-                inbarrel = true;
-                outOfBarrel = false;
+            
+        {       
+                StartCoroutine(Lerpers.LerpTransform(Barrel.transform, barrelPosition, Lerpers.OutQuad(0.2f)));
+                if (Barrel.transform.position == barrelPosition)
+                {
+                    StartCoroutine(Lerpers.LerpTransform(movewall.transform, wallPosition, Lerpers.OutQuad(0.5f)));
+                    inbarrel = true;
+                    outOfBarrel = false;
+                    In = true;
+                    
 
-            }
-
+                }
         }
- 
+
     }
 
+    void Shoot()
+    {
+        Instantiate(bullet, shotpoint.transform.position, shotpoint.transform.rotation);
+        StartCoroutine(Cooldown());
+
+    }
+
+    private IEnumerator Cooldown()
+    {
+        canShoot = false;
+        yield return new WaitForSeconds(fireSpeed);
+        canShoot = true;
+
+    }
+ 
 }
+

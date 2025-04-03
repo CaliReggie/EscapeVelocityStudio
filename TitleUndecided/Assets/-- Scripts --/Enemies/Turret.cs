@@ -67,6 +67,8 @@ public class Turret : MonoBehaviour
                 barrelBase.transform.rotation = Quaternion.Slerp(barrelBase.transform.rotation, baseRotation, lookSpeed);
             }
         }
+
+        
     } 
     
     private bool anyAngleClampedThisFrame;
