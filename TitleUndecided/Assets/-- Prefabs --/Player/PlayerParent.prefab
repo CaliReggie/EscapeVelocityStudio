@@ -5527,6 +5527,7 @@ GameObject:
   - component: {fileID: 6203304368605208349}
   - component: {fileID: 6203304368605208351}
   - component: {fileID: 7895353961724532978}
+  - component: {fileID: 7803251240113604537}
   m_Layer: 13
   m_Name: Player
   m_TagString: Player
@@ -5991,6 +5992,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackInputName: CustomAttack
+  attackSecondaryInputName: CustomSecondaryAttack
   teleportInputName: CustomTeleport
   spawnPoint: {fileID: 763109090479771220}
   realCam: {fileID: 6203304367693416329}
@@ -5998,23 +6000,46 @@ MonoBehaviour:
   - <EquippableClass>k__BackingField: 0
     <AssociatedWeapon>k__BackingField: {fileID: 0}
     <WeaponRefreshDuration>k__BackingField: 0
+    <AmmoCost>k__BackingField: 0
   - <EquippableClass>k__BackingField: 1
     <AssociatedWeapon>k__BackingField: {fileID: -4803091055766053387, guid: 87baa7043ae94484ca297d2e856ab8dc,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
+    <AmmoCost>k__BackingField: 1
   - <EquippableClass>k__BackingField: 2
     <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
+    <AmmoCost>k__BackingField: 2
   - <EquippableClass>k__BackingField: 3
     <AssociatedWeapon>k__BackingField: {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
+    <AmmoCost>k__BackingField: 1
   combatClassPreference: 0
   utilityClassPreference: 1
   meleeClassPreference: 3
   activeTeleport: 0
   teleportTarget: {fileID: 0}
+--- !u!114 &7803251240113604537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6203304368605208357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2511c9f3004eab144b5965f7af4960d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ammoTotalCount: 6
+  ammoRestoredPerSec: 0.5
+  offset: 20
+  AmmoPrefab: {fileID: 8867266241107159188, guid: 94595b005143e8d4ab336fab656b3588,
+    type: 3}
+  AmmoContainer: {fileID: 8101562682978568870, guid: 9d30f94ed6b642c40ac99588ccc0cd2d,
+    type: 3}
 --- !u!1 &6366089962580002061
 GameObject:
   m_ObjectHideFlags: 0

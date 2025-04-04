@@ -42,7 +42,8 @@ public class PlayerEquipabbles : MonoBehaviour
     public EEquippableWeapon utilityClassPreference = EEquippableWeapon.TeleportDisk;
     
     public EEquippableWeapon meleeClassPreference = EEquippableWeapon.Melee;
-    
+
+
     //Dynamic, or Non-Serialized Below
     
     //Timing
@@ -65,6 +66,9 @@ public class PlayerEquipabbles : MonoBehaviour
 
     private static event Action UseEquipmentEvent;
     private static event Action UseEquipmentSecondaryEvent;
+    
+    //Ammunition Script
+    private Ammuninition ammunition;
     void Awake()
     {
         if (S != null)
@@ -75,7 +79,7 @@ public class PlayerEquipabbles : MonoBehaviour
         {
             S = this;
         }
-        
+        ammunition = GetComponent<Ammuninition>();
         _playerMovement = GetComponent<PlayerMovement>();
         
         _playerInput = GetComponentInParent<PlayerInput>();
@@ -93,10 +97,12 @@ public class PlayerEquipabbles : MonoBehaviour
     {
         if (Time.time < _timeUnlocked) return; //Not allowing actions while locked
         
-        if (_attackAction.triggered && (Time.time > CurrentEquippable.TimeRefreshed)) //Allow if triggered and refreshed
+        if (_attackAction.triggered && (Time.time > CurrentEquippable.TimeRefreshed)) //Allow if triggered and refreshed and has ammo needed
         {
-            UseEquipmentEvent?.Invoke();
-            //UseCurrentEquippable();
+            if (ammunition.UseAmmo(_currentEquippable.AmmoCost))
+            {
+                UseEquipmentEvent?.Invoke();
+            }
         }
 
         if (_teleportAction.triggered)
@@ -303,6 +309,7 @@ public class Equippable
     
     [Tooltip("How long to wait before being able to use again. Do not use if equip type is Grapple")]
     [field: SerializeField] public float WeaponRefreshDuration { get; private set; }
+    [field: SerializeField] public float AmmoCost { get; private set; }
     
     //Dynamic, or Non-Serialized Below
     public float LockOnUseDuration => AssociatedWeapon == null ? 0 : AssociatedWeapon.lockedInAttackDur;
