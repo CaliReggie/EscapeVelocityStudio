@@ -29,13 +29,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4927286572826526651}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.08256763, y: 0.5635565, z: 0.05674717, w: 0.8199796}
-  m_LocalPosition: {x: 84.4, y: 15.335, z: -19.858}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.35, z: 0.345}
   m_LocalScale: {x: 0.5, y: 0.05, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 10}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5185302797808786293
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -152,11 +152,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponType: 1
-  lockedInAttackDur: 0.5
   enemyMask:
     serializedVersion: 2
     m_Bits: 0
   damageAmt: 5
+  lockedInAttackDur: 0.5
   speed: 15
   lifeSpan: 5
   ricochet: 1
@@ -164,7 +164,7 @@ MonoBehaviour:
   rayDist: 0.6
   ricochetMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 33792
   homing: 0
   currentTarget: {fileID: 0}
   teleporterPrefab: {fileID: 7360639938885337017, guid: 9bd404f3a897c3a48906ef90656e76eb,

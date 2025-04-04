@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2662717034278497040}
   - component: {fileID: 4116723934708972051}
+  - component: {fileID: 1513543395513729886}
   m_Layer: 16
   m_Name: MeleeParent
   m_TagString: Untagged
@@ -46,13 +47,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponType: 3
-  lockedInAttackDur: 0.25
   enemyMask:
     serializedVersion: 2
     m_Bits: 32768
   damageAmt: 5
+  lockedInAttackDur: 0.25
   duration: 0.25
-  totalRotation: 180
+--- !u!54 &1513543395513729886
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683070164689593416}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &5346853757875424783
 GameObject:
   m_ObjectHideFlags: 0

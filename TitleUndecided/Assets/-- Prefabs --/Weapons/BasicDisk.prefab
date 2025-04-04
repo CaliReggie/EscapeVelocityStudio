@@ -123,8 +123,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4927286572826526651}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.023683116, y: 0.9760789, z: 0.1415247, w: 0.16333959}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.35, z: 0.345}
   m_LocalScale: {x: 0.5, y: 0.05, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -247,11 +247,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponType: 0
-  lockedInAttackDur: 0.5
   enemyMask:
     serializedVersion: 2
     m_Bits: 32768
   damageAmt: 5
+  lockedInAttackDur: 0.5
   speed: 20
   lifeSpan: 5
   ricochet: 1

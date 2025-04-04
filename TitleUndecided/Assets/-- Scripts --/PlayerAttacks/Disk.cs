@@ -23,13 +23,17 @@ public class Disk : Weapon
         startTime = Time.time;
         rb = GetComponent<Rigidbody>();
     }
-
     // Update is called once per frame
     protected virtual void Update()
     {
         TimeCheck();
     }
 
+    protected virtual void Start()
+    {
+        transform.parent = null;
+        rb.AddForce(transform.forward * speed, ForceMode.Impulse);
+    }
     protected virtual void TimeCheck()
     {
         if (lifeSpan + startTime < Time.time)
@@ -56,13 +60,13 @@ public class Disk : Weapon
         rb.AddForce(new Vector3(0f, -5f, 0f), ForceMode.Acceleration);
     }
 
-    protected virtual void OnCollisionEnter(Collision collision)
+    protected override void OnCollisionEnter(Collision collision)
     {
-        if (recentHitObject == collision.collider.gameObject && ((Time.time - recentHitTime) < 0.25f))
+        if ((recentHitObject == collision.collider.gameObject && ((Time.time - recentHitTime) < 0.25f) || collision.gameObject == gameObject))
         {
             return;
         } 
-        CheckForEnemy(collision);
+        base.OnCollisionEnter(collision);
         if (Utils.IsLayerInLayerMask(collision.gameObject.layer, ricochetMask))
         {
             if (ricochet)

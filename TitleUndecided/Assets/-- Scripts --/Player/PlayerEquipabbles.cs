@@ -99,10 +99,7 @@ public class PlayerEquipabbles : MonoBehaviour
         
         if (_attackAction.triggered && (Time.time > CurrentEquippable.TimeRefreshed)) //Allow if triggered and refreshed and has ammo needed
         {
-            if (ammunition.UseAmmo(_currentEquippable.AmmoCost))
-            {
-                UseEquipmentEvent?.Invoke();
-            }
+            UseCurrentEquippable();
         }
 
         if (_teleportAction.triggered)
@@ -116,59 +113,22 @@ public class PlayerEquipabbles : MonoBehaviour
     
     public void UseCurrentEquippable()
     {
-        Weapon correspondingWeapon = CurrentEquippable.AssociatedWeapon;
-        
-        if (CurrentEquippable.EquippableClass == EEquippableClass.Grapple || correspondingWeapon is null)
+        if (CurrentEquippable.EquippableClass == EEquippableClass.Grapple || UseEquipmentEvent == null)
         {
-            //Grapple
             return;
         }
-
-        switch (correspondingWeapon.weaponType)
+        if (ammunition.UseAmmo(_currentEquippable.AmmoCost))
         {
-            case EEquippableWeapon.DamageDisk:
-                Disk disk = Equippable.FindWeaponFromEquippables<Disk>(equippableDefinitions);
-                GameObject diskIns = Instantiate(disk.gameObject, spawnPoint.position, Quaternion.identity);
-                disk.transform.forward = realCam.transform.forward;
-                Rigidbody rb = diskIns.GetComponent<Rigidbody>();
-                rb.AddForce(realCam.transform.forward * disk.speed, ForceMode.Impulse);
-                break;
-            case EEquippableWeapon.TeleportDisk:
-                TeleportDisk teleportDisk = Equippable.FindWeaponFromEquippables<TeleportDisk>(equippableDefinitions);
-                teleportTarget = Instantiate(teleportDisk.gameObject, spawnPoint.position, Quaternion.identity);
-                teleportDisk.transform.forward = realCam.transform.forward;
-                Rigidbody teleportRb = teleportTarget.GetComponent<Rigidbody>();
-                teleportRb.AddForce(realCam.transform.forward * teleportDisk.speed, ForceMode.Impulse);
-                activeTeleport = true;
-                break;
-            case EEquippableWeapon.Melee:
-                
-                MeleeAttack meleeAttack = Equippable.FindWeaponFromEquippables<MeleeAttack>(equippableDefinitions);
-                GameObject meleeIns = Instantiate(meleeAttack.gameObject, _playerMovement.PlayerObj.transform);
-                float lookVertAngle = realCam.transform.localRotation.eulerAngles.x;
-                if (lookVertAngle > 180)
-                {
-                    lookVertAngle -= 360;
-                }
-                lookVertAngle = Mathf.Clamp(lookVertAngle, -30f, 30f);
-                meleeIns.transform.localRotation = Quaternion.Euler(0f, 90f - meleeAttack.totalRotation / 2.0f, -lookVertAngle);
-                break;
-            case EEquippableWeapon.StickyDisk:
-                break;
+            UseEquipmentEvent?.Invoke();
+            _timeUnlocked = Time.time + CurrentEquippable.LockOnUseDuration;
+            CurrentEquippable.OnUsed();
         }
-        
-         _timeUnlocked = Time.time + CurrentEquippable.LockOnUseDuration;
-            
-         CurrentEquippable.OnUsed();
     }
 
     private void DiskAttack()
     {
         Disk disk = Equippable.FindWeaponFromEquippables<Disk>(equippableDefinitions);
-        GameObject diskIns = Instantiate(disk.gameObject, spawnPoint.position, Quaternion.identity);
-        disk.transform.forward = realCam.transform.forward;
-        Rigidbody rb = diskIns.GetComponent<Rigidbody>();
-        rb.AddForce(realCam.transform.forward * disk.speed, ForceMode.Impulse);
+        Instantiate(disk.gameObject, realCam.transform);
     }
     private void DiskAttackSecondary()
     {
@@ -177,10 +137,7 @@ public class PlayerEquipabbles : MonoBehaviour
     private void DiskUtility()
     {
         TeleportDisk teleportDisk = Equippable.FindWeaponFromEquippables<TeleportDisk>(equippableDefinitions);
-        teleportTarget = Instantiate(teleportDisk.gameObject, spawnPoint.position, Quaternion.identity);
-        teleportDisk.transform.forward = realCam.transform.forward;
-        Rigidbody teleportRb = teleportTarget.GetComponent<Rigidbody>();
-        teleportRb.AddForce(realCam.transform.forward * teleportDisk.speed, ForceMode.Impulse);
+        Instantiate(teleportDisk.gameObject, realCam.transform);
         activeTeleport = true;
     }
 
@@ -192,14 +149,7 @@ public class PlayerEquipabbles : MonoBehaviour
     private void MeleeAttack()
     {
         MeleeAttack meleeAttack = Equippable.FindWeaponFromEquippables<MeleeAttack>(equippableDefinitions);
-        GameObject meleeIns = Instantiate(meleeAttack.gameObject, _playerMovement.PlayerObj.transform);
-        float lookVertAngle = realCam.transform.localRotation.eulerAngles.x;
-        if (lookVertAngle > 180)
-        {
-            lookVertAngle -= 360;
-        }
-        lookVertAngle = Mathf.Clamp(lookVertAngle, -30f, 30f);
-        meleeIns.transform.localRotation = Quaternion.Euler(0f, 90f - meleeAttack.totalRotation / 2.0f, -lookVertAngle);
+        GameObject meleeIns = Instantiate(meleeAttack.gameObject, realCam.transform);
     }
 
     private void MeleeAttackSecondary()

@@ -6012,9 +6012,9 @@ MonoBehaviour:
     <WeaponRefreshDuration>k__BackingField: 0
     <AmmoCost>k__BackingField: 2
   - <EquippableClass>k__BackingField: 3
-    <AssociatedWeapon>k__BackingField: {fileID: 4116723934708972051, guid: a2e7973bd175db24b9f741767fa86663,
+    <AssociatedWeapon>k__BackingField: {fileID: 4042177398163280079, guid: 6d23a63c75025a34a94f03001c9b418b,
       type: 3}
-    <WeaponRefreshDuration>k__BackingField: 0
+    <WeaponRefreshDuration>k__BackingField: 1
     <AmmoCost>k__BackingField: 1
   combatClassPreference: 0
   utilityClassPreference: 1
