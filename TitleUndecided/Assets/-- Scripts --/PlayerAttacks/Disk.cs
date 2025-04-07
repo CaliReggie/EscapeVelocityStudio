@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Disk : Weapon
 {
@@ -71,7 +72,6 @@ public class Disk : Weapon
         {
             if (ricochet)
             {
-                
                 Ricochet(collision.contacts[0].normal);
             }
             else
@@ -122,6 +122,10 @@ public class Disk : Weapon
     }
     public virtual void EnemyInRange(GameObject target)
     {
+        if (!homing)
+        {
+            return;
+        }
         if (currentTarget == null)
         {
             currentTarget = target;

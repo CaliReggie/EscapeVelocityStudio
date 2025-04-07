@@ -103,7 +103,7 @@ MonoBehaviour:
   enemyMask:
     serializedVersion: 2
     m_Bits: 32768
-  expForce: 100
+  expForce: 1000
   expDamage: 15
   lifeTime: 2
   startTime: 0
