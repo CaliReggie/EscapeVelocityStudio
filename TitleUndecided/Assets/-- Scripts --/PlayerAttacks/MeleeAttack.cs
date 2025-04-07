@@ -5,19 +5,24 @@ public class MeleeAttack : Weapon
     private static int lastMeleeAttack = -10;
     private static float lastUseTime;
     public float duration = 10f;
+    public bool swinging = false;
     private float _startTime;
     // Update is called once per frame
+    private HashSet<Collider> hitColliders = new HashSet<Collider>();
     void Start()
     {
         _startTime = Time.time;
-        int index = Random.Range(0, 3);
-        while  (Time.time - lastUseTime < 3f && lastMeleeAttack == index)
+        if (GetComponent<Animator>().parameters.Length >0)
         {
-            index = Random.Range(0, 3);
+            int index = Random.Range(0, 3);
+            while  (Time.time - lastUseTime < 3f && lastMeleeAttack == index)
+            {
+                index = Random.Range(0, 3);
+            }
+            GetComponent<Animator>().SetInteger("Index", index);
+            lastMeleeAttack = index;
+            lastUseTime = Time.time;
         }
-        GetComponent<Animator>().SetInteger("Index", index);
-        lastMeleeAttack = index;
-        lastUseTime = Time.time;
     }
     void Update()
     {
@@ -25,9 +30,31 @@ public class MeleeAttack : Weapon
         {
             Destroy(gameObject);
         }
+
+        if (swinging)
+        {
+            if (hitColliders.Count > 0)
+            {
+                foreach (Collider collider in hitColliders)
+                {
+                    base.CheckForEnemy(collider);
+                }
+                hitColliders.Clear();
+            }
+        }
     }
     void EndOfAttack()
     {
         Destroy(gameObject);
+    }
+
+    void EndOfCharge()
+    {
+        swinging = true;
+    }
+
+    protected override void OnTriggerEnter(Collider other)
+    { 
+        hitColliders.Add(other);
     }
 }

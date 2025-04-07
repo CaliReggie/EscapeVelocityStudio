@@ -28,11 +28,13 @@ public class PlayerEquipabbles : MonoBehaviour
     
     public GameObject realCam;
     
+    [FormerlySerializedAs("equippableDefinitions")]
     [Header("Equippable Definition Pool")]
     
     [Tooltip("Definitions for types and stats of equippables. If a definition is grapple, " +
              "ignore the weaponType and refresh duration fields")]
-    [SerializeField] private Equippable[] equippableDefinitions;
+    [SerializeField] private Equippable[] equippablePrimaryDefinitions;
+    [SerializeField] private Equippable[] equippableSecondaryDefinitions;
     
     //This is where we could set the preferences for what gets equipped depending on the class the UI selects
     [Header("Equippable Pool Preferences")]
@@ -97,9 +99,14 @@ public class PlayerEquipabbles : MonoBehaviour
     {
         if (Time.time < _timeUnlocked) return; //Not allowing actions while locked
         
-        if (_attackAction.triggered && (Time.time > CurrentEquippable.TimeRefreshed)) //Allow if triggered and refreshed and has ammo needed
+        if (_attackAction.triggered && (Time.time > CurrentPrimaryEquippable.TimeRefreshed)) //Allow if triggered and refreshed and has ammo needed
         {
             UseCurrentEquippable();
+        }
+
+        else if (_attackSecondaryAction.triggered && (Time.time > CurrentSecondaryEquippable.TimeRefreshed))
+        {
+            UseSecondaryEquippable();
         }
 
         if (_teleportAction.triggered)
@@ -110,52 +117,44 @@ public class PlayerEquipabbles : MonoBehaviour
             }
         }
     }
-    
-    public void UseCurrentEquippable()
+
+    public void UseSecondaryEquippable()
     {
-        if (CurrentEquippable.EquippableClass == EEquippableClass.Grapple || UseEquipmentEvent == null)
+        if (UseEquipmentSecondaryEvent == null)
         {
             return;
         }
-        if (ammunition.UseAmmo(_currentEquippable.AmmoCost))
+        if (ammunition.UseAmmo(_currentSecondaryEquippable.AmmoCost))
+        {
+            UseEquipmentSecondaryEvent?.Invoke();
+            _timeUnlocked = Time.time + CurrentPrimaryEquippable.LockOnUseDuration;
+            CurrentSecondaryEquippable.OnUsed();
+        }
+    }
+    
+    public void UseCurrentEquippable()
+    {
+        if (UseEquipmentEvent == null)
+        {
+            return;
+        }
+        if (ammunition.UseAmmo(_currentPrimaryEquippable.AmmoCost))
         {
             UseEquipmentEvent?.Invoke();
-            _timeUnlocked = Time.time + CurrentEquippable.LockOnUseDuration;
-            CurrentEquippable.OnUsed();
+            _timeUnlocked = Time.time + CurrentPrimaryEquippable.LockOnUseDuration;
+            CurrentPrimaryEquippable.OnUsed();
         }
     }
 
-    private void DiskAttack()
+    private void SpawnPrimaryEquipment()
     {
-        Disk disk = Equippable.FindWeaponFromEquippables<Disk>(equippableDefinitions);
-        Instantiate(disk.gameObject, realCam.transform);
+        Instantiate(CurrentPrimaryEquippable.AssociatedWeapon.gameObject, realCam.transform);
     }
-    private void DiskAttackSecondary()
+    private void SpawnSecondaryEquipment()
     {
-        
+        Instantiate(CurrentSecondaryEquippable.AssociatedWeapon.gameObject, realCam.transform);
     }
-    private void DiskUtility()
-    {
-        TeleportDisk teleportDisk = Equippable.FindWeaponFromEquippables<TeleportDisk>(equippableDefinitions);
-        Instantiate(teleportDisk.gameObject, realCam.transform);
-        activeTeleport = true;
-    }
-
-    private void DiskUtilitySecondary()
-    {
-        
-    }
-
-    private void MeleeAttack()
-    {
-        MeleeAttack meleeAttack = Equippable.FindWeaponFromEquippables<MeleeAttack>(equippableDefinitions);
-        GameObject meleeIns = Instantiate(meleeAttack.gameObject, realCam.transform);
-    }
-
-    private void MeleeAttackSecondary()
-    {
-        
-    }
+    
     public void Teleport()
     {
         transform.position = teleportTarget.transform.position;
@@ -169,7 +168,7 @@ public class PlayerEquipabbles : MonoBehaviour
         //iterating and looking for equippable with same class and matching weapon if not grapple
         Equippable equippable = null;
         
-        foreach (Equippable e in equippableDefinitions)
+        foreach (Equippable e in equippablePrimaryDefinitions)
         {
             if (e.EquippableClass == targetClass)
             {
@@ -212,39 +211,59 @@ public class PlayerEquipabbles : MonoBehaviour
         
         if (equippable is null) return;
         
-        CurrentEquippable = equippable;
+        CurrentPrimaryEquippable = equippable;
+    }
+
+    public Equippable FindEquippableByClass(EEquippableClass targetClass, Equippable[] equippables)
+    {
+        foreach (Equippable e in equippables)
+        {
+            if (e.EquippableClass == targetClass)
+            {
+                return e;
+            }
+        }
+
+        return null;
     }
     
-    private Equippable _currentEquippable;
+    private Equippable _currentPrimaryEquippable;
 
-    public Equippable CurrentEquippable
+    public Equippable CurrentPrimaryEquippable
     {
-        get => _currentEquippable;
+        get => _currentPrimaryEquippable;
         private set
         {
-            _currentEquippable = value;
-            switch (_currentEquippable.EquippableClass)
+            _currentPrimaryEquippable = value;
+            CurrentSecondaryEquippable = FindEquippableByClass(CurrentPrimaryEquippable.EquippableClass, equippableSecondaryDefinitions);
+            if (CurrentPrimaryEquippable.EquippableClass == EEquippableClass.Grapple || CurrentPrimaryEquippable == null)
             {
-                case EEquippableClass.Grapple:
-                    UseEquipmentEvent = null;
-                    UseEquipmentSecondaryEvent = null;
-                    break;
-                case EEquippableClass.CombatDisk:
-                    UseEquipmentEvent = DiskAttack;
-                    UseEquipmentSecondaryEvent = DiskAttackSecondary;
-                    break;
-                case EEquippableClass.UtilityDisk:
-                    UseEquipmentEvent = DiskUtility;
-                    UseEquipmentSecondaryEvent = DiskUtilitySecondary;
-                    break;
-                case EEquippableClass.Melee:
-                    UseEquipmentEvent = MeleeAttack;
-                    UseEquipmentSecondaryEvent = MeleeAttackSecondary;
-                    break;
+                UseEquipmentEvent = null;
+            }
+            else
+            {
+                UseEquipmentEvent = SpawnPrimaryEquipment;
             }
         }
     }
 
+    private Equippable _currentSecondaryEquippable;
+    public Equippable CurrentSecondaryEquippable
+    {
+        get =>_currentSecondaryEquippable;
+        private set
+        {
+            _currentSecondaryEquippable = value;
+            if (CurrentSecondaryEquippable.EquippableClass == EEquippableClass.Grapple || CurrentPrimaryEquippable == null)
+            {
+                UseEquipmentSecondaryEvent = null;
+            }
+            else
+            {
+                UseEquipmentSecondaryEvent = SpawnSecondaryEquipment;
+            }
+        }
+    }
     public bool IsUnlocked => Time.time >= _timeUnlocked;
 }
 

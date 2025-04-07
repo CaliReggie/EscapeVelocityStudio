@@ -5996,7 +5996,7 @@ MonoBehaviour:
   teleportInputName: CustomTeleport
   spawnPoint: {fileID: 763109090479771220}
   realCam: {fileID: 6203304367693416329}
-  equippableDefinitions:
+  equippablePrimaryDefinitions:
   - <EquippableClass>k__BackingField: 0
     <AssociatedWeapon>k__BackingField: {fileID: 0}
     <WeaponRefreshDuration>k__BackingField: 0
@@ -6016,6 +6016,26 @@ MonoBehaviour:
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 1
     <AmmoCost>k__BackingField: 1
+  equippableSecondaryDefinitions:
+  - <EquippableClass>k__BackingField: 0
+    <AssociatedWeapon>k__BackingField: {fileID: 0}
+    <WeaponRefreshDuration>k__BackingField: 0
+    <AmmoCost>k__BackingField: 0
+  - <EquippableClass>k__BackingField: 1
+    <AssociatedWeapon>k__BackingField: {fileID: 7388177921243128230, guid: 2361bf55ebb7b8b419e71c429de18bc5,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 1
+    <AmmoCost>k__BackingField: 2
+  - <EquippableClass>k__BackingField: 2
+    <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: 6c7736c369c899f4681b8516c932afda,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 1
+    <AmmoCost>k__BackingField: 2
+  - <EquippableClass>k__BackingField: 3
+    <AssociatedWeapon>k__BackingField: {fileID: 4042177398163280079, guid: 79887fce1a2a0f347ac8e028f6b5c1fb,
+      type: 3}
+    <WeaponRefreshDuration>k__BackingField: 1
+    <AmmoCost>k__BackingField: 2
   combatClassPreference: 0
   utilityClassPreference: 1
   meleeClassPreference: 3
@@ -6034,7 +6054,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ammoTotalCount: 6
-  ammoRestoredPerSec: 0.5
+  ammoRestoredPerSec: 2
   offset: 20
   AmmoPrefab: {fileID: 8867266241107159188, guid: 94595b005143e8d4ab336fab656b3588,
     type: 3}

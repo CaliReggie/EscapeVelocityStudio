@@ -52,7 +52,7 @@ public class UISelectWheel : MonoBehaviour
 
     private void OnEnable()
     {
-        EEquippableClass currentEquippableClass = PlayerEquipabbles.S.CurrentEquippable.EquippableClass;
+        EEquippableClass currentEquippableClass = PlayerEquipabbles.S.CurrentPrimaryEquippable.EquippableClass;
         
         foreach (EquipWheelSlot slot in wheelSlots) // Showing equipped color if something is equipped
         {
@@ -188,7 +188,7 @@ public class UISelectWheel : MonoBehaviour
         
         slot.activeTimeLeft = changeDuration;
         
-        if (slot.slotEquipClass != PlayerEquipabbles.S.CurrentEquippable.EquippableClass)
+        if (slot.slotEquipClass != PlayerEquipabbles.S.CurrentPrimaryEquippable.EquippableClass)
         {
             slot.slotImage.color = normalColor; // Set to normal color if not equipped
         } 

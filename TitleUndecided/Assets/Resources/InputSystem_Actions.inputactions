@@ -193,6 +193,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CustomSecondaryAttack",
+                    "type": "Button",
+                    "id": "5d82b249-6c27-4e6e-b27b-9c1f817d9e06",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -655,6 +664,28 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "UseRightArm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3b8a7752-59d7-446e-a8aa-b382291fc60a",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CustomSecondaryAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aea36c48-1aed-4cbd-9ce9-eaddc0675877",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "CustomSecondaryAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
