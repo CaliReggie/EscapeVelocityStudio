@@ -1,0 +1,200 @@
+Unity Editor version:    6000.0.26f1 (ccb7c73d2c02)
+Branch:                  6000.0/staging
+Build type:              Release
+Batch mode:              YES
+macOS version:           Version 14.6.1 (Build 23G93)
+Darwin version:          23.6.0
+Architecture:            x86_64
+Running under Rosetta:   YES
+Available memory:        16384 MB
+Using pre-set license
+Pro License: YES
+
+COMMAND LINE ARGUMENTS:
+/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/MacOS/Unity
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker1
+-projectPath
+/Users/carterlynn/231unity/StudioSpring25Project2/TitleUndecided
+-logFile
+Logs/AssetImportWorker1.log
+-srvPort
+59526
+-job-worker-count
+4
+-background-job-worker-count
+8
+-asset-garbage-collectors
+1
+Successfully changed project path to: /Users/carterlynn/231unity/StudioSpring25Project2/TitleUndecided
+/Users/carterlynn/231unity/StudioSpring25Project2/TitleUndecided
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Player connection [8781349440]  Target information:
+
+Player connection [8781349440]  * "[IP] 35.20.212.254 [Port] 0 [Flags] 2 [Guid] 1458331295 [EditorId] 1458331295 [Version] 1048832 [Id] OSXEditor(0,Carters-MacBook-Pro-3.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8781349440]  * "[IP] 169.254.212.157 [Port] 0 [Flags] 2 [Guid] 1458331295 [EditorId] 1458331295 [Version] 1048832 [Id] OSXEditor(0,Carters-MacBook-Pro-3.local) [Debug] 1 [PackageName] OSXEditor [ProjectName] Editor" 
+
+Player connection [8781349440] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [8781349440] Host joined alternative multi-casting on [225.0.0.222:34997]...
+JobSystem: Creating JobQueue using job-worker-count value 4
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 6000.0.26f1 (ccb7c73d2c02)
+[Subsystems] Discovering subsystems at path /Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /Users/carterlynn/231unity/StudioSpring25Project2/TitleUndecided/Assets
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+ preferred device: Apple M2 Pro (high power)
+Metal devices available: 1
+0: Apple M2 Pro (high power)
+Using device Apple M2 Pro (high power)
+Initializing Metal device caps: Apple M2 Pro
+Initialize mono
+Mono path[0] = '/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Managed'
+Mono path[1] = '/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/MonoBleedingEdge/lib/mono/unityjit-macos'
+Mono config path = '/Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56636
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll
+Registered in 0.001774 seconds.
+- Loaded All Assemblies, in  0.695 seconds
+Native extension for OSXStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.924 seconds
+Domain Reload Profiling: 2621ms
+	BeginReloadAssembly (293ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (3ms)
+	RebuildCommonClasses (41ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (184ms)
+	LoadAllAssembliesAndSetupDomain (166ms)
+		LoadAssemblies (290ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (156ms)
+			TypeCache.Refresh (153ms)
+				TypeCache.ScanAssembly (138ms)
+			BuildScriptInfoCaches (0ms)
+			ResolveRequiredComponents (2ms)
+	FinalizeReload (1926ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1792ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (235ms)
+			SetLoadedEditorAssemblies (23ms)
+			BeforeProcessingInitializeOnLoad (35ms)
+			ProcessInitializeOnLoadAttributes (986ms)
+			ProcessInitializeOnLoadMethodAttributes (496ms)
+			AfterProcessingInitializeOnLoad (16ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+========================================================================
+Worker process is ready to serve import requests
+Import Worker Mode flag is 0x00
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  1.463 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Native extension for OSXStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  2.688 seconds
+Domain Reload Profiling: 4152ms
+	BeginReloadAssembly (1312ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (44ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (55ms)
+	RebuildCommonClasses (39ms)
+	RebuildNativeTypeToScriptingClass (12ms)
+	initialDomainReloadingComplete (75ms)
+	LoadAllAssembliesAndSetupDomain (26ms)
+		LoadAssemblies (208ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (14ms)
+			TypeCache.Refresh (9ms)
+				TypeCache.ScanAssembly (4ms)
+			BuildScriptInfoCaches (3ms)
+			ResolveRequiredComponents (1ms)
+	FinalizeReload (2689ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (1269ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (30ms)
+			SetLoadedEditorAssemblies (26ms)
+			BeforeProcessingInitializeOnLoad (57ms)
+			ProcessInitializeOnLoadAttributes (939ms)
+			ProcessInitializeOnLoadMethodAttributes (190ms)
+			AfterProcessingInitializeOnLoad (26ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (26ms)
+Launching external process: /Applications/Unity/Hub/Editor/6000.0.26f1/Unity.app/Contents/Tools/UnityShaderCompiler
+Launched and connected shader compiler UnityShaderCompiler after 0.08 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 7 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 64 unused Assets / (67.6 KB). Loaded Objects now: 679.
+Memory consumption went from 88.4 MB to 88.3 MB.
+Total: 3.777584 ms (FindLiveObjects: 0.047084 ms CreateObjectMapping: 0.005250 ms MarkObjects: 3.637916 ms  DeleteObjects: 0.086875 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 1362924.819319 seconds.
+  path: Assets/-- Scripts --
+  artifactKey: Guid(b5263591124610d4081538597e476f12) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/-- Scripts -- using Guid(b5263591124610d4081538597e476f12) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '6d39f7bba0e581319b86478f9af2647d') in 0.006207292 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 0
+
