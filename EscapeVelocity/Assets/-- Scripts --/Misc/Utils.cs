@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum EScreenPos
@@ -56,5 +57,27 @@ public class Utils : MonoBehaviour
     {
         return ((1 << layer) & layerMask.value) != 0;
     }
+    
+    //Shoutout JB
+    static public Vector3 Bezier( float u, List<Vector3> vList, int i0=0, int i1=-1 ) {
+        // Set i1 to the last element in vList
+        if (i1 == -1) i1 = vList.Count-1;
+        // If we are only looking at one element of vList, return it
+        if (i0 == i1) {
+            return( vList[i0] );
+        }
+        // Otherwise, call Bezier again with all but the leftmost used element of vList
+        Vector3 l = Bezier(u, vList, i0, i1-1);
+        // And call Bezier again with all but the rightmost used element of vList
+        Vector3 r = Bezier(u, vList, i0+1, i1);
+        // The result is the Lerp of these two recursive calls to Bezier
+        Vector3 res = Vector3.LerpUnclamped( l, r, u );
+        return( res );
+    }
+    
+    // This version allows an Array or a series of Vector3s as input
+	static public Vector3 Bezier( float u, params Vector3[] vecs ) {
+		return( Bezier( u, new List<Vector3>(vecs) ) );
+	}
 
 }
