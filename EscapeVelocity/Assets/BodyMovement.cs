@@ -9,6 +9,9 @@ public class BodyMovement : MonoBehaviour
     
     [SerializeField] private LegReference[] legs;
 
+    [SerializeField]
+    private Transform movementOrientation;
+
     [Header("Body Movement")]
     
     [SerializeField] private float targetBodyHeight = 1f;
@@ -55,6 +58,8 @@ public class BodyMovement : MonoBehaviour
     private Vector3 _curTargetPosition;
     
     private Quaternion _curTargetRotation;
+    
+    private bool _legsInitialized;
     
     private Vector3 AverageLegPosition
     {
@@ -145,15 +150,21 @@ public class BodyMovement : MonoBehaviour
         _averageBackRightPosition /= BRCount;
         
         _curTargetPosition = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
+        
+        _legsInitialized = true;
     }
 
     private void Update()
     {
+        if (!_legsInitialized) return;
+        
         CalculatePosition();
+        
+        BodyMove();
         
         CalculateRotation();
 
-        MoveTransforms();
+        BodyRotate();
     }
 
     private void CalculatePosition()
@@ -187,7 +198,7 @@ public class BodyMovement : MonoBehaviour
         
         _averageBackRightPosition /= BRCount;
         
-        _curTargetPosition = AverageLegPosition + Vector3.up * targetBodyHeight + Vector3.right * lateralOffset;
+        _curTargetPosition = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
         
         return;
         
@@ -222,13 +233,6 @@ public class BodyMovement : MonoBehaviour
         
     }
     
-    private void MoveTransforms()
-    {
-        BodyMove();
-
-        BodyRotate();
-    }
-    
     private void BodyMove()
     {
         Vector3 targetBodyPos = transform.position;
@@ -238,18 +242,25 @@ public class BodyMovement : MonoBehaviour
         if (move) { targetBodyPos += moveSpeed * Time.deltaTime * transform.forward; }
         
         transform.position = Vector3.Lerp(transform.position, targetBodyPos, posEasing);
+        
+        movementOrientation.position = transform.position;
     }
     
     private void BodyRotate()
     {
         Quaternion targetRotation = _curTargetRotation;
         
+        // transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotEasing);
+        transform.rotation = _curTargetRotation;
+        
         if (rotate)
         {
-            targetRotation *= Quaternion.Euler(rotationSpeed * Time.deltaTime * rotationAddition);
+           Quaternion targetOrientationRotation = transform.rotation * Quaternion.Euler(rotationSpeed * Time.deltaTime * rotationAddition);
+
+           movementOrientation.rotation = targetOrientationRotation;
+            
+            Debug.DrawRay(movementOrientation.position, movementOrientation.forward * 5f, Color.red);
         }
-        
-        transform.rotation = targetRotation;
     }
     
     private void OnDrawGizmosSelected()
