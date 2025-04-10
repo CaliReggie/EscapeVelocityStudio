@@ -8,14 +8,14 @@ public class LegMovement : MonoBehaviour
 {
     [Header("Prediction References")]
     
-    [Tooltip("The transform that will be used to predict the leg point")]
-    [SerializeField] private Transform predictionOrigin;
-    
     [Tooltip("The transform that will represent the target of the leg point")]
     [SerializeField] private Transform legTargetLoc;
     
+    [Tooltip("The transform that will be used to predict the leg point")]
+    [field: SerializeField] private Transform predictionOrigin;
+    
     [Tooltip("The transform that is the tip of the leg")]
-    [SerializeField] private Transform legLoc;
+    [field: SerializeField] public Transform LegLoc { get; private set; }
     
     [Header("Prediction Settings")]
 
@@ -25,12 +25,6 @@ public class LegMovement : MonoBehaviour
     [SerializeField] private float predictionRadius = 0.5f;
     
     [SerializeField] private LayerMask detectionLayers;
-    
-    [Range(0,1)] [SerializeField] private float missEasing = 0.5f; //TODO: TS sucks rn
-    
-    [SerializeField] private bool constrainRange;
-    
-    [SerializeField] private Vector2 constrainedRange = new (1f, 10f);
     
     
     private enum EasingType
@@ -51,7 +45,7 @@ public class LegMovement : MonoBehaviour
     
     [SerializeField] private float distanceDifToStep = 5f;
     
-    [SerializeField] private float stepDuration = 1f;
+    [SerializeField] public float stepDuration = 1f;
     
     [SerializeField] private float peakTargetHeight = 1f;
     
@@ -67,22 +61,9 @@ public class LegMovement : MonoBehaviour
 
     private bool _detectionMissed;
     
-    public bool Stepping { get; private set; } = false;
+    [field: SerializeField] private bool Stepping { get; set; } = false;
     
-    private bool ShouldMatchSynchronousLegs
-    {
-        get
-        {
-            foreach (LegMovement leg in snychrononousLegs)
-            {
-                if (leg.Stepping) return true;
-            }
-
-            return false;
-        }
-    }
-    
-    private bool ShouldWaitAsynchronousLegs
+    private bool WaitForAsynchronousLegs
     {
         get
         {
@@ -95,22 +76,47 @@ public class LegMovement : MonoBehaviour
         }
     }
     
+    private bool CanStep
+    {
+        get
+        {
+            if (Stepping) return false;
+            
+            if (WaitForAsynchronousLegs) return false;
+            
+            return ExceedingStepDistance;
+        }
+    }
+    
+    private float CurrentStepDistance => Vector3.Distance(LegLoc.position, _currentTargetPoint);
+    
+    private bool ExceedingStepDistance => CurrentStepDistance > distanceDifToStep;
+    
     internal void Initialize()
     {
-        _currentTargetPoint = legLoc.position;
+        _currentTargetPoint = LegLoc.position;
         
-        _previousTargetPoint = legLoc.position;
-
+        _previousTargetPoint = LegLoc.position;
+        
+        ManageDetection();
+        
         StopAllCoroutines();
         
         StartCoroutine(Step());
     }
     
+    public void SetBehaviour( float distance = 0, float duration = 0, float height = 0)
+    {
+        if (distance > 0) distanceDifToStep = distance;
+        
+        if (duration > 0) stepDuration = duration;
+        
+        if (height > 0) peakTargetHeight = height;
+    }
+    
     private void Update()
     {
         ManageDetection();
-        
-        ManageTargetPoint();
         
         SetTargetLoc();
     }
@@ -119,7 +125,9 @@ public class LegMovement : MonoBehaviour
     {
         RaycastHit hit;
         
-        if (Physics.SphereCast(predictionOrigin.position, predictionRadius, Vector3.down, out hit,
+        Vector3 predictionPosition = predictionOrigin.position;
+        
+        if (Physics.SphereCast(predictionPosition, predictionRadius, Vector3.down, out hit,
                 predictionDistance, detectionLayers))
         {
             _currentTargetPoint = hit.point;
@@ -128,29 +136,9 @@ public class LegMovement : MonoBehaviour
         }
         else
         {
-            _currentTargetPoint = Vector3.Lerp(_previousTargetPoint, legLoc.position, missEasing);
+            _currentTargetPoint = _previousTargetPoint;
             
             _detectionMissed = true;
-        }
-    }
-    
-    private void ManageTargetPoint()
-    {
-        
-        if (constrainRange)
-        {
-            Vector3 targetDirection = _currentTargetPoint - predictionOrigin.position;
-            
-            float targetDistance = targetDirection.magnitude;
-            
-            if (targetDistance < constrainedRange.x)
-            {
-                _currentTargetPoint = predictionOrigin.position + targetDirection.normalized * constrainedRange.x;
-            }
-            else if (targetDistance > constrainedRange.y)
-            {
-                _currentTargetPoint = predictionOrigin.position + targetDirection.normalized * constrainedRange.y;
-            }
         }
         
         _previousTargetPoint = _currentTargetPoint;
@@ -164,13 +152,6 @@ public class LegMovement : MonoBehaviour
         }
         else
         {
-            // if (Stepping) return;
-            //
-            // if (LegDistanceToTarget > distanceDifToStep)
-            // {
-            //     StartCoroutine(Step());
-            // }
-            
             if (CanStep)
             {
                 StartCoroutine(Step());
@@ -182,7 +163,12 @@ public class LegMovement : MonoBehaviour
     {
         Stepping = true;
         
-        Vector3 startPos = legLoc.position;
+        foreach (LegMovement leg in snychrononousLegs)
+        {
+            leg.TryStep();
+        }
+        
+        Vector3 startPos = LegLoc.position;
         
         Vector3 endPos = _currentTargetPoint;
         
@@ -201,19 +187,23 @@ public class LegMovement : MonoBehaviour
         easingPoints[2] = endPos;
         
         float timeLeft = stepDuration;
+
+        float u = 0f;
         
-        while (LegDistanceToTarget > 1f)
+        while (u < 1f)
         {
             if (_detectionMissed)
             {
-                Stepping = false;
-                
                 break;
             }
             
+            timeLeft -= Time.deltaTime;
+            
             easingPoints[2] = _currentTargetPoint;
             
-            float u = 1 - (timeLeft / stepDuration);
+            u = 1 - (timeLeft / stepDuration);
+            
+            u = Mathf.Clamp01(u);
             
             float stepEasing = 0f;
 
@@ -245,20 +235,18 @@ public class LegMovement : MonoBehaviour
             
             legTargetLoc.position = Utils.Bezier(stepEasing, easingPoints);
             
-            timeLeft -= Time.deltaTime;
-            
             yield return new WaitForEndOfFrame();
         }
-        
-        if (!Stepping) { yield break; }
-        
-        legTargetLoc.position = _currentTargetPoint;
         
         Stepping = false;
     }
     
     private void OnDrawGizmosSelected()
     {
+        Gizmos.color = Color.blue;
+        
+        Gizmos.DrawSphere(legTargetLoc.position, 0.5f);
+        
         Gizmos.color = Color.red;
         
         Gizmos.DrawLine(predictionOrigin.position, predictionOrigin.position + Vector3.down * 
@@ -267,23 +255,10 @@ public class LegMovement : MonoBehaviour
         Gizmos.DrawSphere(_currentTargetPoint, 0.5f);
     }
     
-    
-    
-    private bool CanStep
+    private void TryStep()
     {
-        get
-        {
-            if (Stepping) return false;
-            
-            if (ShouldMatchSynchronousLegs) return true;
-            
-            if (ShouldWaitAsynchronousLegs) return false;
-
-            // return Vector3.Distance(legLoc.position, _currentTargetPoint) > distanceDifToStep; ?
-            
-            return LegDistanceToTarget > distanceDifToStep;
-        }
+        if (!CanStep) return;
+        
+        StartCoroutine(Step());
     }
-    
-    private float LegDistanceToTarget => Vector3.Distance(legTargetLoc.position, _currentTargetPoint);
 }
