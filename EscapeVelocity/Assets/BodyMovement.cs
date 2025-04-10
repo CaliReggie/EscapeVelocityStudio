@@ -290,7 +290,7 @@ public class BodyMovement : MonoBehaviour
         //return if not playing
         if (!Application.isPlaying) return;
         
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.blue;
         
         Gizmos.DrawSphere(AverageLegPosition, 0.5f);
         
