@@ -12,21 +12,12 @@ public class BodyMovement : MonoBehaviour
     [Header("Body Movement")]
     
     [SerializeField] private float targetBodyHeight = 1f;
-    
-    [SerializeField] private float lateralOffset = 0f;
-    
-    [Range(0,1)] [SerializeField] private float posEasing = 0.5f;
-    
-    [SerializeField] bool move;
 
     [SerializeField] private float moveSpeed = 1f;
     
-    [SerializeField] private bool rotate;
+    [Range(0,1)] [SerializeField] private float posEasing = 0.5f;
     
-    [SerializeField] private Vector3 rotationAddition;
-
-    [SerializeField]
-    private float rotationSpeed;
+    [SerializeField] private float rotationSpeed;
     
     [Range(0,1)] [SerializeField] private float rotEasing = 0.5f;
     
@@ -41,6 +32,11 @@ public class BodyMovement : MonoBehaviour
     [SerializeField] private float stepHeight = 1f;
     
     //Private, or non serialized below
+    
+    //Input
+    private Vector2 _moveInput;
+    
+    private float _rotationInput;
     
     private Vector3 _averageBackLeftPosition;
     
@@ -147,8 +143,8 @@ public class BodyMovement : MonoBehaviour
         _averageFrontRightPosition /= FRCount;
         
         _averageBackRightPosition /= BRCount;
-        
-        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
+
+        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight;
         
         _legsInitialized = true;
     }
@@ -156,6 +152,8 @@ public class BodyMovement : MonoBehaviour
     private void Update()
     {
         if (!_legsInitialized) return;
+
+        GetInput();
         
         CalculatePosition();
         
@@ -164,6 +162,22 @@ public class BodyMovement : MonoBehaviour
         CalculateRotation();
 
         BodyRotate();
+    }
+    
+    private void GetInput()
+    {
+        _moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            _moveInput *= 3f;
+        }
+        
+        float leftLook = Input.GetKey(KeyCode.Mouse0) ? -1 : 0;
+        
+        float rightLook = Input.GetKey(KeyCode.Mouse1) ? 1 : 0;
+        
+        _rotationInput = leftLook + rightLook;
     }
 
     private void CalculatePosition()
@@ -196,8 +210,8 @@ public class BodyMovement : MonoBehaviour
         _averageFrontRightPosition /= FRCount;
         
         _averageBackRightPosition /= BRCount;
-        
-        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
+
+        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight;
         
         return;
         
@@ -235,19 +249,38 @@ public class BodyMovement : MonoBehaviour
         
         targetBodyPos.y = _curPositionFromLegs.y;
         
-        if (move) { targetBodyPos += moveSpeed * Time.deltaTime * transform.forward; }
+        if (_moveInput != Vector2.zero)
+        {
+            Vector2 additionalMove = moveSpeed * Time.deltaTime * new Vector2(_moveInput.x, _moveInput.y);
+            
+            targetBodyPos += transform.forward * additionalMove.y;
+            
+            targetBodyPos += transform.right * additionalMove.x;
+        }
         
         transform.position = Vector3.Lerp(transform.position, targetBodyPos, posEasing);
     }
     
     private void BodyRotate()
     {
-        Quaternion targetRotation = _curRotationFromLegs;
-        
-        if (rotate) //If rotating, we move from current rotation to added rotation from settings
+        // Accumulate rotation offset if rotating
+        if (_rotationInput != 0)
         {
-            targetRotation *= Quaternion.Euler(rotationSpeed * Time.deltaTime * rotationAddition);
-        } 
+            Quaternion rotationAddition = Quaternion.Euler(0, _rotationInput * rotationSpeed * Time.deltaTime, 0);
+            
+            _rotationOffsetFromInput *= rotationAddition;
+            
+            _rotationOffsetFromInput.y = Mathf.Clamp(_rotationOffsetFromInput.y, -.25f, .25f);
+            
+            _rotationOffsetFromInput.w = 1f;
+        }
+        else
+        {
+            // Reset rotation offset if not rotating
+            _rotationOffsetFromInput = Quaternion.Slerp(_rotationOffsetFromInput, Quaternion.identity, 0.1f);
+        }
+        
+        Quaternion targetRotation = _curRotationFromLegs * _rotationOffsetFromInput;
         
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotEasing);
     }
