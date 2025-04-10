@@ -9,9 +9,6 @@ public class BodyMovement : MonoBehaviour
     
     [SerializeField] private LegReference[] legs;
 
-    [SerializeField]
-    private Transform movementOrientation;
-
     [Header("Body Movement")]
     
     [SerializeField] private float targetBodyHeight = 1f;
@@ -55,9 +52,11 @@ public class BodyMovement : MonoBehaviour
     
     int BLCount, FLCount, FRCount, BRCount;
     
-    private Vector3 _curTargetPosition;
+    private Vector3 _curPositionFromLegs;
     
-    private Quaternion _curTargetRotation;
+    private Quaternion _curRotationFromLegs;
+    
+    private Quaternion _rotationOffsetFromInput = Quaternion.identity;
     
     private bool _legsInitialized;
     
@@ -149,7 +148,7 @@ public class BodyMovement : MonoBehaviour
         
         _averageBackRightPosition /= BRCount;
         
-        _curTargetPosition = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
+        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
         
         _legsInitialized = true;
     }
@@ -198,7 +197,7 @@ public class BodyMovement : MonoBehaviour
         
         _averageBackRightPosition /= BRCount;
         
-        _curTargetPosition = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
+        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight + transform.right * lateralOffset;
         
         return;
         
@@ -213,54 +212,44 @@ public class BodyMovement : MonoBehaviour
     
     private void CalculateRotation()
     {
-        float pitch; //Determined by averages of fronts vs back legs
-        float yaw; //Determined by averages of lefts vs rights
-        
         Vector3 averageFront = (_averageFrontLeftPosition + _averageFrontRightPosition) / 2f;
         Vector3 averageBack = (_averageBackLeftPosition + _averageBackRightPosition) / 2f;
         Vector3 averageLeft = (_averageBackLeftPosition + _averageFrontLeftPosition) / 2f;
         Vector3 averageRight = (_averageBackRightPosition + _averageFrontRightPosition) / 2f;
-        
-        Vector3 averageFrontBack = averageFront - averageBack;
-        
-        Vector3 averageLeftRight = averageLeft - averageRight;
-        
-        pitch = Mathf.Atan2(averageFrontBack.y, averageFrontBack.magnitude) * Mathf.Rad2Deg;
-        
-        yaw = Mathf.Atan2(averageLeftRight.y, averageLeftRight.magnitude) * Mathf.Rad2Deg;
-        
-        _curTargetRotation = Quaternion.Euler(-pitch, -yaw, 0f);
-        
+
+        Vector3 forward = (averageFront - averageBack).normalized;
+        Vector3 right = (averageRight - averageLeft).normalized;
+        Vector3 up = Vector3.Cross(forward, right).normalized;
+
+        // Re-orthogonalize right in case of non-perfect leg placement
+        right = Vector3.Cross(up, forward).normalized;
+
+        // Build rotation from direction vectors
+        _curRotationFromLegs = Quaternion.LookRotation(forward, up);
+
     }
     
     private void BodyMove()
     {
         Vector3 targetBodyPos = transform.position;
         
-        targetBodyPos.y = _curTargetPosition.y;
+        targetBodyPos.y = _curPositionFromLegs.y;
         
         if (move) { targetBodyPos += moveSpeed * Time.deltaTime * transform.forward; }
         
         transform.position = Vector3.Lerp(transform.position, targetBodyPos, posEasing);
-        
-        movementOrientation.position = transform.position;
     }
     
     private void BodyRotate()
     {
-        Quaternion targetRotation = _curTargetRotation;
+        Quaternion targetRotation = _curRotationFromLegs;
         
-        // transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotEasing);
-        transform.rotation = _curTargetRotation;
-        
-        if (rotate)
+        if (rotate) //If rotating, we move from current rotation to added rotation from settings
         {
-           Quaternion targetOrientationRotation = transform.rotation * Quaternion.Euler(rotationSpeed * Time.deltaTime * rotationAddition);
-
-           movementOrientation.rotation = targetOrientationRotation;
-            
-            Debug.DrawRay(movementOrientation.position, movementOrientation.forward * 5f, Color.red);
-        }
+            targetRotation *= Quaternion.Euler(rotationSpeed * Time.deltaTime * rotationAddition);
+        } 
+        
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotEasing);
     }
     
     private void OnDrawGizmosSelected()
@@ -274,9 +263,9 @@ public class BodyMovement : MonoBehaviour
         
         Gizmos.color = Color.green;
         
-        Gizmos.DrawSphere(_curTargetPosition, 0.5f);
+        Gizmos.DrawSphere(_curPositionFromLegs, 0.5f);
 
-        Gizmos.DrawRay(AverageLegPosition, _curTargetRotation * Vector3.forward * 5f);
+        Gizmos.DrawRay(AverageLegPosition, _curRotationFromLegs * Vector3.forward * 5f);
     }
 }
 
