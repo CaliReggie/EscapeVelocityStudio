@@ -1,17 +1,24 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
+[RequireComponent(typeof(Boss))]
 public class BodyMovement : MonoBehaviour
 {
     [Header("References")]
-
-    [SerializeField] private Boss boss; // Used to query for information on behaviour
     
     [SerializeField] private LegReference[] legs; // Wrapper list for managing attached legs
+    
+    private enum EMovementSource
+    {
+        None,
+        UserInput,
+        Boss
+    }
 
     [Header("Body Movement")]
+
+    [SerializeField] private EMovementSource movementSource = EMovementSource.Boss; // Source of movement input
     
     [SerializeField] private float targetBodyHeight = 1f; // Height above avg leg position to move body to
 
@@ -43,10 +50,14 @@ public class BodyMovement : MonoBehaviour
     //Private, or non serialized below
     
     //Input
-    private Vector2 _moveInput; //Lateral movement input, set from boss query or (deprecated) user input
+    private Vector2 _moveInput; //Lateral movement input, set from _boss query or (deprecated) user input
     
-    private float _rotationInput; //Rotation input, set from boss query or (deprecated) user input
+    private float _rotationInput; //Rotation input, set from _boss query or (deprecated) user input
                                   //(-1 for left, 1 for right)
+                                  
+    //References
+    
+    private Boss _boss; // Used to query for information on behaviour
                                   
     private Vector3 _averageUnweightedPosition; //Used for weighting body position and rotation
     
@@ -66,30 +77,31 @@ public class BodyMovement : MonoBehaviour
     
     private Quaternion _rotationOffsetFromInput = Quaternion.identity; // Used for additive turning
     
-    private bool _legsInitialized; // Flag to make sure we don't try to calculate with null values
-    
     private Vector3 AverageLegPosition // Averages all types of legs to get a single point
     {
         get
         {
-            Vector3[] legPositions = {
-                _averageUnweightedPosition,
-                _averageBackLeftPosition,
-                _averageFrontLeftPosition,
-                _averageFrontRightPosition,
-                _averageBackRightPosition
-            };
+            List<Vector3> legPositions = new List<Vector3>();
+            
+            if (_averageUnweightedPosition != Vector3.zero) legPositions.Add(_averageUnweightedPosition);
+            if (_averageBackLeftPosition != Vector3.zero) legPositions.Add(_averageBackLeftPosition);
+            if (_averageFrontLeftPosition != Vector3.zero) legPositions.Add(_averageFrontLeftPosition);
+            if (_averageFrontRightPosition != Vector3.zero) legPositions.Add(_averageFrontRightPosition);
+            if (_averageBackRightPosition != Vector3.zero) legPositions.Add(_averageBackRightPosition);
+            
+            if (legPositions.Count == 0) return Vector3.zero; // No legs, no position
             
             Vector3 averageLegPosition = Vector3.zero;
             
-            for (int i = 0; i < legPositions.Length; i++)
+            // Calculate the average position of all legs
+            for (int i = 0; i < legPositions.Count; i++)
             {
                 if (legPositions[i] == Vector3.zero) continue; // Skip non calculated values
                 
                 averageLegPosition += legPositions[i];
             }
-
-            averageLegPosition /= legPositions.Length;
+            
+            averageLegPosition /= legPositions.Count;
             
             return averageLegPosition;
         }
@@ -123,29 +135,48 @@ public class BodyMovement : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        _boss = GetComponent<Boss>();
+    }
+
     private void OnEnable()
     {
-        InitLegs();
-    }
-    
-    private void InitLegs()
-    {
         RefreshCounts();
-        
-        RefreshAverages();
-        
-        _targetPosAboveLegs = AverageLegPosition + transform.up * targetBodyHeight;
-        
-        _legsInitialized = true;
     }
 
     private void Update()
     {
-        if (!_legsInitialized) return;
-        
-        if (!boss.HasTarget) return;
-
-        SetMoveInput();
+        switch (movementSource)
+        {
+            case EMovementSource.UserInput:
+                
+                GetMoveInput();
+                
+                break;
+            
+            case EMovementSource.Boss: 
+                
+                if (!_boss.HasTarget) // No target, no movement
+                {
+                    _moveInput = Vector2.zero;
+                    
+                    _rotationInput = 0f;
+                    
+                    return; 
+                }   
+                
+                SetMoveInput();
+                
+                break;
+            
+            default:
+                
+                _moveInput = Vector2.zero;
+                _rotationInput = 0f;
+                
+                break;
+        }
         
         CalculatePosition();
         
@@ -156,34 +187,34 @@ public class BodyMovement : MonoBehaviour
         BodyRotate();
     }
     
-    // private void GetMoveInput()
-    // {
-    //     _moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-    //     
-    //     if (Input.GetKey(KeyCode.LeftShift))
-    //     {
-    //         _moveInput *= 3f;
-    //     }
-    //     
-    //     float leftLook = Input.GetKey(KeyCode.Mouse0) ? -1 : 0;
-    //     
-    //     float rightLook = Input.GetKey(KeyCode.Mouse1) ? 1 : 0;
-    //     
-    //     _rotationInput = leftLook + rightLook;
-    // }
+    private void GetMoveInput()
+    {
+        _moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            _moveInput *= 3f;
+        }
+        
+        float leftLook = Input.GetKey(KeyCode.Mouse0) ? -1 : 0;
+        
+        float rightLook = Input.GetKey(KeyCode.Mouse1) ? 1 : 0;
+        
+        _rotationInput = leftLook + rightLook;
+    }
     
     /// <summary>
-    /// Query to boss and set a target lateral movement and rotation input based on a target position
+    /// Query to _boss and set a target lateral movement and rotation input based on a target position
     /// </summary>
     private void SetMoveInput()
     {
-        Vector3 targetPosition = boss.GetTargetPosition(); // See Boss.cs
+        Vector3 targetPosition = _boss.GetTargetPosition(); // See Boss.cs
         
         Vector3 toTarget = targetPosition - transform.position; // Target direction
         
         float distanceToTarget = toTarget.magnitude;
 
-        if (distanceToTarget < boss.StoppingDistance) //Nothing if in range
+        if (distanceToTarget < _boss.StoppingDistance) //Nothing if in range
         {
             _moveInput = Vector2.zero;
             _rotationInput = 0f;
@@ -221,6 +252,7 @@ public class BodyMovement : MonoBehaviour
     
     private void RefreshCounts()
     {
+        XCount = 0;
         BLCount = 0;
         FLCount = 0;
         FRCount = 0;
@@ -232,6 +264,7 @@ public class BodyMovement : MonoBehaviour
             else if (leg.legType == LegType.FrontLeft) FLCount++;
             else if (leg.legType == LegType.FrontRight) FRCount++;
             else if (leg.legType == LegType.BackRight) BRCount++;
+            else if (leg.legType == LegType.Unweighted) XCount++;
         }
     }
     
@@ -267,13 +300,23 @@ public class BodyMovement : MonoBehaviour
         
         //Dividing by counts for averages
         
+        if (XCount == 0) XCount = 1; // Avoid division by zero
+        
         _averageUnweightedPosition /= XCount;
+        
+        if (BLCount == 0) BLCount = 1;
         
         _averageBackLeftPosition /= BLCount;
         
+        if (FLCount == 0) FLCount = 1;
+        
         _averageFrontLeftPosition /= FLCount;
         
+        if (FRCount == 0) FRCount = 1;
+        
         _averageFrontRightPosition /= FRCount;
+        
+        if (BRCount == 0) BRCount = 1;
         
         _averageBackRightPosition /= BRCount;
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
@@ -65,6 +66,16 @@ public class Boss : MonoBehaviour
         else
         {
             Debug.LogWarning("New target is null. Cannot set target.");
+        }
+        
+        List<Turret> turrets = new List<Turret>(GetComponentsInChildren<Turret>());
+        
+        if (turrets.Count > 0)
+        {
+            foreach (Turret turret in turrets)
+            {
+                turret.SetTarget(newTarget);
+            }
         }
     }
     

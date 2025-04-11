@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.Serialization;
@@ -7,11 +8,9 @@ public class Turret : MonoBehaviour
 {
     [Header("References")]
     
-    public static GameObject movewall;
-    
-    public GameObject Barrel;
-    
     public GameObject Base;
+    
+    public GameObject BarrelBase;
     
     public Transform playerpos;
     
@@ -31,93 +30,54 @@ public class Turret : MonoBehaviour
     
     public float distancetoplayer;
     
-    public Quaternion startingRotation;
+    public Quaternion localStartingRot;
     
     public Vector3 currentRotation;
     
     public Quaternion targetRotation;
-    
-    //Non serialized or private below
-    private bool ranonce = false;
-    private Vector3 wallPosition;
-    private Vector3 basePosition;
-    private Vector3 barrelPosition;
-    private Vector3 movedWall;
-    private Vector3 movedBase;
-    private Vector3 movedBarrel;
-    private bool outOfBarrel = false;
-    private bool inbarrel = true;
-    
-  
 
-    void Start()
+
+    private void OnEnable()
     {
-        // viewRadius.x = Mathf.Clamp(viewRadius.x, 0, 179);
-        // viewRadius.y = Mathf.Clamp(viewRadius.y, 0, 179);
-        
-        movewall = GameObject.Find("movewall");
-        Barrel = GameObject.Find("barrel");
-        Base = GameObject.Find("base");
-        wallPosition = movewall.transform.position;
-        basePosition = Base.transform.position;
-        barrelPosition = Barrel.transform.position;
-        movedWall = movewall.transform.position + movewall.transform.forward * -1.1f;
-        movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
-        movedBarrel = Barrel.transform.position + Base.transform.forward * 1.6f;
+        localStartingRot = BarrelBase.transform.localRotation;
     }
     
+    //returns the starting rotation (stores as local) to world rotation
+    private Quaternion WorldStartingRot()
+    {
+        Quaternion worldRotation = Base.transform.rotation * localStartingRot;
+        
+        return worldRotation;
+    }
+
 
     void Update()
     {
-        distancetoplayer = Vector3.Distance(transform.position, playerpos.position);
-        if (outOfBarrel)
+        if (playerpos == null) { return; }
+        
+        distancetoplayer = Vector3.Distance(playerpos.position, BarrelBase.transform.position);
+        
+        if (distancetoplayer < dist)
         {
             RotateBarrel();
         }
-        if (distancetoplayer < dist && inbarrel)
+        else
         {
-            TurrentInit();
-
-        }
-        
-        if (distancetoplayer > dist && outOfBarrel)
-        {
-            TurretRetract();
-        }
-
-    }
-
-    public void TurrentInit()
-    {
-        StartCoroutine(Lerpers.LerpTransform(movewall.transform, movedWall, Lerpers.OutQuad(1f)));
-        if (movewall.transform.position == movedWall)
-        {
-            if (!ranonce)
+            if (returnsToStartRot)
             {
-
-                startingRotation = Barrel.transform.rotation;
-
-                ranonce = true;
-            }
-            
-            StartCoroutine(Lerpers.LerpTransform(Base.transform, movedBase, Lerpers.OutQuad(0.7f)));
-            if (Base.transform.position == movedBase)
-            {
-                StartCoroutine(Lerpers.LerpTransform(Barrel.transform, movedBarrel, Lerpers.OutQuad(0.3f)));
-                if (Barrel.transform.position == movedBarrel)
-                {
-                    inbarrel = false;
-                    outOfBarrel = true;
-                    
-                }
-
+                targetRotation = Quaternion.Euler(WorldStartingRot().eulerAngles);
+                
+                BarrelBase.transform.rotation = Quaternion.Slerp(BarrelBase.transform.rotation, targetRotation,
+                    lookSpeed);
+                
+                currentRotation = BarrelBase.transform.rotation.eulerAngles;
             }
         }
     }
 
-void RotateBarrel()
+    void RotateBarrel()
     {
-        Vector3 targetDir = playerpos.transform.position - Barrel.transform.position;
+        Vector3 targetDir = playerpos.transform.position - BarrelBase.transform.position;
         
         Quaternion targetDirRot = Quaternion.LookRotation(targetDir);
         
@@ -125,20 +85,20 @@ void RotateBarrel()
         
         if (returnsToStartRot)
         {
-            targetRotEuler = ClampEulerRot(startingRotation.eulerAngles, targetRotEuler, viewRadius / 2,
+            targetRotEuler = ClampEulerRot(WorldStartingRot().eulerAngles, targetRotEuler, viewRadius / 2,
                 false);
         }
         else 
         {
-            targetRotEuler = ClampEulerRot(startingRotation.eulerAngles, targetRotEuler, viewRadius / 2,
+            targetRotEuler = ClampEulerRot(WorldStartingRot().eulerAngles, targetRotEuler, viewRadius / 2,
                 true, currentRotation);
         }
         
         targetRotation = Quaternion.Euler(targetRotEuler);
         
-        Barrel.transform.rotation = Quaternion.Slerp(Barrel.transform.rotation, targetRotation, lookSpeed);
+        BarrelBase.transform.rotation = Quaternion.Slerp(BarrelBase.transform.rotation, targetRotation, lookSpeed);
         
-        currentRotation = Barrel.transform.rotation.eulerAngles;
+        currentRotation = BarrelBase.transform.rotation.eulerAngles;
         
         return;
         
@@ -204,23 +164,16 @@ void RotateBarrel()
             return b;
         }
     }
-
-    void TurretRetract()
+    
+    public void SetTarget(Transform newTarget)
     {
-        StartCoroutine(Lerpers.LerpTransform(Base.transform, basePosition, Lerpers.OutQuad(0.5f)));
-        if (Base.transform.position == basePosition)
+        if (newTarget != null)
         {
-            StartCoroutine(Lerpers.LerpTransform(Barrel.transform, barrelPosition, Lerpers.OutQuad(0.2f)));
-            if (Barrel.transform.position == barrelPosition)
-            {
-                StartCoroutine(Lerpers.LerpTransform(movewall.transform, wallPosition, Lerpers.OutQuad(0.5f)));
-                inbarrel = true;
-                outOfBarrel = false;
-
-            }
-
+            playerpos = newTarget;
         }
- 
+        else
+        {
+            Debug.LogWarning("New target is null. Cannot set target.");
+        }
     }
-
 }

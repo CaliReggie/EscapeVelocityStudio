@@ -1,8 +1,5 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public enum EasingType // Changes step animation behaviourTODO: SHOW!!!!
     {
@@ -138,9 +135,9 @@ public class LegMovement : MonoBehaviour
         else
         {
             
-            // _currentTargetPoint = _previousTargetPoint;
+            _currentTargetPoint = _previousTargetPoint;
             
-            _currentTargetPoint = predictionPosition + Vector3.down * legHeight; //Setting to default
+            // _currentTargetPoint = predictionPosition + Vector3.down * legHeight; //Setting to default
             
             _detectionMissed = true;
         }
@@ -188,9 +185,11 @@ public class LegMovement : MonoBehaviour
         //Using a bezier curve between array of Vector3s. Will update the last point for guaranteed hit
         Vector3[] easingPoints = { startPos, midPoint, endPos };
         
+        float clampedStepDistance = Mathf.Clamp(CurrentStepDistance, DynamicDistanceRange.x, DynamicDistanceRange.y);
+        
         // Uses distance of step withing dynamic range to act as t for lerp between min and max step speeds
         float stepDuration = Mathf.Lerp(DynamicDurationMinMax.x, DynamicDurationMinMax.y,
-            (CurrentStepDistance - DynamicDistanceRange.x) / (DynamicDistanceRange.y - DynamicDistanceRange.x));
+            1 - (clampedStepDistance - DynamicDistanceRange.x) / (DynamicDistanceRange.y - DynamicDistanceRange.x));
         
         float timeLeft = stepDuration;
 
