@@ -439,17 +439,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3547a7a7140027b409781f20f6e728e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Base: {fileID: 377970952593703812}
-  BarrelBase: {fileID: 2509325181671148734}
-  playerpos: {fileID: 0}
-  dist: 10
-  viewRadius: {x: 135, y: 45}
+  barrelBase: {fileID: 2509325181671148734}
+  turretBase: {fileID: 377970952593703812}
+  playerPos: {fileID: 0}
+  targetDistance: 10
+  targetDiameter: {x: 180, y: 180}
   lookSpeed: 0.3
-  returnsToStartRot: 1
-  distancetoplayer: 0
-  startingRotation: {x: 0, y: 0, z: 0, w: 0}
+  radiusRelativeToBase: 1
+  returnsToBaseRot: 1
+  playerDistance: 0
   currentRotation: {x: 0, y: 0, z: 0}
   targetRotation: {x: 0, y: 0, z: 0, w: 0}
+  fullRadiusColor: {r: 1, g: 1, b: 1, a: 1}
+  targetRadiusColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &2509325181671148734
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,6 +618,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 115
+      objectReference: {fileID: 0}
+    - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
         type: 3}
@@ -855,7 +862,7 @@ PrefabInstance:
     - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.9900007
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
         type: 3}
@@ -1095,7 +1102,7 @@ PrefabInstance:
     - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.9900007
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
         type: 3}
@@ -1360,7 +1367,7 @@ PrefabInstance:
     - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.9900007
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4823011481464741697, guid: 73b862f6173454a448b2a9d3db8d0114,
         type: 3}

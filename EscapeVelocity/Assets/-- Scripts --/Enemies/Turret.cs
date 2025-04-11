@@ -1,106 +1,193 @@
-using System;
 using UnityEngine;
-using UnityEngine.ProBuilder;
-using UnityEngine.Serialization;
-using System.Collections;
 
 public class Turret : MonoBehaviour
 {
     [Header("References")]
     
-    public GameObject Base;
+    [SerializeField] private GameObject barrelBase;
     
-    public GameObject BarrelBase;
+    [SerializeField] private GameObject turretBase;
     
-    public Transform playerpos;
+    [SerializeField] private Transform playerPos;
     
     [Header("Detection Settings")]
     
-    public float dist = 10f;
-
-    public Vector2 viewRadius = new Vector2(135f, 45f);
+    [SerializeField] private float targetDistance = 10f;
     
-    [Range(0, 1)] public float lookSpeed = 0.3f;
+    [SerializeField] private Vector2 targetDiameter = new (135f, 45f);
+    
+    [Range(0, 1)] [SerializeField] private float lookSpeed = 0.3f;
     
     [Header("Behaviour Settings")]
     
-    public bool returnsToStartRot = true;
+    [SerializeField] private bool radiusRelativeToBase = true;
+    
+    [SerializeField] private bool returnsToBaseRot = true;
     
     [Header("Dynamic")]
     
-    public float distancetoplayer;
+    [SerializeField] private float playerDistance;
     
-    public Quaternion localStartingRot;
+    [SerializeField] private Vector3 currentRotation;
     
-    public Vector3 currentRotation;
+    [SerializeField] private Quaternion targetRotation;
     
-    public Quaternion targetRotation;
-
-
-    private void OnEnable()
+    [Header("Debug")]
+    
+    [SerializeField] private Color fullRadiusColor = Color.white;
+    
+    [SerializeField] private Color targetRadiusColor = Color.red;
+    
+    private void Start()
     {
-        localStartingRot = BarrelBase.transform.localRotation;
+        currentRotation = barrelBase.transform.rotation.eulerAngles;
+        
+        targetRotation = barrelBase.transform.rotation;
     }
     
-    //returns the starting rotation (stores as local) to world rotation
-    private Quaternion WorldStartingRot()
+    private void Update()
     {
-        Quaternion worldRotation = Base.transform.rotation * localStartingRot;
+        if (playerPos == null) return;
         
-        return worldRotation;
-    }
-
-
-    void Update()
-    {
-        if (playerpos == null) { return; }
+        playerDistance = Vector3.Distance(transform.position, playerPos.position);
         
-        distancetoplayer = Vector3.Distance(playerpos.position, BarrelBase.transform.position);
-        
-        if (distancetoplayer < dist)
+        if (playerDistance <= targetDistance)
         {
             RotateBarrel();
         }
         else
         {
-            if (returnsToStartRot)
+            if (returnsToBaseRot)
             {
-                targetRotation = Quaternion.Euler(WorldStartingRot().eulerAngles);
+                targetRotation = turretBase.transform.rotation;
+                    
+                barrelBase.transform.rotation = Quaternion.Slerp(barrelBase.transform.rotation, targetRotation, lookSpeed);
                 
-                BarrelBase.transform.rotation = Quaternion.Slerp(BarrelBase.transform.rotation, targetRotation,
-                    lookSpeed);
-                
-                currentRotation = BarrelBase.transform.rotation.eulerAngles;
+                currentRotation = barrelBase.transform.rotation.eulerAngles;
             }
         }
-    }
-
-    void RotateBarrel()
+    } 
+    
+    private bool anyAngleClampedThisFrame;
+    private void RotateBarrel()
     {
-        Vector3 targetDir = playerpos.transform.position - BarrelBase.transform.position;
+        Vector3 targetDirection = playerPos.transform.position - barrelBase.transform.position;
         
-        Quaternion targetDirRot = Quaternion.LookRotation(targetDir);
+        Quaternion targetDirRot = Quaternion.LookRotation(targetDirection);
         
         Vector3 targetRotEuler = targetDirRot.eulerAngles;
         
-        if (returnsToStartRot)
+        if (returnsToBaseRot)
         {
-            targetRotEuler = ClampEulerRot(WorldStartingRot().eulerAngles, targetRotEuler, viewRadius / 2,
-                false);
+            if (radiusRelativeToBase)
+            {
+                targetRotEuler = ClampEulerRotToBase(turretBase.transform.eulerAngles, targetRotEuler, targetDiameter / 2);
+            }
+            else
+            {
+                targetRotEuler = ClampEulerRotToBase(currentRotation, targetRotEuler, targetDiameter / 2);
+            }
+            
+            if (anyAngleClampedThisFrame)
+            {
+                targetRotEuler = turretBase.transform.eulerAngles;
+            }
         }
         else 
         {
-            targetRotEuler = ClampEulerRot(WorldStartingRot().eulerAngles, targetRotEuler, viewRadius / 2,
-                true, currentRotation);
+            if (radiusRelativeToBase)
+            {
+                targetRotEuler = ClampEulerRotToCurrent(currentRotation, turretBase.transform.eulerAngles, targetRotEuler,
+                    targetDiameter / 2);
+            }
+            else
+            {
+                targetRotEuler = ClampEulerRotToCurrent(currentRotation, currentRotation, targetRotEuler,
+                    targetDiameter / 2);
+            }
+            
+            if (anyAngleClampedThisFrame)
+            {
+                targetRotEuler = currentRotation;
+            }
         }
+        
+        anyAngleClampedThisFrame = false;
         
         targetRotation = Quaternion.Euler(targetRotEuler);
         
-        BarrelBase.transform.rotation = Quaternion.Slerp(BarrelBase.transform.rotation, targetRotation, lookSpeed);
+        barrelBase.transform.rotation = Quaternion.Slerp(barrelBase.transform.rotation, targetRotation, lookSpeed);
         
-        currentRotation = BarrelBase.transform.rotation.eulerAngles;
+        currentRotation = barrelBase.transform.rotation.eulerAngles;
         
         return;
+        
+        Vector3 ClampEulerRotToBase(Vector3 baseEuler, Vector3 targetEuler, Vector2 limits)
+        {
+            Vector3 a = baseEuler;
+            
+            Vector3 b = targetEuler;
+            
+            b.y = ClampAngleToBase(a.y, b.y , -limits.x, limits.x);
+            
+            b.x = ClampAngleToBase(a.x, b.x, -limits.y, limits.y);
+            return b;
+        }
+        
+        Vector3 ClampEulerRotToCurrent(Vector3 currentEuler, Vector3 baseEuler, Vector3 targetEuler, Vector2 limits)
+        {
+            Vector3 a = baseEuler;
+            
+            Vector3 b = targetEuler;
+            
+            b.y = ClampAngleToCurrent(currentEuler.y, a.y, b.y , -limits.x, limits.x);
+            
+            b.x = ClampAngleToCurrent(currentEuler.x, a.x, b.x, -limits.y, limits.y);
+            
+            return b;
+        }
+        
+        float ClampAngleToBase(float baseDir, float targetDir, float minAngle, float maxAngle)
+        {
+            float angle = EulerAngle(baseDir, targetDir);
+            
+            bool isBetween = angle > minAngle && angle < maxAngle;
+            
+            angle = Mathf.Clamp(angle, minAngle, maxAngle);
+            
+            if (isBetween)
+            {
+                return baseDir + angle;
+            }
+            else
+            {
+                anyAngleClampedThisFrame = true;
+                
+                return baseDir;
+            }
+        }
+        
+        float ClampAngleToCurrent(float current, float baseDir, float targetDir, float minAngle, float maxAngle)
+        {
+            float angle = EulerAngle(baseDir, targetDir);
+            
+            bool isBetween = angle > minAngle && angle < maxAngle;
+            
+            angle = Mathf.Clamp(angle, minAngle, maxAngle);
+
+
+            
+            if (isBetween)
+            {
+                return baseDir + angle;
+            }
+            else
+            {
+                anyAngleClampedThisFrame = true;
+                
+                return current;
+            }
+        }
         
         float EulerAngle(float dirOne, float dirTwo)
         {
@@ -112,56 +199,61 @@ public class Turret : MonoBehaviour
             
             return angle;
         }
+    }
         
-        float ClampAngleToCurrent(float dirOne, float dirTwo, float minAngle, float maxAngle, float current)
+    // If radius is relative to base, we draw a radius from barrel base in the 4 relative angles that go from
+    // the base rotation plus the relative target radius angles
+    // If not, this radius is drawn relative to the current rotation of the barrel base
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = fullRadiusColor;
+        
+        if (turretBase == null) return; 
+        if (barrelBase == null) return;
+        
+        Gizmos.DrawWireSphere(barrelBase.transform.position, targetDistance);
+        
+        float xRadius = targetDiameter.x / 2;
+        
+        float yRadius = targetDiameter.y / 2;
+        
+        Vector3[] angles = new Vector3[4];
+        
+        Vector3 rotation = Vector3.zero;
+        
+        if (radiusRelativeToBase)
         {
-            float angle = EulerAngle(dirOne, dirTwo);
+            rotation = turretBase.transform.rotation.eulerAngles;
             
-            bool isBetween = angle > minAngle && angle < maxAngle;
+            angles[0] = new Vector3(rotation.x + yRadius, rotation.y + xRadius, rotation.z);
             
-            angle = Mathf.Clamp(angle, minAngle, maxAngle);
+            angles[1] = new Vector3(rotation.x - yRadius, rotation.y + xRadius, rotation.z);
             
-            if (isBetween) { return dirOne + angle; }
+            angles[3] = new Vector3(rotation.x + yRadius, rotation.y - xRadius, rotation.z);
             
-            else
-            {
-                return current;
-            }
+            angles[2] = new Vector3(rotation.x - yRadius, rotation.y - xRadius, rotation.z);
+        }
+        else
+        {
+            rotation = barrelBase.transform.rotation.eulerAngles;
+            
+            angles[0] = new Vector3(rotation.x + yRadius, rotation.y + xRadius, rotation.z);
+            
+            angles[1] = new Vector3(rotation.x - yRadius, rotation.y + xRadius, rotation.z);
+            
+            angles[3] = new Vector3(rotation.x + yRadius, rotation.y - xRadius, rotation.z);
+            
+            angles[2] = new Vector3(rotation.x - yRadius, rotation.y - xRadius, rotation.z);
         }
         
-        float ClampAngleToBase(float dirOne, float dirTwo, float minAngle, float maxAngle)
-        {
-            float angle = EulerAngle(dirOne, dirTwo);
-            
-            bool isBetween = angle > minAngle && angle < maxAngle;
-            
-            angle = Mathf.Clamp(angle, minAngle, maxAngle);
-            
-            if (isBetween) { return dirOne + angle; }
-            else { return dirOne; }
-        }
+        Gizmos.color = targetRadiusColor;
         
-        Vector3 ClampEulerRot(Vector3 baseEuler, Vector3 targetEuler, Vector2 limits, bool clampToCurrent, 
-            Vector3 current = default)
+        //drawing arms of the radius
+        for (int i = 0; i < angles.Length; i++)
         {
-            Vector3 a = baseEuler;
+            Vector3 dir = Quaternion.Euler(angles[i]) * Vector3.forward * targetDistance;
             
-            Vector3 b = targetEuler;
-            
-            if (clampToCurrent)
-            {
-                b.x = ClampAngleToCurrent(a.x, b.x, -limits.y, limits.y, current.x);
-            
-                b.y = ClampAngleToCurrent(a.y, b.y , -limits.x, limits.x, current.y);
-            }
-            else
-            {
-                b.x = ClampAngleToBase(a.x, b.x, -limits.y, limits.y);
-            
-                b.y = ClampAngleToBase(a.y, b.y , -limits.x, limits.x);
-            }
-            
-            return b;
+            Gizmos.DrawRay(barrelBase.transform.position, dir);
         }
     }
     
@@ -169,7 +261,7 @@ public class Turret : MonoBehaviour
     {
         if (newTarget != null)
         {
-            playerpos = newTarget;
+            playerPos = newTarget;
         }
         else
         {
