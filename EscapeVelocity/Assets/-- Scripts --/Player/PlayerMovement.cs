@@ -233,9 +233,14 @@ public class PlayerMovement : MonoBehaviour
         //Managing spawn pos since rigidbody attached. Parent trans set to desired spawn pos + rot in GameInputManager
         Vector3 offset = transform.position - transform.parent.position;
         
-        _rb.MovePosition(transform.parent.position + offset); // rigidbody needs to be moved specially to move GO
+        Teleport(transform.position + offset);
         
         if (Boss.Instance != null) Boss.Instance.SetTarget(transform);
+    }
+    
+    public void Teleport(Vector3 position)
+    {
+        _rb.MovePosition(position); // rigidbody needs to be moved specially to move GO
     }
     
     private void OnDisable()

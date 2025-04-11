@@ -157,9 +157,14 @@ public class PlayerEquipabbles : MonoBehaviour
     
     public void Teleport()
     {
-        transform.position = teleportTarget.transform.position;
+        Vector3 targetPos = teleportTarget.transform.position;
+        
+        _playerMovement.Teleport(targetPos);
+
         GetComponent<Rigidbody>().linearVelocity = teleportTarget.GetComponent<Rigidbody>().linearVelocity;
+        
         Destroy(teleportTarget);
+        
         S.activeTeleport = false;
     }
     

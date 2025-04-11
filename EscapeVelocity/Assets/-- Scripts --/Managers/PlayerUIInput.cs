@@ -14,6 +14,8 @@ public class PlayerUIInput : MonoBehaviour
     [SerializeField] private string equipWheelUseAction = "EquipWheelUse";
     
     [SerializeField] private string equipWheelNavigateAction = "EquipWheelNavigate";
+
+    [SerializeField] private string lookAction = "Look";
     
     [SerializeField] private string playerActionMap = "Player";
     
@@ -26,6 +28,8 @@ public class PlayerUIInput : MonoBehaviour
     private InputAction _equippableWheelUseAction;
     
     private InputAction _equippableWheelNavigateAction;
+
+    private InputAction _lookAction;
     
     private UIManager _uiManager;
     
@@ -38,6 +42,8 @@ public class PlayerUIInput : MonoBehaviour
         _playerInput = GetComponent<PlayerInput>();
         
         _pauseAction = _playerInput.actions.FindAction(pauseAction);
+
+        _lookAction = _playerInput.actions.FindAction(lookAction);
         
         _equippableWheelUseAction = _playerInput.actions.FindAction(equipWheelUseAction);
         
@@ -100,12 +106,20 @@ public class PlayerUIInput : MonoBehaviour
         if (_equippableWheelUseAction.triggered && PlayerEquipabbles.S.IsUnlocked)
         {
             _uiManager.UISelectWheel.gameObject.SetActive(true);
+
+            Time.timeScale = 0.1f;
+
+            _lookAction.Disable();
         }
         
         // Turn off if wheel is active and not being used
         if (_uiManager.UISelectWheel.gameObject.activeSelf && !_equippableWheelUseAction.IsPressed())
         {
             _uiManager.UISelectWheel.gameObject.SetActive(false);
+
+            Time.timeScale = 1f;
+
+            _lookAction.Enable();
         }
     }
     
