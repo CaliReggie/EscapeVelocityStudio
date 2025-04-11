@@ -134,11 +134,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Large Sword Parent
       objectReference: {fileID: 0}
-    - target: {fileID: 4498545134249467124, guid: 79887fce1a2a0f347ac8e028f6b5c1fb,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 79887fce1a2a0f347ac8e028f6b5c1fb,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -147,12 +142,12 @@ PrefabInstance:
     - target: {fileID: 6817472501798378072, guid: 79887fce1a2a0f347ac8e028f6b5c1fb,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 79887fce1a2a0f347ac8e028f6b5c1fb,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 79887fce1a2a0f347ac8e028f6b5c1fb,
         type: 3}
@@ -15566,7 +15561,7 @@ PrefabInstance:
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.366
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
@@ -15576,37 +15571,37 @@ PrefabInstance:
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.215
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 6817472501798378072, guid: 6d23a63c75025a34a94f03001c9b418b,
         type: 3}
@@ -26604,6 +26599,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ExplosiveDiskParent
+      objectReference: {fileID: 0}
+    - target: {fileID: 4927286572826526651, guid: 2361bf55ebb7b8b419e71c429de18bc5,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8717316061528129624, guid: 2361bf55ebb7b8b419e71c429de18bc5,
         type: 3}

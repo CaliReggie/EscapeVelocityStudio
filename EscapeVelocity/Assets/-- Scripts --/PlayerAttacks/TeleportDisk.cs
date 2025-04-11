@@ -2,11 +2,14 @@ using UnityEngine;
 
 public class TeleportDisk : Disk
 {
-    [Header("Teleport Disk")]
-    public GameObject teleporterPrefab;
-    public float playerHeight;
     private bool frozen = false;
 
+    protected override void Start()
+    {
+        base.Start();
+        PlayerEquipabbles.S.activeTeleport = true;
+        PlayerEquipabbles.S.teleportTarget = gameObject;
+    }
     protected override void Movement()
     {
         if (!frozen)
@@ -18,7 +21,7 @@ public class TeleportDisk : Disk
     {
         frozen = true;
         rb.constraints = RigidbodyConstraints.FreezeAll;
-        GetComponent<Collider>().enabled = false;
+        GetComponentInChildren<Collider>().enabled = false;
         ricochet = false;
     }
 

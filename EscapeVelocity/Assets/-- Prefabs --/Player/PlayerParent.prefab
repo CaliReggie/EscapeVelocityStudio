@@ -6007,7 +6007,7 @@ MonoBehaviour:
     <WeaponRefreshDuration>k__BackingField: 0
     <AmmoCost>k__BackingField: 1
   - <EquippableClass>k__BackingField: 2
-    <AssociatedWeapon>k__BackingField: {fileID: -1763987983881152478, guid: b7eccd994f935d94e8b9630a38154908,
+    <AssociatedWeapon>k__BackingField: {fileID: 8458386910422099417, guid: 6e24355182f4eda449374d05aa9d8428,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 0
     <AmmoCost>k__BackingField: 2
@@ -6027,7 +6027,7 @@ MonoBehaviour:
     <WeaponRefreshDuration>k__BackingField: 1
     <AmmoCost>k__BackingField: 2
   - <EquippableClass>k__BackingField: 2
-    <AssociatedWeapon>k__BackingField: {fileID: 6067361804023609896, guid: 6c7736c369c899f4681b8516c932afda,
+    <AssociatedWeapon>k__BackingField: {fileID: 4909552417030516060, guid: 3b67b2315c333b9449477ac4c8104e07,
       type: 3}
     <WeaponRefreshDuration>k__BackingField: 1
     <AmmoCost>k__BackingField: 2

@@ -14,10 +14,10 @@ public class MeleeAttack : Weapon
         _startTime = Time.time;
         if (GetComponent<Animator>().parameters.Length >0)
         {
-            int index = Random.Range(0, 3);
+            int index = Random.Range(0, 2);
             while  (Time.time - lastUseTime < 3f && lastMeleeAttack == index)
             {
-                index = Random.Range(0, 3);
+                index = Random.Range(0, 2);
             }
             GetComponent<Animator>().SetInteger("Index", index);
             lastMeleeAttack = index;

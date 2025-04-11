@@ -103,10 +103,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8717316061528129624}
-  - component: {fileID: -4803091055766053387}
   - component: {fileID: -5801585941380627023}
+  - component: {fileID: 8458386910422099417}
   m_Layer: 16
-  m_Name: BasicDiskParent
+  m_Name: TeleportDiskParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -129,34 +129,6 @@ Transform:
   - {fileID: 7974528829868148294}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-4803091055766053387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4927286572826526651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a480b89a639614d84b7ce549ae5a1a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponType: 0
-  enemyMask:
-    serializedVersion: 2
-    m_Bits: 32768
-  damageAmt: 5
-  lockedInAttackDur: 0.5
-  speed: 20
-  lifeSpan: 5
-  ricochet: 1
-  maxRicochetCount: 3
-  rayDist: 0.6
-  ricochetMask:
-    serializedVersion: 2
-    m_Bits: 34304
-  homing: 1
-  currentTarget: {fileID: 0}
 --- !u!54 &-5801585941380627023
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -184,6 +156,37 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &8458386910422099417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4927286572826526651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb2956a5246a41f439984108cec3507f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponType: 1
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 0
+  damageAmt: 5
+  lockedInAttackDur: 0.5
+  speed: 15
+  lifeSpan: 5
+  ricochet: 1
+  maxRicochetCount: 3
+  rayDist: 0.6
+  ricochetMask:
+    serializedVersion: 2
+    m_Bits: 33792
+  homing: 0
+  currentTarget: {fileID: 0}
+  teleporterPrefab: {fileID: 7360639938885337017, guid: 9bd404f3a897c3a48906ef90656e76eb,
+    type: 3}
+  playerHeight: 0
 --- !u!1001 &4660484568651594662
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -192,6 +195,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8717316061528129624}
     m_Modifications:
+    - target: {fileID: 7902248459018578354, guid: f8525fda14d91274d9499b4be22a9ace,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 0.80236626
+      objectReference: {fileID: 0}
+    - target: {fileID: 7902248459018578354, guid: f8525fda14d91274d9499b4be22a9ace,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7902248459018578354, guid: f8525fda14d91274d9499b4be22a9ace,
+        type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8341428137908717727, guid: f8525fda14d91274d9499b4be22a9ace,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -247,6 +265,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spinning Disk
       objectReference: {fileID: 0}
+    - target: {fileID: 9218101637118168305, guid: f8525fda14d91274d9499b4be22a9ace,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 99c4b56ab89c69d46b128dfef5d01d7e, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
