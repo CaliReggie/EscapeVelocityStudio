@@ -1,159 +1,182 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
+[RequireComponent(typeof(Boss))]
 public class BodyMovement : MonoBehaviour
 {
     [Header("References")]
     
-    [SerializeField] private LegReference[] legs;
+    [SerializeField] private LegReference[] legs; // Wrapper list for managing attached legs
+    
+    private enum EMovementSource
+    {
+        None,
+        UserInput,
+        Boss
+    }
 
     [Header("Body Movement")]
-    
-    [SerializeField] private float targetBodyHeight = 1f;
 
-    [SerializeField] private float moveSpeed = 1f;
+    [SerializeField] private EMovementSource movementSource = EMovementSource.Boss; // Source of movement input
     
-    [Range(0,1)] [SerializeField] private float posEasing = 0.5f;
+    [SerializeField] private float targetBodyHeight = 1f; // Height above avg leg position to move body to
+
+    [SerializeField] private float moveSpeed = 1f; //Speed at which lateral target move is set
     
-    [SerializeField] private float rotationSpeed;
+    [Range(0,1)] [SerializeField] private float posEasing = 0.5f; //Easing between current and target position
     
-    [Range(0,1)] [SerializeField] private float rotEasing = 0.5f;
+    [SerializeField] private float rotationSpeed = 60; //Speed at which body rotates, kinda jank rn
+    
+    [Range(0,1)] [SerializeField] private float rotEasing = 0.5f; //Easing between current and target rotation
     
     [Header("Leg Behaviour")]
     
-    [SerializeField] private bool overrideLegBehaviour;
+    [Tooltip("Click to assign below settings to all attached legs")]
+    [SerializeField] private bool setAllLegSettings;
     
-    [SerializeField] private float stepDistance = 1f;
+    [SerializeField] private float stepDistance = 1f; //See LegMovement
     
-    [SerializeField] private float stepDuration = 1f;
+    [SerializeField] private Vector2 dynamicDistanceRange = new Vector2(0.5f, 1.5f);  //See LegMovement
     
-    [SerializeField] private float stepHeight = 1f;
+    [SerializeField] private Vector2 dynamicDurationMinMax = new Vector2(0.5f, 1f); //See LegMovement
+    
+    [Range(0,1)] [SerializeField] private float stepHeightFactor = 0.5f; // See LegMovement
+    
+    [SerializeField] private EasingType stepEasingType = EasingType.None; // See LegMovement
+    
+    [Range(1,10)] [SerializeField] private int stepEasingMagnitude = 1; //See LegMovement
     
     //Private, or non serialized below
     
     //Input
-    private Vector2 _moveInput;
+    private Vector2 _moveInput; //Lateral movement input, set from _boss query or (deprecated) user input
     
-    private float _rotationInput;
+    private float _rotationInput; //Rotation input, set from _boss query or (deprecated) user input
+                                  //(-1 for left, 1 for right)
+                                  
+    //References
     
-    private Vector3 _averageBackLeftPosition;
+    private Boss _boss; // Used to query for information on behaviour
+                                  
+    private Vector3 _averageUnweightedPosition; //Used for weighting body position and rotation
     
-    private Vector3 _averageFrontLeftPosition;
+    private Vector3 _averageBackLeftPosition; //Used for weighting body position and rotation
     
-    private Vector3 _averageFrontRightPosition;
+    private Vector3 _averageFrontLeftPosition; //Used for weighting body position and rotation
     
-    private Vector3 _averageBackRightPosition;
+    private Vector3 _averageFrontRightPosition; //Used for weighting body position and rotation
     
-    int BLCount, FLCount, FRCount, BRCount;
+    private Vector3 _averageBackRightPosition; //Used for weighting body position and rotation
     
-    private Vector3 _curPositionFromLegs;
+    int XCount, BLCount, FLCount, FRCount, BRCount; //Counts of legs of each type, used for averaging
     
-    private Quaternion _curRotationFromLegs;
+    private Vector3 _targetPosAboveLegs; // Current average of all leg positions plus height, used for body position
     
-    private Quaternion _rotationOffsetFromInput = Quaternion.identity;
+    private Quaternion _curRotationFromLegs; // Current average target rotation from leg positions
     
-    private bool _legsInitialized;
+    private Quaternion _rotationOffsetFromInput = Quaternion.identity; // Used for additive turning
     
-    private Vector3 AverageLegPosition
+    private Vector3 AverageLegPosition // Averages all types of legs to get a single point
     {
         get
         {
-            Vector3 averageLegPosition = _averageBackLeftPosition +
-                                         _averageFrontLeftPosition +
-                                         _averageFrontRightPosition +
-                                         _averageBackRightPosition;
+            List<Vector3> legPositions = new List<Vector3>();
             
-            averageLegPosition /= 4f;
+            if (_averageUnweightedPosition != Vector3.zero) legPositions.Add(_averageUnweightedPosition);
+            if (_averageBackLeftPosition != Vector3.zero) legPositions.Add(_averageBackLeftPosition);
+            if (_averageFrontLeftPosition != Vector3.zero) legPositions.Add(_averageFrontLeftPosition);
+            if (_averageFrontRightPosition != Vector3.zero) legPositions.Add(_averageFrontRightPosition);
+            if (_averageBackRightPosition != Vector3.zero) legPositions.Add(_averageBackRightPosition);
+            
+            if (legPositions.Count == 0) return Vector3.zero; // No legs, no position
+            
+            Vector3 averageLegPosition = Vector3.zero;
+            
+            // Calculate the average position of all legs
+            for (int i = 0; i < legPositions.Count; i++)
+            {
+                if (legPositions[i] == Vector3.zero) continue; // Skip non calculated values
+                
+                averageLegPosition += legPositions[i];
+            }
+            
+            averageLegPosition /= legPositions.Count;
             
             return averageLegPosition;
         }
     }
 
-    private void OnValidate()
+    private void OnValidate() //Way to set values in editor regardless of playmode or not
     {
-        if (overrideLegBehaviour)
+        if (setAllLegSettings)
         {
-            foreach (LegReference leg in legs)
-            {
-                leg.legMovement.SetBehaviour(stepDistance, stepDuration, stepHeight);
-            }
+            SetLegSettings();
             
-            overrideLegBehaviour = false;
+            setAllLegSettings = false;
+        }
+    }
+    
+    private void SetLegSettings()
+    {
+        foreach (LegReference leg in legs)
+        {
+            leg.legMovement.StepDistance = stepDistance;
+            
+            leg.legMovement.DynamicDistanceRange = dynamicDistanceRange;
+            
+            leg.legMovement.DynamicDurationMinMax = dynamicDurationMinMax;
+            
+            leg.legMovement.StepHeightFactor = stepHeightFactor;
+            
+            leg.legMovement.StepEasingType = stepEasingType;
+            
+            leg.legMovement.StepEasingMagnitude = stepEasingMagnitude;
         }
     }
 
+    private void Awake()
+    {
+        _boss = GetComponent<Boss>();
+    }
 
     private void OnEnable()
     {
-        StartCoroutine(InitLegs());
-    }
-
-    private IEnumerator InitLegs()
-    {
-        _averageBackLeftPosition = Vector3.zero;
-        _averageFrontLeftPosition = Vector3.zero;
-        _averageFrontRightPosition = Vector3.zero;
-        _averageBackRightPosition = Vector3.zero;
-        
-        BLCount = 0;
-        FLCount = 0;
-        FRCount = 0;
-        BRCount = 0;
-        
-        yield return new WaitForSeconds(0.1f);
-        
-        foreach (LegReference leg in legs)
-        {
-            leg.legMovement.Initialize();
-            
-            leg.legMovement.SetBehaviour(stepDistance, stepDuration, stepHeight);
-            
-            if (leg.legType == LegType.BackLeft)
-            {
-                _averageBackLeftPosition += leg.legMovement.LegLoc.position;
-                
-                BLCount++;
-            }
-            else if (leg.legType == LegType.FrontLeft)
-            {
-                _averageFrontLeftPosition += leg.legMovement.LegLoc.position;
-                
-                FLCount++;
-            }
-            else if (leg.legType == LegType.FrontRight)
-            {
-                _averageFrontRightPosition += leg.legMovement.LegLoc.position;
-                
-                FRCount++;
-            }
-            else if (leg.legType == LegType.BackRight)
-            {
-                _averageBackRightPosition += leg.legMovement.LegLoc.position;
-                
-                BRCount++;
-            }
-        }
-        
-        _averageBackLeftPosition /= BLCount;
-        
-        _averageFrontLeftPosition /= FLCount;
-        
-        _averageFrontRightPosition /= FRCount;
-        
-        _averageBackRightPosition /= BRCount;
-
-        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight;
-        
-        _legsInitialized = true;
+        RefreshCounts();
     }
 
     private void Update()
     {
-        if (!_legsInitialized) return;
-
-        GetInput();
+        switch (movementSource)
+        {
+            case EMovementSource.UserInput:
+                
+                GetMoveInput();
+                
+                break;
+            
+            case EMovementSource.Boss: 
+                
+                if (!_boss.HasTarget) // No target, no movement
+                {
+                    _moveInput = Vector2.zero;
+                    
+                    _rotationInput = 0f;
+                    
+                    return; 
+                }   
+                
+                SetMoveInput();
+                
+                break;
+            
+            default:
+                
+                _moveInput = Vector2.zero;
+                _rotationInput = 0f;
+                
+                break;
+        }
         
         CalculatePosition();
         
@@ -164,7 +187,7 @@ public class BodyMovement : MonoBehaviour
         BodyRotate();
     }
     
-    private void GetInput()
+    private void GetMoveInput()
     {
         _moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         
@@ -179,77 +202,150 @@ public class BodyMovement : MonoBehaviour
         
         _rotationInput = leftLook + rightLook;
     }
+    
+    /// <summary>
+    /// Query to _boss and set a target lateral movement and rotation input based on a target position
+    /// </summary>
+    private void SetMoveInput()
+    {
+        Vector3 targetPosition = _boss.GetTargetPosition(); // See Boss.cs
+        
+        Vector3 toTarget = targetPosition - transform.position; // Target direction
+        
+        float distanceToTarget = toTarget.magnitude;
 
-    private void CalculatePosition()
+        if (distanceToTarget < _boss.StoppingDistance) //Nothing if in range
+        {
+            _moveInput = Vector2.zero;
+            _rotationInput = 0f;
+            return;
+        }
+        
+        Vector3 localToTarget = transform.InverseTransformDirection(toTarget.normalized); //World to local direction
+        
+        _moveInput = new Vector2(localToTarget.x, localToTarget.z); // Horizontal part of said direction
+        
+        _moveInput = Vector2.ClampMagnitude(_moveInput, 1f); // Clamped to replicate input
+        
+        Vector3 flatToTarget = toTarget;
+        flatToTarget.y = 0; // Horizontal direction to target
+        
+        Vector3 flatForward = transform.forward;
+        flatForward.y = 0; // Horizontal forward direction
+
+        Vector3 cross = Vector3.Cross(flatForward.normalized, flatToTarget.normalized); //Cross for orientation
+        
+        _rotationInput = Mathf.Sign(Vector3.Dot(cross, Vector3.up));  //Sign of the cross product
+
+        float angle                    = Vector3.Angle(flatForward, flatToTarget); //Angle between forward and target
+        if (angle < 5f) _rotationInput = 0f; // Ignore small angles
+    }
+
+    private void CalculatePosition() // TODO: SHOW!!!!
     {
         RefreshAverages();
+
+        _targetPosAboveLegs = AverageLegPosition + transform.up * targetBodyHeight;
+        
+        return;
+    }
+    
+    private void RefreshCounts()
+    {
+        XCount = 0;
+        BLCount = 0;
+        FLCount = 0;
+        FRCount = 0;
+        BRCount = 0;
         
         foreach (LegReference leg in legs)
         {
+            if (leg.legType == LegType.BackLeft) BLCount++;
+            else if (leg.legType == LegType.FrontLeft) FLCount++;
+            else if (leg.legType == LegType.FrontRight) FRCount++;
+            else if (leg.legType == LegType.BackRight) BRCount++;
+            else if (leg.legType == LegType.Unweighted) XCount++;
+        }
+    }
+    
+    private void RefreshAverages()
+    {
+        _averageUnweightedPosition = Vector3.zero;
+        _averageBackLeftPosition = Vector3.zero;
+        _averageFrontLeftPosition = Vector3.zero;
+        _averageFrontRightPosition = Vector3.zero;
+        _averageBackRightPosition = Vector3.zero;
+        
+        foreach (LegReference leg in legs) //Adding weights by type
+        {
             switch (leg.legType)
             {
+                case LegType.Unweighted:
+                    _averageUnweightedPosition += leg.legMovement.LegRealLoc.position;
+                    break;
                 case LegType.BackLeft:
-                    _averageBackLeftPosition += leg.legMovement.LegLoc.position;
+                    _averageBackLeftPosition += leg.legMovement.LegRealLoc.position;
                     break;
                 case LegType.FrontLeft:
-                    _averageFrontLeftPosition += leg.legMovement.LegLoc.position;
+                    _averageFrontLeftPosition += leg.legMovement.LegRealLoc.position;
                     break;
                 case LegType.FrontRight:
-                    _averageFrontRightPosition += leg.legMovement.LegLoc.position;
+                    _averageFrontRightPosition += leg.legMovement.LegRealLoc.position;
                     break;
                 case LegType.BackRight:
-                    _averageBackRightPosition += leg.legMovement.LegLoc.position;
+                    _averageBackRightPosition += leg.legMovement.LegRealLoc.position;
                     break;
             }
         }
         
+        //Dividing by counts for averages
+        
+        if (XCount == 0) XCount = 1; // Avoid division by zero
+        
+        _averageUnweightedPosition /= XCount;
+        
+        if (BLCount == 0) BLCount = 1;
+        
         _averageBackLeftPosition /= BLCount;
+        
+        if (FLCount == 0) FLCount = 1;
         
         _averageFrontLeftPosition /= FLCount;
         
+        if (FRCount == 0) FRCount = 1;
+        
         _averageFrontRightPosition /= FRCount;
         
+        if (BRCount == 0) BRCount = 1;
+        
         _averageBackRightPosition /= BRCount;
-
-        _curPositionFromLegs = AverageLegPosition + transform.up * targetBodyHeight;
-        
-        return;
-        
-        void RefreshAverages()
-        {
-            _averageBackLeftPosition = Vector3.zero;
-            _averageFrontLeftPosition = Vector3.zero;
-            _averageFrontRightPosition = Vector3.zero;
-            _averageBackRightPosition = Vector3.zero;
-        }
     }
     
-    private void CalculateRotation()
+    private void CalculateRotation() // TODO: SHOW!!!!
     {
+        // Calculating weights by body position
+        
         Vector3 averageFront = (_averageFrontLeftPosition + _averageFrontRightPosition) / 2f;
         Vector3 averageBack = (_averageBackLeftPosition + _averageBackRightPosition) / 2f;
         Vector3 averageLeft = (_averageBackLeftPosition + _averageFrontLeftPosition) / 2f;
         Vector3 averageRight = (_averageBackRightPosition + _averageFrontRightPosition) / 2f;
 
-        Vector3 forward = (averageFront - averageBack).normalized;
-        Vector3 right = (averageRight - averageLeft).normalized;
+        Vector3 forward = (averageFront - averageBack).normalized; // Forward weight direction
+        Vector3 right = (averageRight - averageLeft).normalized; // Right weight direction
         Vector3 up = Vector3.Cross(forward, right).normalized;
-
-        // Re-orthogonalize right in case of non-perfect leg placement
-        right = Vector3.Cross(up, forward).normalized;
-
-        // Build rotation from direction vectors
-        _curRotationFromLegs = Quaternion.LookRotation(forward, up);
-
+        
+        right = Vector3.Cross(up, forward).normalized; //For future issues with correcting leg placement
+        
+        _curRotationFromLegs = Quaternion.LookRotation(forward, up); // Rotation from legs
     }
     
-    private void BodyMove()
+    private void BodyMove() // TODO: SHOW!!!!
     {
         Vector3 targetBodyPos = transform.position;
         
-        targetBodyPos.y = _curPositionFromLegs.y;
+        targetBodyPos.y = _targetPosAboveLegs.y; // Target pos is added height of target pos
         
-        if (_moveInput != Vector2.zero)
+        if (_moveInput != Vector2.zero) //Adding lateral movement
         {
             Vector2 additionalMove = moveSpeed * Time.deltaTime * new Vector2(_moveInput.x, _moveInput.y);
             
@@ -258,13 +354,12 @@ public class BodyMovement : MonoBehaviour
             targetBodyPos += transform.right * additionalMove.x;
         }
         
-        transform.position = Vector3.Lerp(transform.position, targetBodyPos, posEasing);
+        transform.position = Vector3.Lerp(transform.position, targetBodyPos, posEasing); //Lerping to target
     }
     
-    private void BodyRotate()
+    private void BodyRotate() // TODO: SHOW!!!!
     {
-        // Accumulate rotation offset if rotating
-        if (_rotationInput != 0)
+        if (_rotationInput != 0) // Kinda janky, adding rotation to current target like this to avoid snapping
         {
             Quaternion rotationAddition = Quaternion.Euler(0, _rotationInput * rotationSpeed * Time.deltaTime, 0);
             
@@ -272,19 +367,19 @@ public class BodyMovement : MonoBehaviour
             
             _rotationOffsetFromInput.y = Mathf.Clamp(_rotationOffsetFromInput.y, -.25f, .25f);
             
-            _rotationOffsetFromInput.w = 1f;
+            _rotationOffsetFromInput.w = 1f; // Quaternion weirdness
         }
-        else
+        else //Go back to fully weighted look rotation
         {
-            // Reset rotation offset if not rotating
             _rotationOffsetFromInput = Quaternion.Slerp(_rotationOffsetFromInput, Quaternion.identity, 0.1f);
         }
         
         Quaternion targetRotation = _curRotationFromLegs * _rotationOffsetFromInput;
         
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotEasing);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotEasing); // Rot lerping
     }
     
+    //Drawing debug info
     private void OnDrawGizmosSelected()
     {
         //return if not playing
@@ -296,7 +391,7 @@ public class BodyMovement : MonoBehaviour
         
         Gizmos.color = Color.green;
         
-        Gizmos.DrawSphere(_curPositionFromLegs, 0.5f);
+        Gizmos.DrawSphere(_targetPosAboveLegs, 0.5f);
 
         Gizmos.DrawRay(AverageLegPosition, _curRotationFromLegs * Vector3.forward * 5f);
     }
@@ -304,7 +399,7 @@ public class BodyMovement : MonoBehaviour
 
 public enum LegType
 {
-    None,
+    Unweighted,
     BackLeft,
     FrontLeft,
     FrontRight,
