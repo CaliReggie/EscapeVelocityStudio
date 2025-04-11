@@ -4,30 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class LegMovement : MonoBehaviour
-{
-    [Header("Prediction References")]
-    
-    [Tooltip("The transform that will represent the target of the leg point")]
-    [SerializeField] private Transform legTargetLoc;
-    
-    [Tooltip("The transform that will be used to predict the leg point")]
-    [field: SerializeField] private Transform predictionOrigin;
-    
-    [Tooltip("The transform that is the tip of the leg")]
-    [field: SerializeField] public Transform LegLoc { get; private set; }
-    
-    [Header("Prediction Settings")]
-
-    [Tooltip("The distance at which the leg place point will be predicted")]
-    [SerializeField] private float predictionDistance = 10f;
-    
-    [SerializeField] private float predictionRadius = 0.5f;
-    
-    [SerializeField] private LayerMask detectionLayers;
-    
-    
-    private enum EasingType // TODO: SHOW!!!!
+public enum EasingType // Changes step animation behaviourTODO: SHOW!!!!
     {
         None,
         EaseIn,
@@ -35,35 +12,63 @@ public class LegMovement : MonoBehaviour
         EaseInOut
     }
 
+public class LegMovement : MonoBehaviour
+{
+    [Header("Prediction References")]
+    
+    [SerializeField] private Transform legTargetLoc; // Transform that rig guides tip to
+    
+    [field: SerializeField] public Transform LegRealLoc { get; private set; } // Represents tip of the leg
+    
+    [Tooltip("The transform that will be used to predict the leg point")]
+    [field: SerializeField] private Transform stepPredictionOrigin; // Location used to get ground hit
+    
+    
+    [Header("Prediction Settings")]
+
+    [Tooltip("From the highest point on the leg, what is the real distance to the ground")]
+    [SerializeField] private float legHeight = 25f;
+    
+    [SerializeField] private float predictionRadius = 0.5f; //Spherecast radius
+    
+    [SerializeField] private LayerMask detectionLayers;
+
     [Header("Behaviour References")] // TODO: SHOW!!!!
 
+    [Tooltip("Legs references here will be called to step when this one does")]
     [SerializeField] private LegMovement[] snychrononousLegs;
-    
+     
+    [Tooltip("Will not step while these legs are stepping")]
     [SerializeField] private LegMovement[] asynchronousLegs;
     
     [Header("Behaviour Settings")] // TODO: SHOW!!!!
+
+    [Tooltip("Exists for serialization purposes")]
+    [SerializeField] private bool emptyBool;
+
+    [field: SerializeField] public float StepDistance { get; set; } = 1f; //At distance exceeded will try step
     
-    [SerializeField] private float distanceDifToStep = 5f;
+    [field: SerializeField] public Vector2 DynamicDistanceRange { get; set; } = new Vector2(0.5f, 1.5f); //See Step()
     
-    [SerializeField] public float stepDuration = 1f;
+    [field: SerializeField] public Vector2 DynamicDurationMinMax { get; set; } = new Vector2(0.5f, 1f); //See Step()
     
-    [SerializeField] private float peakTargetHeight = 1f;
+    [Range(0,1)] [field: SerializeField] public float StepHeightFactor { get; set; } = 0.5f; // See Step()
     
-    [SerializeField] private EasingType stepEasingType;
+    [field: SerializeField] public EasingType StepEasingType { get; set; } = EasingType.None;
     
-    [Range(1,10)] [SerializeField] private int easingMagnitude = 1;
+    [Range(1,10)] [field: SerializeField] public int StepEasingMagnitude { get; set; } = 1; //Affects curve of easing
     
     //Private or non serialized below
     
-    private Vector3 _currentTargetPoint;
+    private Vector3 _currentTargetPoint; //Point we use to calculate where to put target loc
     
-    private Vector3 _previousTargetPoint;
+    private Vector3 _previousTargetPoint; //Used to track for debug or error handling
 
-    private bool _detectionMissed;
+    private bool _detectionMissed; //Used to track if we are missing the ground
     
-    [field: SerializeField] private bool Stepping { get; set; } = false;
+    private bool Stepping { get; set; } = false; // Read by other legs and Read/Set by this leg
     
-    private bool WaitForAsynchronousLegs // TODO: SHOW!!!!
+    private bool WaitForAsynchronousLegs // False when asyn legs are stepping TODO: SHOW!!!!
     {
         get
         {
@@ -76,7 +81,7 @@ public class LegMovement : MonoBehaviour
         }
     }
     
-    private bool CanStep
+    private bool CanStep // Condensed logic to know when a step can be taken 
     {
         get
         {
@@ -84,34 +89,30 @@ public class LegMovement : MonoBehaviour
             
             if (WaitForAsynchronousLegs) return false;
             
-            return ExceedingStepDistance;
+            return ExceedingStepDistance; // Have exceeded distance?, therefore should step
         }
     }
     
-    private float CurrentStepDistance => Vector3.Distance(LegLoc.position, _currentTargetPoint);
+    private float CurrentStepDistance => Vector3.Distance(LegRealLoc.position, _currentTargetPoint);
     
-    private bool ExceedingStepDistance => CurrentStepDistance > distanceDifToStep;
-    
-    internal void Initialize()
+    private bool ExceedingStepDistance => CurrentStepDistance > StepDistance;
+
+    private void OnEnable()
     {
-        _currentTargetPoint = LegLoc.position;
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        _currentTargetPoint = LegRealLoc.position;
         
-        _previousTargetPoint = LegLoc.position;
+        _previousTargetPoint = LegRealLoc.position;
         
         ManageDetection();
         
         StopAllCoroutines();
         
         StartCoroutine(Step());
-    }
-    
-    public void SetBehaviour( float distance = 0, float duration = 0, float height = 0)
-    {
-        if (distance > 0) distanceDifToStep = distance;
-        
-        if (duration > 0) stepDuration = duration;
-        
-        if (height > 0) peakTargetHeight = height;
     }
     
     private void Update()
@@ -125,10 +126,10 @@ public class LegMovement : MonoBehaviour
     {
         RaycastHit hit;
         
-        Vector3 predictionPosition = predictionOrigin.position;
+        Vector3 predictionPosition = stepPredictionOrigin.position;
         
         if (Physics.SphereCast(predictionPosition, predictionRadius, Vector3.down, out hit,
-                predictionDistance, detectionLayers))
+                legHeight * 2f, detectionLayers)) //Height * 2 should be good
         {
             _currentTargetPoint = hit.point;
             
@@ -136,7 +137,10 @@ public class LegMovement : MonoBehaviour
         }
         else
         {
-            _currentTargetPoint = _previousTargetPoint;
+            
+            // _currentTargetPoint = _previousTargetPoint;
+            
+            _currentTargetPoint = predictionPosition + Vector3.down * legHeight; //Setting to default
             
             _detectionMissed = true;
         }
@@ -148,7 +152,7 @@ public class LegMovement : MonoBehaviour
     {
         if (_detectionMissed)
         {
-            legTargetLoc.position = _currentTargetPoint;
+            legTargetLoc.position = _currentTargetPoint; // Will have been calculated in ManageDetection()
         }
         else
         {
@@ -163,31 +167,34 @@ public class LegMovement : MonoBehaviour
     {
         Stepping = true;
         
-        foreach (LegMovement leg in snychrononousLegs)
+        foreach (LegMovement leg in snychrononousLegs) // Try to make others step
         {
             leg.TryStep();
         }
         
-        Vector3 startPos = LegLoc.position;
+        Vector3 startPos = LegRealLoc.position; //Starting from real leg log for visuals
         
-        Vector3 endPos = _currentTargetPoint;
-        
-        Vector3 midPoint = Vector3.Lerp(startPos, endPos, 0.5f);
+        Vector3 endPos = _currentTargetPoint; //Will be calculated to something we can use
         
         // float ydifference = Mathf.Abs(startPos.y - endPos.y); //TODO maybe care about dif amounts another time
         
+        Vector3 midPoint = Vector3.Lerp(startPos, endPos, 0.5f);
+        
+        // additional step height is a factor from 0-1 considering how tall the leg is plus the midpoint
+        float peakTargetHeight = StepHeightFactor * legHeight;
+        
         midPoint.y += peakTargetHeight;
         
-        Vector3[] easingPoints = new Vector3[3];
+        //Using a bezier curve between array of Vector3s. Will update the last point for guaranteed hit
+        Vector3[] easingPoints = { startPos, midPoint, endPos };
         
-        easingPoints[0] = startPos;
-        
-        easingPoints[1] = midPoint;
-        
-        easingPoints[2] = endPos;
+        // Uses distance of step withing dynamic range to act as t for lerp between min and max step speeds
+        float stepDuration = Mathf.Lerp(DynamicDurationMinMax.x, DynamicDurationMinMax.y,
+            (CurrentStepDistance - DynamicDistanceRange.x) / (DynamicDistanceRange.y - DynamicDistanceRange.x));
         
         float timeLeft = stepDuration;
 
+        // u used as t for bezier curve, also used to track time left
         float u = 0f;
         
         while (u < 1f) // TODO: SHOW!!!! UTILS
@@ -199,48 +206,50 @@ public class LegMovement : MonoBehaviour
             
             timeLeft -= Time.deltaTime;
             
-            easingPoints[2] = _currentTargetPoint;
+            easingPoints[2] = _currentTargetPoint; //updating the last point
             
-            u = 1 - (timeLeft / stepDuration);
+            u = 1 - (timeLeft / stepDuration); // updating u
             
-            u = Mathf.Clamp01(u);
+            u = Mathf.Clamp01(u); // guaranteed to end at 1
             
-            float stepEasing = 0f;
+            float stepEasing = 0f; // base declaration
 
-            switch (stepEasingType)
+            switch (StepEasingType)
             {
                 case EasingType.EaseIn:
                     
-                    stepEasing = Mathf.Pow(u, easingMagnitude);
+                    stepEasing = Mathf.Pow(u, StepEasingMagnitude); //Formula: u^n
                     break;
                 
                 case EasingType.EaseOut:
                     
-                    stepEasing = 1 - Mathf.Pow(1 - u, easingMagnitude);
+                    stepEasing = 1 - Mathf.Pow(1 - u, StepEasingMagnitude); //Formula: 1 - (1-u)^n
                     break;
                 
                 case EasingType.EaseInOut:
                     
-                    stepEasing = u < 0.5f ? 
-                        Mathf.Pow(u * 2, easingMagnitude) / 2 : 
-                        1 - (Mathf.Pow((1 - u) * 2, easingMagnitude) / 2);
+                    stepEasing = u < 0.5f ?                                         // Formula: u < 0.5 ?
+                        Mathf.Pow(u * 2, StepEasingMagnitude) / 2 :            // (u*2)^n/2 :
+                        1 - (Mathf.Pow((1 - u) * 2, StepEasingMagnitude) / 2); // 1 - ((1-u)*2)^n/2
                     break;
                 
                 case EasingType.None:
                     
-                    stepEasing = u;
+                    stepEasing = u; // u already 0-1
+                    
                     break;
                 
             }
             
-            legTargetLoc.position = Utils.Bezier(stepEasing, easingPoints);
+            legTargetLoc.position = Utils.Bezier(stepEasing, easingPoints); // See Utils for Bezier
             
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame(); // Neat way to run on delta time ?
         }
         
         Stepping = false;
     }
     
+    //Debug drawing
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.blue;
@@ -249,13 +258,16 @@ public class LegMovement : MonoBehaviour
         
         Gizmos.color = Color.red;
         
-        Gizmos.DrawLine(predictionOrigin.position, predictionOrigin.position + Vector3.down * 
-            predictionDistance);
+        Gizmos.DrawLine(stepPredictionOrigin.position, stepPredictionOrigin.position + Vector3.down * 
+            legHeight * 2f);
         
         Gizmos.DrawSphere(_currentTargetPoint, 0.5f);
     }
     
-    private void TryStep()
+    /// <summary>
+    /// Attempts to step the leg.
+    /// </summary>
+    public void TryStep()
     {
         if (!CanStep) return;
         
