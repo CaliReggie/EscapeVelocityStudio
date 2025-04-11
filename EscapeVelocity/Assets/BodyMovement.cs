@@ -6,6 +6,8 @@ using UnityEngine.Serialization;
 public class BodyMovement : MonoBehaviour
 {
     [Header("References")]
+
+    [SerializeField] private Boss boss;
     
     [SerializeField] private LegReference[] legs;
 
@@ -152,8 +154,10 @@ public class BodyMovement : MonoBehaviour
     private void Update()
     {
         if (!_legsInitialized) return;
+        
+        if (!boss.HasTarget) return;
 
-        GetInput();
+        SetMoveInput();
         
         CalculatePosition();
         
@@ -164,23 +168,55 @@ public class BodyMovement : MonoBehaviour
         BodyRotate();
     }
     
-    private void GetInput()
+    // private void GetMoveInput()
+    // {
+    //     _moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+    //     
+    //     if (Input.GetKey(KeyCode.LeftShift))
+    //     {
+    //         _moveInput *= 3f;
+    //     }
+    //     
+    //     float leftLook = Input.GetKey(KeyCode.Mouse0) ? -1 : 0;
+    //     
+    //     float rightLook = Input.GetKey(KeyCode.Mouse1) ? 1 : 0;
+    //     
+    //     _rotationInput = leftLook + rightLook;
+    // }
+    
+    private void SetMoveInput()
     {
-        _moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector3 targetPosition = boss.GetTargetPosition();
         
-        if (Input.GetKey(KeyCode.LeftShift))
+        Vector3 toTarget = targetPosition - transform.position;
+        float distanceToTarget = toTarget.magnitude;
+
+        if (distanceToTarget < boss.StoppingDistance)
         {
-            _moveInput *= 3f;
+            _moveInput = Vector2.zero;
+            _rotationInput = 0f;
+            return;
         }
-        
-        float leftLook = Input.GetKey(KeyCode.Mouse0) ? -1 : 0;
-        
-        float rightLook = Input.GetKey(KeyCode.Mouse1) ? 1 : 0;
-        
-        _rotationInput = leftLook + rightLook;
+
+        // Get move input relative to boss's local space
+        Vector3 localToTarget = transform.InverseTransformDirection(toTarget.normalized);
+        _moveInput = new Vector2(localToTarget.x, localToTarget.z);
+        _moveInput = Vector2.ClampMagnitude(_moveInput, 1f);
+
+        // Determine rotation direction
+        Vector3 flatToTarget = toTarget;
+        flatToTarget.y = 0;
+        Vector3 flatForward = transform.forward;
+        flatForward.y = 0;
+
+        Vector3 cross = Vector3.Cross(flatForward.normalized, flatToTarget.normalized);
+        _rotationInput = Mathf.Sign(Vector3.Dot(cross, Vector3.up));
+
+        float angle                    = Vector3.Angle(flatForward, flatToTarget);
+        if (angle < 5f) _rotationInput = 0f;
     }
 
-    private void CalculatePosition()
+    private void CalculatePosition() // TODO: SHOW!!!!
     {
         RefreshAverages();
         
@@ -224,7 +260,7 @@ public class BodyMovement : MonoBehaviour
         }
     }
     
-    private void CalculateRotation()
+    private void CalculateRotation() // TODO: SHOW!!!!
     {
         Vector3 averageFront = (_averageFrontLeftPosition + _averageFrontRightPosition) / 2f;
         Vector3 averageBack = (_averageBackLeftPosition + _averageBackRightPosition) / 2f;
@@ -234,16 +270,14 @@ public class BodyMovement : MonoBehaviour
         Vector3 forward = (averageFront - averageBack).normalized;
         Vector3 right = (averageRight - averageLeft).normalized;
         Vector3 up = Vector3.Cross(forward, right).normalized;
-
-        // Re-orthogonalize right in case of non-perfect leg placement
-        right = Vector3.Cross(up, forward).normalized;
-
-        // Build rotation from direction vectors
+        
+        right = Vector3.Cross(up, forward).normalized; //For future issues with correcting leg placement
+        
         _curRotationFromLegs = Quaternion.LookRotation(forward, up);
 
     }
     
-    private void BodyMove()
+    private void BodyMove() // TODO: SHOW!!!!
     {
         Vector3 targetBodyPos = transform.position;
         
@@ -261,9 +295,8 @@ public class BodyMovement : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, targetBodyPos, posEasing);
     }
     
-    private void BodyRotate()
+    private void BodyRotate() // TODO: SHOW!!!!
     {
-        // Accumulate rotation offset if rotating
         if (_rotationInput != 0)
         {
             Quaternion rotationAddition = Quaternion.Euler(0, _rotationInput * rotationSpeed * Time.deltaTime, 0);
@@ -276,7 +309,6 @@ public class BodyMovement : MonoBehaviour
         }
         else
         {
-            // Reset rotation offset if not rotating
             _rotationOffsetFromInput = Quaternion.Slerp(_rotationOffsetFromInput, Quaternion.identity, 0.1f);
         }
         

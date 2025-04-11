@@ -5919,7 +5919,7 @@ MonoBehaviour:
   useChargeOnHookNotHit: 1
   whatIsGrappleable:
     serializedVersion: 2
-    m_Bits: 1536
+    m_Bits: 34304
   aimLineSpherecastRadius: 3
   maxGrappleDistance: 25
   grappleDelayTime: 0.15

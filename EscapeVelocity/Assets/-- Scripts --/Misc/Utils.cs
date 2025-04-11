@@ -58,7 +58,7 @@ public class Utils : MonoBehaviour
         return ((1 << layer) & layerMask.value) != 0;
     }
     
-    //Shoutout JB
+    //Shoutout JB GameProfBond the GOAT
     static public Vector3 Bezier( float u, List<Vector3> vList, int i0=0, int i1=-1 ) {
         // Set i1 to the last element in vList
         if (i1 == -1) i1 = vList.Count-1;

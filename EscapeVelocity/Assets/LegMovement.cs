@@ -27,7 +27,7 @@ public class LegMovement : MonoBehaviour
     [SerializeField] private LayerMask detectionLayers;
     
     
-    private enum EasingType
+    private enum EasingType // TODO: SHOW!!!!
     {
         None,
         EaseIn,
@@ -35,13 +35,13 @@ public class LegMovement : MonoBehaviour
         EaseInOut
     }
 
-    [Header("Behaviour References")]
+    [Header("Behaviour References")] // TODO: SHOW!!!!
 
     [SerializeField] private LegMovement[] snychrononousLegs;
     
     [SerializeField] private LegMovement[] asynchronousLegs;
     
-    [Header("Behaviour Settings")]
+    [Header("Behaviour Settings")] // TODO: SHOW!!!!
     
     [SerializeField] private float distanceDifToStep = 5f;
     
@@ -63,7 +63,7 @@ public class LegMovement : MonoBehaviour
     
     [field: SerializeField] private bool Stepping { get; set; } = false;
     
-    private bool WaitForAsynchronousLegs
+    private bool WaitForAsynchronousLegs // TODO: SHOW!!!!
     {
         get
         {
@@ -159,7 +159,7 @@ public class LegMovement : MonoBehaviour
         }
     }
     
-    private IEnumerator Step()
+    private IEnumerator Step() // TODO: SHOW!!!!
     {
         Stepping = true;
         
@@ -190,7 +190,7 @@ public class LegMovement : MonoBehaviour
 
         float u = 0f;
         
-        while (u < 1f)
+        while (u < 1f) // TODO: SHOW!!!! UTILS
         {
             if (_detectionMissed)
             {

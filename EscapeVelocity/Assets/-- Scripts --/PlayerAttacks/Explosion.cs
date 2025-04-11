@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Explosion : MonoBehaviour
@@ -14,7 +15,15 @@ public class Explosion : MonoBehaviour
             Vector3 direction = other.transform.position - transform.position;
             float radius = direction.magnitude;
             other.gameObject.GetComponent<Rigidbody>().AddExplosionForce(expForce, transform.position, radius);
-            other.gameObject.GetComponent<Enemy>().TakeDamage(expDamage);
+            try {other.gameObject.GetComponent<Enemy>().TakeDamage(expDamage);}
+            catch (NullReferenceException e)
+            {
+               try {other.gameObject.GetComponentInParent<Enemy>().TakeDamage(expDamage);}
+               catch (NullReferenceException e2)
+               {
+                   return;
+               }
+            }
         }
     }
 

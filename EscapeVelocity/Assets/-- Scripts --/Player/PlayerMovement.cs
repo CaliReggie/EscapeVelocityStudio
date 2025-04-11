@@ -234,6 +234,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 offset = transform.position - transform.parent.position;
         
         _rb.MovePosition(transform.parent.position + offset); // rigidbody needs to be moved specially to move GO
+        
+        if (Boss.Instance != null) Boss.Instance.SetTarget(transform);
     }
     
     private void OnDisable()

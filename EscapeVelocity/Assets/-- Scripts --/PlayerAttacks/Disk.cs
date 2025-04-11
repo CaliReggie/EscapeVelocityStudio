@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -97,7 +98,15 @@ public class Disk : Weapon
             recentHitObject = hit.collider.gameObject;
             if (Utils.IsLayerInLayerMask(hit.collider.gameObject.layer, enemyMask))
             {
-                hit.collider.gameObject.GetComponent<Enemy>().TakeDamage(damageAmt);
+                try {hit.collider.gameObject.GetComponent<Enemy>().TakeDamage(damageAmt);}
+                catch (NullReferenceException e)
+                {
+                   try {hit.collider.gameObject.GetComponentInParent<Enemy>().TakeDamage(damageAmt);}
+                   catch (NullReferenceException e2)
+                   {
+                       return;
+                   }
+                }
             }
         }
     }

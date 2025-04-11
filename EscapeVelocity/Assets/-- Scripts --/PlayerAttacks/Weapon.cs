@@ -19,7 +19,15 @@ public abstract class Weapon : MonoBehaviour
     {
         if (Utils.IsLayerInLayerMask(other.gameObject.layer, enemyMask))
         {
-            other.gameObject.GetComponent<Enemy>().TakeDamage(damageAmt);
+            try {other.gameObject.GetComponent<Enemy>().TakeDamage(damageAmt);}
+            catch (NullReferenceException e)
+            {
+               try {other.gameObject.GetComponentInParent<Enemy>().TakeDamage(damageAmt);}
+               catch (NullReferenceException e2)
+               {
+                   return;
+               }
+            }
         }
     }
 
