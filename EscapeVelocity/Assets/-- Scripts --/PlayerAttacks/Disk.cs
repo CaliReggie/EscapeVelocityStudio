@@ -34,7 +34,23 @@ public class Disk : Weapon
     protected virtual void Start()
     {
         transform.parent = null;
-        rb.AddForce(transform.forward * speed, ForceMode.Impulse);
+        Vector3 playerMovementForce = Vector3.zero; 
+        Vector3 playerVelocity = PlayerEquipabbles.S.GetComponent<Rigidbody>().linearVelocity;
+        if (playerVelocity.x * transform.forward.x > 0)
+        {
+            playerMovementForce.x = playerVelocity.x;
+        }
+
+        if (playerVelocity.y * transform.forward.y > 0)
+        {
+            playerMovementForce.y = playerVelocity.y;
+        }
+
+        if (playerVelocity.z * transform.forward.z > 0)
+        {
+            playerMovementForce.z = playerVelocity.z;
+        }
+        rb.linearVelocity = playerMovementForce + transform.forward * speed;
     }
     protected virtual void TimeCheck()
     {
