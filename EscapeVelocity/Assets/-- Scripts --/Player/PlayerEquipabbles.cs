@@ -27,7 +27,8 @@ public class PlayerEquipabbles : MonoBehaviour
     [Header("Camera References")]
     
     public GameObject realCam;
-    
+
+    [Header("Enemy Hit Flash Material")] public Material enemyHitMaterial;
     [FormerlySerializedAs("equippableDefinitions")]
     [Header("Equippable Definition Pool")]
     

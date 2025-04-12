@@ -613,6 +613,7 @@ MonoBehaviour:
   speed: 0
   duration: 3
   secondary: 0
+  direction: {x: 0, y: 0, z: 0}
 --- !u!43 &44746369
 Mesh:
   m_ObjectHideFlags: 0

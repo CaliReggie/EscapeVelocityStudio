@@ -20,18 +20,10 @@ public class AirSlash : Weapon
         }
         Vector3 playerMovementForce = Vector3.zero; 
         Vector3 playerVelocity = PlayerEquipabbles.S.GetComponent<Rigidbody>().linearVelocity;
-        if (playerVelocity.x * direction.x > 0)
+        playerVelocity = Vector3.Project(playerVelocity, direction);
+        if (Vector3.Dot(playerVelocity, direction) > 0)
         {
-            playerMovementForce.x = playerVelocity.x;
-        }
-
-        if (playerVelocity.y * direction.y > 0)
-        {
-            playerMovementForce.y = playerVelocity.y;
-        }
-        if (playerVelocity.z * direction.z > 0)
-        {
-            playerMovementForce.z = playerVelocity.z;
+            playerMovementForce = playerVelocity;
         }
 
         GetComponent<Rigidbody>().linearVelocity = direction * speed + playerMovementForce;
