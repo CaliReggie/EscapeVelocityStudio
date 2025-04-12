@@ -74,9 +74,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 32768
   damageAmt: 5
-  lockedInAttackDur: 0
+  lockedInAttackDur: 1
   duration: 100
   swinging: 0
+  slashObj: {fileID: 7806150972814151779, guid: 36c23944dfd5df046a6b66334d23a87e,
+    type: 3}
 --- !u!54 &-8069487864702923224
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -142,6 +142,8 @@ MonoBehaviour:
   lockedInAttackDur: 1
   duration: 100
   swinging: 0
+  slashObj: {fileID: 7806150972814151779, guid: d44ca7f36266ac14587d3165d4148cfe,
+    type: 3}
 --- !u!54 &-8069487864702923224
 Rigidbody:
   m_ObjectHideFlags: 0

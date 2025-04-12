@@ -7,7 +7,7 @@ public class MeleeAttack : Weapon
     public float duration = 10f;
     public bool swinging = false;
     private float _startTime;
-    // Update is called once per frame
+    public GameObject slashObj;
     private HashSet<Collider> hitColliders = new HashSet<Collider>();
     void Start()
     {
@@ -51,6 +51,11 @@ public class MeleeAttack : Weapon
     void EndOfCharge()
     {
         swinging = true;
+    }
+
+    void SpawnSlash()
+    { 
+        Instantiate(slashObj, transform);
     }
 
     protected override void OnTriggerEnter(Collider other)

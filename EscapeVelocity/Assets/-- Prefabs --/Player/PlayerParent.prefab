@@ -2221,7 +2221,6 @@ GameObject:
   - component: {fileID: 8317578503454885746}
   - component: {fileID: 8100683747862903763}
   - component: {fileID: 1231737499675846396}
-  - component: {fileID: 8625274449780451119}
   m_Layer: 13
   m_Name: rightHookPointPrediction
   m_TagString: Untagged
@@ -2297,27 +2296,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &8625274449780451119
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3168374826763531907}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3223460074210817111
 GameObject:
   m_ObjectHideFlags: 0
@@ -4740,7 +4718,6 @@ GameObject:
   - component: {fileID: 2523285966236994814}
   - component: {fileID: 7886669834817850940}
   - component: {fileID: 7638515717365332753}
-  - component: {fileID: 9073018330577898806}
   m_Layer: 13
   m_Name: leftHookPointPrediction
   m_TagString: Untagged
@@ -4816,27 +4793,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &9073018330577898806
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5837542682323500864}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5886573898417331705
 GameObject:
   m_ObjectHideFlags: 0
@@ -5162,7 +5118,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6203304367237142540
 Transform:
   m_ObjectHideFlags: 0
@@ -5227,6 +5183,7 @@ MonoBehaviour:
   pauseAction: Pause
   equipWheelUseAction: EquipWheelUse
   equipWheelNavigateAction: EquipWheelNavigate
+  lookAction: Look
   playerActionMap: Player
   uiActionMap: UI
 --- !u!1 &6203304367693416329
@@ -6054,7 +6011,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ammoTotalCount: 6
-  ammoRestoredPerSec: 2
+  ammoRestoredPerSec: 0.5
   offset: 20
   AmmoPrefab: {fileID: 8867266241107159188, guid: 94595b005143e8d4ab336fab656b3588,
     type: 3}

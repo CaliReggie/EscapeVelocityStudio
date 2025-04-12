@@ -173,7 +173,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 32768
   damageAmt: 5
-  lockedInAttackDur: 0
+  lockedInAttackDur: 0.5
   speed: 15
   lifeSpan: 5
   ricochet: 0

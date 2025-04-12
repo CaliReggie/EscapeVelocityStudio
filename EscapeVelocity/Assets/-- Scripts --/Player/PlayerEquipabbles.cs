@@ -127,7 +127,7 @@ public class PlayerEquipabbles : MonoBehaviour
         if (ammunition.UseAmmo(_currentSecondaryEquippable.AmmoCost))
         {
             UseEquipmentSecondaryEvent?.Invoke();
-            _timeUnlocked = Time.time + CurrentPrimaryEquippable.LockOnUseDuration;
+            _timeUnlocked = Time.time + CurrentSecondaryEquippable.LockOnUseDuration;
             CurrentSecondaryEquippable.OnUsed();
         }
     }
