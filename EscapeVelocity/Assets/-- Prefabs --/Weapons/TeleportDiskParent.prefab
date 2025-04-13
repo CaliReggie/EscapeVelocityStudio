@@ -174,6 +174,12 @@ MonoBehaviour:
     m_Bits: 0
   damageAmt: 5
   lockedInAttackDur: 0.5
+  enemyHitClip: {fileID: 8300000, guid: 994d8f6c131c0614aaaecc10d5ee13fc, type: 3}
+  audioSource: {fileID: 0}
+  ricochetAudioClips:
+  - {fileID: 8300000, guid: e774a377f191a0e4aa772006ceb8f81a, type: 3}
+  - {fileID: 8300000, guid: 28b9db3b7cf0fbb44b3c89af45223db0, type: 3}
+  - {fileID: 8300000, guid: 37bce668b40b1be46ad5f974ce57229f, type: 3}
   speed: 15
   lifeSpan: 5
   ricochet: 1
@@ -184,9 +190,6 @@ MonoBehaviour:
     m_Bits: 33792
   homing: 0
   currentTarget: {fileID: 0}
-  teleporterPrefab: {fileID: 7360639938885337017, guid: 9bd404f3a897c3a48906ef90656e76eb,
-    type: 3}
-  playerHeight: 0
 --- !u!1001 &4660484568651594662
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -210,6 +213,16 @@ PrefabInstance:
       propertyPath: InitialModule.startColor.maxColor.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8261295369048331953, guid: f8525fda14d91274d9499b4be22a9ace,
+        type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: 9dc11df242601f74d9d874fc5249b138, type: 3}
+    - target: {fileID: 8261295369048331953, guid: f8525fda14d91274d9499b4be22a9ace,
+        type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 9dc11df242601f74d9d874fc5249b138, type: 3}
     - target: {fileID: 8341428137908717727, guid: f8525fda14d91274d9499b4be22a9ace,
         type: 3}
       propertyPath: m_LocalPosition.x

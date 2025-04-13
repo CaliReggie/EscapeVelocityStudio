@@ -1,10 +1,12 @@
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Random = UnityEngine.Random;
 
 public class Disk : Weapon
 {
     [Header("Basic Disk Data")]
+    public AudioClip[] ricochetAudioClips;
     public float speed = 15;
     public float lifeSpan = 5f;
     [Header("Ricochet")]
@@ -24,6 +26,7 @@ public class Disk : Weapon
     {
         startTime = Time.time;
         rb = GetComponent<Rigidbody>();
+        base.Awake();
     }
     // Update is called once per frame
     protected virtual void Update()
@@ -105,14 +108,14 @@ public class Disk : Weapon
             recentHitObject = hit.collider.gameObject;
             if (Utils.IsLayerInLayerMask(hit.collider.gameObject.layer, enemyMask))
             {
-                try {hit.collider.gameObject.GetComponent<Enemy>().TakeDamage(damageAmt);}
-                catch (NullReferenceException e)
+                CheckForEnemy(hit.collider);
+            }
+            else 
+            {
+                if (ricochet)
                 {
-                   try {hit.collider.gameObject.GetComponentInParent<Enemy>().TakeDamage(damageAmt);}
-                   catch (NullReferenceException e2)
-                   {
-                       return;
-                   }
+                    audioSource.clip = ricochetAudioClips[Random.Range(0, ricochetAudioClips.Length)];
+                    audioSource.Play();
                 }
             }
         }
@@ -123,6 +126,7 @@ public class Disk : Weapon
         ricochetCount++;
         if (ricochetCount >= maxRicochetCount)
         {
+            ricochet = false;
             DiskEnd();
         }
         Vector3 reflectDirection= Vector3.Reflect(transform.forward, hitNormal);

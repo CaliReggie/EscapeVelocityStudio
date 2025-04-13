@@ -9,6 +9,7 @@ public class MeleeAttack : Weapon
     private float _startTime;
     public GameObject slashObj;
     private HashSet<Collider> hitColliders = new HashSet<Collider>();
+    public AudioClip slashSound;
     void Start()
     {
         _startTime = Time.time;
@@ -51,6 +52,8 @@ public class MeleeAttack : Weapon
     void EndOfCharge()
     {
         swinging = true;
+        audioSource.clip = slashSound;
+        audioSource.Play();
     }
 
     void SpawnSlash()
