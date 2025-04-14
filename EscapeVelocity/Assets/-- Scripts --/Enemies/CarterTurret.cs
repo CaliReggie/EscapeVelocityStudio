@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.Serialization;
 using System.Collections;
-
+using System.ComponentModel;
+using UnityEngine.InputSystem;
 public class CarterTurret : MonoBehaviour
 {
     [Header("References")]
@@ -33,6 +34,8 @@ public class CarterTurret : MonoBehaviour
     
     public float distancetoplayer;
 
+    private float turretScale;
+
     private float fireSpeed = 1f;
     
     public Quaternion startingRotation;
@@ -46,8 +49,8 @@ public class CarterTurret : MonoBehaviour
     private Vector3 wallPosition;
     private Vector3 basePosition;
     private Vector3 barrelPosition;
-    private Vector3 movedWall;
-    private Vector3 movedBase;
+    private Vector3 movedWall; 
+    Vector3 movedBase;
     private Vector3 movedBarrel;
     private bool outOfBarrel = false;
     private bool inbarrel = true;
@@ -68,22 +71,34 @@ public class CarterTurret : MonoBehaviour
         wallPosition = movewall.transform.position;
         basePosition = Base.transform.position;
         barrelPosition = Barrel.transform.position;
-        movedWall = movewall.transform.position - movewall.transform.forward * 1.1f;
-        movedBase = new Vector3(movewall.transform.position.x, Base.transform.position.y, Base.transform.position.z);
+        turretScale = this.transform.localScale.x;
+        Debug.Log(turretScale);
+        
+        movedWall = movewall.transform.position - movewall.transform.forward * 1.1f * turretScale;
+        movedBase = Base.transform.position + Base.transform.right * 1.3f * turretScale;
         float yRot = Barrel.transform.eulerAngles.y;
         if (Mathf.Approximately(yRot, 0f) || Mathf.Approximately(yRot, 180f))
         {
-            movedBarrel = Barrel.transform.position + Barrel.transform.forward * 0.2f;
+            movedBarrel = Barrel.transform.position + Barrel.transform.forward * 1.4f * turretScale;
         }
         else
         {
-            movedBarrel = Barrel.transform.position + Barrel.transform.forward * 1.6f;
+            movedBarrel = Barrel.transform.position + Barrel.transform.forward * 1.6f * turretScale;
         }
     }
     
 
     void Update()
     {
+    
+        if (GameInputManager.Instance.PlayerInput != null && playerpos == null)
+        {
+            
+            playerpos = GameInputManager.Instance.PlayerInput.transform.GetComponentInChildren<PlayerMovement>().transform;
+
+        }
+        if (playerpos == null) return;
+    
         distancetoplayer = Vector3.Distance(transform.position, playerpos.position);
         if (outOfBarrel)
         {
@@ -127,6 +142,8 @@ public class CarterTurret : MonoBehaviour
                 StartCoroutine(Lerpers.LerpTransform(Barrel.transform, movedBarrel, Lerpers.OutQuad(0.3f)));
                 if (Barrel.transform.position == movedBarrel)
                 {
+                    Debug.Log(Base.transform.position);
+                    Debug.Log(movedBarrel);
                     inbarrel = false;
                     outOfBarrel = true;
                     In = false;

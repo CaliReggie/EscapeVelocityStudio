@@ -600,8 +600,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 438.21, y: 114.56, z: 82.2}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7966312077866322405}
   - {fileID: 6366991421318275737}
@@ -624,7 +624,7 @@ MonoBehaviour:
   bullet: {fileID: 7976350888868913369, guid: d6cfe677a160bc54797d904f904b0de8, type: 3}
   shotpoint: {fileID: 549180068214161008}
   playerpos: {fileID: 0}
-  dist: 15
+  dist: 40
   viewRadius: {x: 135, y: 45}
   lookSpeed: 0.3
   returnsToStartRot: 1
@@ -632,6 +632,8 @@ MonoBehaviour:
   startingRotation: {x: 0, y: 0, z: 0, w: 0}
   currentRotation: {x: 0, y: 0, z: 0}
   targetRotation: {x: 0, y: 0, z: 0, w: 0}
+  canShoot: 0
+  In: 0
 --- !u!1 &5738402333476564565
 GameObject:
   m_ObjectHideFlags: 0
