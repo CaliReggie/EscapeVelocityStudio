@@ -64,6 +64,7 @@ public class CarterTurret : MonoBehaviour
     {
         // viewRadius.x = Mathf.Clamp(viewRadius.x, 0, 179);
         // viewRadius.y = Mathf.Clamp(viewRadius.y, 0, 179);
+        dist = 70f;
         
 
         wallPosition = movewall.transform.position;

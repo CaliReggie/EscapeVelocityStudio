@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Turret : MonoBehaviour
 {
@@ -7,6 +8,8 @@ public class Turret : MonoBehaviour
     [SerializeField] private GameObject barrelBase;
     
     [SerializeField] private GameObject turretBase;
+    public GameObject shotpoint;
+    public GameObject bullet;
     
     [SerializeField] private Transform playerPos;
     
@@ -23,6 +26,7 @@ public class Turret : MonoBehaviour
     [SerializeField] private bool radiusRelativeToBase = true;
     
     [SerializeField] private bool returnsToBaseRot = true;
+    private bool canShoot;
     
     [Header("Dynamic")]
     
@@ -54,6 +58,7 @@ public class Turret : MonoBehaviour
         if (playerDistance <= targetDistance)
         {
             RotateBarrel();
+            Shoot();
         }
         else
         {
@@ -261,4 +266,20 @@ public class Turret : MonoBehaviour
     {
         playerPos = newTarget;
     }
+    void Shoot()
+    {
+        Instantiate(bullet, shotpoint.transform.position, shotpoint.transform.rotation);
+        StartCoroutine(Cooldown());
+
+    }
+
+    private IEnumerator Cooldown()
+    {
+        canShoot = false;
+        yield return new WaitForSeconds(0.4f);
+        canShoot = true;
+
+    }
+ 
 }
+
