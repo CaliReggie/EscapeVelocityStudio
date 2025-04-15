@@ -31,9 +31,15 @@ public class Boss : MonoBehaviour
     [Tooltip("Exists for serialization purposes")]
     [SerializeField] private bool emptyBool;
     
-    [SerializeField] private float maxHealth;
+    [SerializeField] private float stageOnehealth;
+    
+    [SerializeField] private float stageTwohealth;
+    
+    [SerializeField] private float stageThreehealth;
 
     [field: SerializeField] public float StoppingDistance { get; private set; } = 10f;
+    
+    private Enemy _enemy;
 
     private void Awake()
     {
@@ -42,22 +48,55 @@ public class Boss : MonoBehaviour
         Instance = this;
         
         transform.parent.gameObject.SetActive(false);
+
+        _enemy = GetComponent<Enemy>();
+        
+        switch (GameStateManager.Instance.CurrentGameStateSceneInfo.CurrentStage)
+        {
+            case EStage.One:
+                _enemy.health = stageOnehealth;
+                break;
+            case EStage.Two:
+                _enemy.health = stageTwohealth;
+                break;
+            case EStage.Three:
+                _enemy.health = stageThreehealth;
+                break;
+        }
+    }
+
+    private void OnEnable()
+    {
+        UIManager.Instance.SetBossHealth(_enemy.health / stageOnehealth);
     }
 
     private void OnDestroy()
     {
         if (Instance == this) { Instance = null; }
     }
-
     private void Update()
     {
         if (followTarget == null) { return; }
         
         // Vector3 targetPosition = GetNavmeshPosition(walkableSurface, followTarget);
+
+        switch (GameStateManager.Instance.CurrentGameStateSceneInfo.CurrentStage)
+        {
+            case EStage.One:
+                if (_enemy.health < stageTwohealth)
+                {
+                    MoveToSpawn(EStage.Two, false);
+                }
+                break;
+            case EStage.Two:
+                if (_enemy.health < stageThreehealth)
+                {
+                    MoveToSpawn(EStage.Three, false);
+                }
+                break;
+        }
         
-        Vector3 targetPosition = followTarget.position;
-        
-        Debug.DrawRay(targetPosition, Vector3.up * 10f, Color.red);
+        UIManager.Instance.SetBossHealth(_enemy.health / stageOnehealth);
     }
     
     private Vector3 GetNavmeshPosition(NavMeshSurface surface, Transform target)
@@ -90,40 +129,50 @@ public class Boss : MonoBehaviour
     
     public Vector3 GetTargetPosition()
     {
-        return GetNavmeshPosition(walkableSurface, followTarget);
+        // return GetNavmeshPosition(walkableSurface, followTarget);
+        
+        if (followTarget != null)
+        {
+            return followTarget.position;
+        }
+        else
+        {
+            return Vector3.zero;
+        }
     }
     
     public void MoveToSpawn(EStage stage, bool active)
     {
         transform.parent.gameObject.SetActive(false);
-        
-        Enemy enemy = GetComponent<Enemy>();
+        float setHealth = stageOnehealth;
 
-        float setHealth = maxHealth;
+        Debug.Log(setHealth);
         
         switch (stage)
         {
             case EStage.One:
                 transform.position = spawn1.position;
                 transform.rotation = spawn1.rotation;
-                setHealth = maxHealth;
+                setHealth =         stageOnehealth;
                 break;
             case EStage.Two:
                 transform.position = spawn2.position;
                 transform.rotation = spawn2.rotation;
-                setHealth = maxHealth * (2/3);
+                setHealth          = stageTwohealth;
                 break;
             case EStage.Three:
                 transform.position = spawn3.position;
                 transform.rotation = spawn3.rotation;
-                setHealth = maxHealth * (1/3);
+                setHealth          = stageThreehealth;
                 break;
             default:
                 Debug.LogWarning("Invalid stage provided.");
                 break;
         }
+
+        Debug.Log(setHealth);
         
-        enemy.health = setHealth;
+        _enemy.health = setHealth;
         
         transform.parent.gameObject.SetActive(active);
     }

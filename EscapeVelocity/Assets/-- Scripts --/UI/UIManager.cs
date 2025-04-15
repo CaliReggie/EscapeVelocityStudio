@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Canvas))]
 public class UIManager : MonoBehaviour
@@ -33,7 +34,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject gameOverPage;
     
     [SerializeField] private TextMeshProUGUI timeText;
-        
+
+    [SerializeField]
+    private Slider bossHealth;
+    
     [Header("Holders")]
     
     [SerializeField] private Transform iconHolder;
@@ -195,6 +199,19 @@ public class UIManager : MonoBehaviour
                 SetTimer(GameStateManager.Instance.GetStartTime());
 
                 uiSelectWheel.SetToBase();
+
+                switch (GameStateManager.Instance.CurrentGameStateSceneInfo.CurrentStage)
+                {
+                    case EStage.One:
+                        SetBossHealth(1);
+                        break;
+                    case EStage.Two:
+                        SetBossHealth(.66f);
+                        break;
+                    case EStage.Three:
+                        SetBossHealth(.33f);
+                        break;
+                }
                 
                 break;
             
@@ -226,6 +243,13 @@ public class UIManager : MonoBehaviour
     public void StartCountdown(float time)
     {
         _gameTimeLeft = time;
+    }
+    
+    public void SetBossHealth(float health)
+    {
+        if (bossHealth == null) return;
+        
+        bossHealth.value = health;
     }
     
     public void CALL_UNPAUSE()

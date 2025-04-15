@@ -210,6 +210,8 @@ public class BodyMovement : MonoBehaviour
     {
         Vector3 targetPosition = _boss.GetTargetPosition(); // See Boss.cs
         
+        if (targetPosition == Vector3.zero) return;
+        
         Vector3 toTarget = targetPosition - transform.position; // Target direction
         
         float distanceToTarget = toTarget.magnitude;
