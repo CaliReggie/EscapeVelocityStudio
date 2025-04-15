@@ -26,7 +26,7 @@ public class Turret : MonoBehaviour
     [SerializeField] private bool radiusRelativeToBase = true;
     
     [SerializeField] private bool returnsToBaseRot = true;
-    private bool canShoot;
+    private bool canShoot = true;
     
     [Header("Dynamic")]
     
@@ -58,7 +58,10 @@ public class Turret : MonoBehaviour
         if (playerDistance <= targetDistance)
         {
             RotateBarrel();
-            Shoot();
+            if (canShoot)
+            {
+                Shoot();
+            }
         }
         else
         {
@@ -276,7 +279,7 @@ public class Turret : MonoBehaviour
     private IEnumerator Cooldown()
     {
         canShoot = false;
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(0.2f);
         canShoot = true;
 
     }
