@@ -29,6 +29,8 @@ public class Grappling: MonoBehaviour
         Precise
     }
     
+    public AudioSource grappleAudioSource;
+    
     [Header("Hook Rig References")]
     [SerializeField] private List<Transform> gunTips;
     
@@ -438,6 +440,8 @@ public class Grappling: MonoBehaviour
 
         SwingsActive[swingIndex] = true;
         UpdateHooksActive();
+        
+        grappleAudioSource.Play();
     }
 
     private void StopSwing(int swingIndex)
@@ -653,6 +657,8 @@ public class Grappling: MonoBehaviour
         // StartCoroutine(StopGrapple(grappleIndex, 1f));
         
         _grapplesExecuted[grappleIndex] = true;
+        
+        grappleAudioSource.Play();
     }
 
     private void TryStopGrapple(int grappleIndex)

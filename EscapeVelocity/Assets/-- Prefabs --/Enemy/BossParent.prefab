@@ -205,11 +205,36 @@ PrefabInstance:
       propertyPath: m_Name
       value: Body
       objectReference: {fileID: 0}
+    - target: {fileID: 429089081243417323, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
+        type: 3}
+      propertyPath: stageOnehealth
+      value: 750
+      objectReference: {fileID: 0}
+    - target: {fileID: 429089081243417323, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
+        type: 3}
+      propertyPath: stageTwohealth
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 429089081243417323, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
+        type: 3}
+      propertyPath: stageThreehealth
+      value: 250
+      objectReference: {fileID: 0}
     - target: {fileID: 917288071151054965, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
         type: 3}
       propertyPath: m_Data.m_Target
       value: 
       objectReference: {fileID: 7641343794926741476}
+    - target: {fileID: 1823088784620562057, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2572008969904059218, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
+        type: 3}
+      propertyPath: isBoss
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3059498603080221282, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
         type: 3}
       propertyPath: legTargetLoc
@@ -235,6 +260,11 @@ PrefabInstance:
       propertyPath: m_Data.m_Target
       value: 
       objectReference: {fileID: 4199662090293296963}
+    - target: {fileID: 5240863026246326902, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 6882747695288175787, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -284,6 +314,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8832236636033871373, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8910113593833170265, guid: 4212c6a85ffa52d4eaa4d3a9677d2440,
         type: 3}
