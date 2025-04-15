@@ -160,7 +160,7 @@ MonoBehaviour:
   rayDist: 0.6
   ricochetMask:
     serializedVersion: 2
-    m_Bits: 34304
+    m_Bits: 34305
   homing: 1
   currentTarget: {fileID: 0}
 --- !u!54 &-5801585941380627023

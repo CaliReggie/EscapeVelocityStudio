@@ -95,11 +95,39 @@ public class GameInputManager : MonoBehaviour
         
         //setting prefab to spawn
         _playerInputManager.playerPrefab = playableScenePlayerPrefab;
+
+        Vector3 spawnPos = Vector3.zero;
+        
+        Vector3 spawnRot = Vector3.zero;
+
+        switch (GameStateManager.Instance.CurrentGameStateSceneInfo.CurrentStage)
+        {
+            case EStage.One:
+                spawnPos = GameStateManager.Instance.CurrentGameStateSceneInfo.stageOnePos;
+
+                spawnRot = GameStateManager.Instance.CurrentGameStateSceneInfo.stageOneRot;
+                
+                break;
+            
+            case EStage.Two:
+                spawnPos = GameStateManager.Instance.CurrentGameStateSceneInfo.stageTwoPos;
+
+                spawnRot = GameStateManager.Instance.CurrentGameStateSceneInfo.stageTwoRot;
+                
+                break;
+            
+            case EStage.Three:
+                spawnPos = GameStateManager.Instance.CurrentGameStateSceneInfo.stageThreePos;
+
+                spawnRot = GameStateManager.Instance.CurrentGameStateSceneInfo.stageThreeRot;
+                
+                break;
+        }
         
         //setting spawn pos and rot from current scene info
-        _currentSpawnPos = GameStateManager.Instance.CurrentGameStateSceneInfo.SceneSpawnWorldPos;
+        _currentSpawnPos = spawnPos;
         
-        _currentSpawnRot = GameStateManager.Instance.CurrentGameStateSceneInfo.SceneSpawnRot;
+        _currentSpawnRot = spawnRot;
         
         //enabling joining
         JoiningEnabled = true;
@@ -112,6 +140,10 @@ public class GameInputManager : MonoBehaviour
         //Setting player parent (player input) world spawn loc and rot
         playerInput.transform.position = _currentSpawnPos;
         playerInput.transform.rotation = Quaternion.Euler(_currentSpawnRot);
+
+        UIManager.Instance.StartCountdown(GameStateManager.Instance.GetStartTime());
+        
+        Boss.Instance.MoveToSpawn(GameStateManager.Instance.CurrentGameStateSceneInfo.CurrentStage);
     }
     
     private void OnPlayerLeft(PlayerInput playerInput)

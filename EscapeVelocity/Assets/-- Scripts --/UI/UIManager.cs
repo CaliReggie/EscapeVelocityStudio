@@ -26,10 +26,13 @@ public class UIManager : MonoBehaviour
     
     [SerializeField] private GameObject playerHUDPage;
     
-    [FormerlySerializedAs("equippableWheel")]
     [SerializeField] private UISelectWheel uiSelectWheel;
     
     [SerializeField] private GameObject pausePage;
+    
+    [SerializeField] private GameObject gameOverPage;
+    
+    [SerializeField] private TextMeshProUGUI timeText;
         
     [Header("Holders")]
     
@@ -48,6 +51,8 @@ public class UIManager : MonoBehaviour
     
     //Rect and screen info
     private RectTransform _canvasRectTransform;
+
+    private float _gameTimeLeft; //When set above 0, game over logic counted down
     
     void Awake()
     {
@@ -85,11 +90,44 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         GameStateManager.Instance.OnGameStateChanged += OnStateChange;
+
+        _gameTimeLeft = 0;
     }
     
     private void OnDisable()
     {
         GameStateManager.Instance.OnGameStateChanged -= OnStateChange;
+    }
+
+    private void Update()
+    {
+        if (_gameTimeLeft > 0)
+        {
+            _gameTimeLeft -= Time.deltaTime;
+            
+            SetTimer(_gameTimeLeft);
+            
+            if (_gameTimeLeft <= 0)
+            {
+                GameStateManager.Instance.GameOver(false);
+            }
+        }
+    }
+    
+   private void SetTimer(float secondsLeft)
+    {
+        float minutes = Mathf.FloorToInt(secondsLeft / 60);
+        
+        float seconds = Mathf.FloorToInt(secondsLeft % 60);
+        
+        if (seconds < 10)
+        {
+            timeText.text = $"{minutes}:0{seconds}";
+        }
+        else
+        {
+            timeText.text = $"{minutes}:{seconds}";
+        }
     }
 
     private void OnStateChange(EGameState toState, EGameState fromState)
@@ -102,6 +140,7 @@ public class UIManager : MonoBehaviour
                 mainMenuPage.SetActive(false);
                 playerHUDPage.SetActive(false);
                 pausePage.SetActive(false);
+                gameOverPage.SetActive(false);
                 
                 break;
             
@@ -127,6 +166,8 @@ public class UIManager : MonoBehaviour
                 break;
             
             case EGameState.GameOver:
+                // Turn off relevant UI
+                gameOverPage.SetActive(false);
                 break;
         }
         
@@ -151,6 +192,10 @@ public class UIManager : MonoBehaviour
                 
                 CursorLocked(true);
                 
+                SetTimer(GameStateManager.Instance.GetStartTime());
+
+                uiSelectWheel.SetToBase();
+                
                 break;
             
             case EGameState.Pause:
@@ -163,6 +208,10 @@ public class UIManager : MonoBehaviour
                 break;
             
             case EGameState.GameOver:
+                // Turn on relevant UI
+                gameOverPage.SetActive(true);
+
+                CursorLocked(false);
                 break;
         }
     }
@@ -174,14 +223,19 @@ public class UIManager : MonoBehaviour
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
     }
     
+    public void StartCountdown(float time)
+    {
+        _gameTimeLeft = time;
+    }
+    
     public void CALL_UNPAUSE()
     {
         GameStateManager.Instance.EnterGameState(EGameState.Game, GameStateManager.Instance.GameStateSO.GameState);
     }
     
-    public void CALL_SCENE_RELOAD()
+    public void CALL_SCENE_RELOAD(bool resetStage = true)
     {
-        GameStateManager.Instance.ReloadScene();
+        GameStateManager.Instance.ReloadScene(resetStage);
     }
     
     

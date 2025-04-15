@@ -16,11 +16,23 @@ public class UISelectWheel : MonoBehaviour
     
     [Header("Color Settings")]
     
-    [SerializeField] private Color normalColor = Color.white;
+    [SerializeField] private Sprite normalImage;
     
-    [SerializeField] private Color selectedColor = Color.red;
+    [SerializeField] private Sprite selectedImage;
     
-    [SerializeField] private Color equippedColor = Color.green;
+    [SerializeField] private Sprite equippedImage;
+    
+    [Header("Equip Icons")]
+    
+    [SerializeField] private Sprite grappleIcon;
+    
+    [SerializeField] private Sprite damageDiscIcon;
+    
+    [SerializeField] private Sprite utilityDiscIcon;
+    
+    [SerializeField] private Sprite meleeIcon;
+    
+    [SerializeField] private Image equipIcon;
     
     [Header("Wheel Slots")]
     
@@ -49,6 +61,11 @@ public class UISelectWheel : MonoBehaviour
             enabled = false;
         }
     }
+    
+    public void SetToBase()
+    {
+        equipIcon.sprite = grappleIcon; // Default icon
+    }
 
     private void OnEnable()
     {
@@ -58,7 +75,7 @@ public class UISelectWheel : MonoBehaviour
         {
             if (slot.slotEquipClass == currentEquippableClass)
             {
-                slot.slotImage.color = equippedColor;
+                slot.slotImage.sprite = equippedImage;
             }
         }
         
@@ -72,12 +89,28 @@ public class UISelectWheel : MonoBehaviour
         foreach (EquipWheelSlot slot in wheelSlots) // Resetting slots
         {
             slot.Reset(resetScale);
-            
-            slot.slotImage.color = normalColor;
+
+            slot.slotImage.sprite = normalImage;
 
             if (_selectedSlot != null && _selectedSlot == slot) // If we have a selected slot, ensure it's equipped
             {
                 PlayerEquipabbles.S.EquipByClass(slot.slotEquipClass);
+
+                switch (slot.slotEquipClass)
+                {
+                    case EEquippableClass.Grapple:
+                        equipIcon.sprite = grappleIcon;
+                        break;
+                    case EEquippableClass.CombatDisk:
+                        equipIcon.sprite = damageDiscIcon;
+                        break;
+                    case EEquippableClass.UtilityDisk:
+                        equipIcon.sprite = utilityDiscIcon;
+                        break;
+                    case EEquippableClass.Melee:
+                        equipIcon.sprite = meleeIcon;
+                        break;
+                }
             }
         }
         
@@ -138,13 +171,13 @@ public class UISelectWheel : MonoBehaviour
                     {
                         if (slot == _selectedSlot) return;
                         
-                        DeselectSlot(_selectedSlot);
+                        DeselectSlot(_selectedSlot, normalImage, equippedImage);
                         
-                        SelectSlot(slot);
+                        SelectSlot(slot, selectedImage);
                     }
                     else
                     {
-                        SelectSlot(slot);
+                        SelectSlot(slot, selectedImage);
                     }
                 }
             }
@@ -156,20 +189,20 @@ public class UISelectWheel : MonoBehaviour
                     {
                         if (slot == _selectedSlot) return;
                         
-                        DeselectSlot(_selectedSlot);
+                        DeselectSlot(_selectedSlot, normalImage, equippedImage);
                         
-                        SelectSlot(slot);
+                        SelectSlot(slot, selectedImage);
                     }
                     else
                     {
-                        SelectSlot(slot);
+                        SelectSlot(slot, selectedImage);
                     }
                 }
             }
         }
     }
 
-    private void SelectSlot(EquipWheelSlot slot)
+    private void SelectSlot(EquipWheelSlot slot, Sprite selectedImage)
     {
         _animatingSlots.Add(slot.slotTransform);
         
@@ -177,10 +210,10 @@ public class UISelectWheel : MonoBehaviour
         
         slot.activeTimeLeft = changeDuration;
         
-        slot.slotImage.color = selectedColor;
+        slot.slotImage.sprite = selectedImage; // Set to selected color
     }
     
-    private void DeselectSlot(EquipWheelSlot slot)
+    private void DeselectSlot(EquipWheelSlot slot, Sprite normalImage, Sprite equippedImage)
     {
         _selectedSlot = null;
         
@@ -190,11 +223,11 @@ public class UISelectWheel : MonoBehaviour
         
         if (slot.slotEquipClass != PlayerEquipabbles.S.CurrentPrimaryEquippable.EquippableClass)
         {
-            slot.slotImage.color = normalColor; // Set to normal color if not equipped
+            slot.slotImage.sprite = normalImage;
         } 
         else
         {
-            slot.slotImage.color = equippedColor; // Keep equipped color if it is
+            slot.slotImage.sprite = equippedImage;
         }
     }
 

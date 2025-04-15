@@ -187,7 +187,7 @@ MonoBehaviour:
   rayDist: 0.6
   ricochetMask:
     serializedVersion: 2
-    m_Bits: 36352
+    m_Bits: 36353
   homing: 0
   currentTarget: {fileID: 0}
   explosionPrefab: {fileID: 7061871669671832728, guid: dffaabf5fa5015244b774a973a32141e,
