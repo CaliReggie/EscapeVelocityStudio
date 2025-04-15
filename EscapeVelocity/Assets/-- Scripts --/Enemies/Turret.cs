@@ -259,13 +259,6 @@ public class Turret : MonoBehaviour
     
     public void SetTarget(Transform newTarget)
     {
-        if (newTarget != null)
-        {
-            playerPos = newTarget;
-        }
-        else
-        {
-            Debug.LogWarning("New target is null. Cannot set target.");
-        }
+        playerPos = newTarget;
     }
 }

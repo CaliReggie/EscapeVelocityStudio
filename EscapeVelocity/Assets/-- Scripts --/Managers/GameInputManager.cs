@@ -143,7 +143,7 @@ public class GameInputManager : MonoBehaviour
 
         UIManager.Instance.StartCountdown(GameStateManager.Instance.GetStartTime());
         
-        Boss.Instance.MoveToSpawn(GameStateManager.Instance.CurrentGameStateSceneInfo.CurrentStage);
+        Boss.Instance.MoveToSpawn(GameStateManager.Instance.CurrentGameStateSceneInfo.CurrentStage, false);
     }
     
     private void OnPlayerLeft(PlayerInput playerInput)

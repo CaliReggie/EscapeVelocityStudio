@@ -53,7 +53,9 @@ public class Boss : MonoBehaviour
     {
         if (followTarget == null) { return; }
         
-        Vector3 targetPosition = GetNavmeshPosition(walkableSurface, followTarget);
+        // Vector3 targetPosition = GetNavmeshPosition(walkableSurface, followTarget);
+        
+        Vector3 targetPosition = followTarget.position;
         
         Debug.DrawRay(targetPosition, Vector3.up * 10f, Color.red);
     }
@@ -73,14 +75,7 @@ public class Boss : MonoBehaviour
     
     public void SetTarget(Transform newTarget)
     {
-        if (newTarget != null)
-        {
-            followTarget = newTarget;
-        }
-        else
-        {
-            Debug.LogWarning("New target is null. Cannot set target.");
-        }
+        followTarget = newTarget;
         
         List<Turret> turrets = new List<Turret>(GetComponentsInChildren<Turret>());
         
@@ -98,7 +93,7 @@ public class Boss : MonoBehaviour
         return GetNavmeshPosition(walkableSurface, followTarget);
     }
     
-    public void MoveToSpawn(EStage stage)
+    public void MoveToSpawn(EStage stage, bool active)
     {
         transform.parent.gameObject.SetActive(false);
         
@@ -130,7 +125,7 @@ public class Boss : MonoBehaviour
         
         enemy.health = setHealth;
         
-        transform.parent.gameObject.SetActive(true);
+        transform.parent.gameObject.SetActive(active);
     }
     
     public bool HasTarget => followTarget != null;
