@@ -36,7 +36,7 @@ public class CarterTurret : MonoBehaviour
 
     private float turretScale;
 
-    private float fireSpeed = 1f;
+    public float fireSpeed = 1f;
     
     public Quaternion startingRotation;
     
