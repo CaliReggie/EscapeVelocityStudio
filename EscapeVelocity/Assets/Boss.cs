@@ -16,10 +16,22 @@ public class Boss : MonoBehaviour
     
     [SerializeField] private Transform followTarget;
 
+    [SerializeField]
+    private Transform spawn1;
+    
+    [SerializeField]
+    private Transform spawn2;
+    
+    [SerializeField]
+    private Transform spawn3;
+    
+
     [Header("Settings")]
 
     [Tooltip("Exists for serialization purposes")]
     [SerializeField] private bool emptyBool;
+    
+    [SerializeField] private float maxHealth;
 
     [field: SerializeField] public float StoppingDistance { get; private set; } = 10f;
 
@@ -28,6 +40,8 @@ public class Boss : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(Instance.gameObject); }
         
         Instance = this;
+        
+        transform.parent.gameObject.SetActive(false);
     }
 
     private void OnDestroy()
@@ -82,6 +96,41 @@ public class Boss : MonoBehaviour
     public Vector3 GetTargetPosition()
     {
         return GetNavmeshPosition(walkableSurface, followTarget);
+    }
+    
+    public void MoveToSpawn(EStage stage)
+    {
+        transform.parent.gameObject.SetActive(false);
+        
+        Enemy enemy = GetComponent<Enemy>();
+
+        float setHealth = maxHealth;
+        
+        switch (stage)
+        {
+            case EStage.One:
+                transform.position = spawn1.position;
+                transform.rotation = spawn1.rotation;
+                setHealth = maxHealth;
+                break;
+            case EStage.Two:
+                transform.position = spawn2.position;
+                transform.rotation = spawn2.rotation;
+                setHealth = maxHealth * (2/3);
+                break;
+            case EStage.Three:
+                transform.position = spawn3.position;
+                transform.rotation = spawn3.rotation;
+                setHealth = maxHealth * (1/3);
+                break;
+            default:
+                Debug.LogWarning("Invalid stage provided.");
+                break;
+        }
+        
+        enemy.health = setHealth;
+        
+        transform.parent.gameObject.SetActive(true);
     }
     
     public bool HasTarget => followTarget != null;

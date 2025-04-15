@@ -83,6 +83,8 @@ public class GameStateManager : MonoBehaviour
         if (!ValidInfo(info)) { return; }
         
         CurrentGameStateSceneInfo = info;
+        
+        CurrentGameStateSceneInfo.CurrentStage = info.StartStage;
     }
     
     // For reacting to scene load to start state logic
@@ -103,7 +105,7 @@ public class GameStateManager : MonoBehaviour
         switch (fromState)
         {
             case EGameState.Reset:
-                // Do something
+                Time.timeScale = 1;
                 break;
             
             case EGameState.MainMenu:
@@ -138,7 +140,7 @@ public class GameStateManager : MonoBehaviour
                 Time.timeScale = 0;
                 break;
             case EGameState.GameOver:
-                // Do something
+                Time.timeScale = 0;
                 break;
         }
     }
@@ -297,6 +299,27 @@ public class GameStateManager : MonoBehaviour
         OnGameStateChanged?.Invoke(toState, fromState);
     }
     
+    public void GameOver(bool won)
+    {
+        if (!CanEnterGameState(EGameState.GameOver)) { return; }
+        
+        GameStateSO.SetGameWon(won, this);
+        
+        ThisOnGameStateChanged(EGameState.GameOver, GameStateSO.GameState);
+        
+        EnterGameState(EGameState.GameOver, GameStateSO.GameState);
+    }
+    
+    public void SetStage(EStage toStage)
+    {
+        CurrentGameStateSceneInfo.CurrentStage = toStage;
+    }
+    
+    public void SetStartStage()
+    {
+        CurrentGameStateSceneInfo.CurrentStage = CurrentGameStateSceneInfo.StartStage;
+    }
+    
     // For loading a scene from a scene load info SO
     public void LoadSceneWithGameStateSceneInfo(GameStateSceneInfo info)
     {
@@ -312,7 +335,7 @@ public class GameStateManager : MonoBehaviour
     }
     
     // For reloading with the current scene load info SO
-    public void ReloadScene()
+    public void ReloadScene(bool resetStage = true)
     {
         if (!ValidInfo(CurrentGameStateSceneInfo)) { return; }
         
@@ -320,7 +343,36 @@ public class GameStateManager : MonoBehaviour
         
         EnterGameState(EGameState.Reset, GameStateSO.GameState);
         
+        if (resetStage)
+        {
+            SetStartStage();
+        }
+        
         SceneManager.LoadScene(CurrentGameStateSceneInfo.SceneName);
+    }
+    
+    public float GetStartTime()
+    {
+        if (CurrentGameStateSceneInfo == null)
+        {
+            Debug.LogError("CurrentGameStateSceneInfo is null!");
+            
+            return 0f;
+        }
+        
+        switch(CurrentGameStateSceneInfo.CurrentStage)
+        {
+            case EStage.One:
+                return CurrentGameStateSceneInfo.FullGameTime;
+            case EStage.Two:
+                return CurrentGameStateSceneInfo.FullGameTime * 2 / 3;
+            case EStage.Three:
+                return CurrentGameStateSceneInfo.FullGameTime * 1 / 3;
+            default:
+                Debug.LogError("Invalid stage!");
+                
+                return 0f;
+        }
     }
     
     public void QUIT_GAME()

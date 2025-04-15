@@ -1,6 +1,13 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
+public enum EStage
+{
+    One,
+    Two,
+    Three
+}
+
 /// <summary>
 /// Container for information about what scene to load, and relevant information about the game state to load with.
 /// </summary>
@@ -13,10 +20,18 @@ public class GameStateSceneInfo : ScriptableObject
     [Tooltip("The game state that the scene should load with.")]
     [field: SerializeField] public EGameState SceneStartState { get; private set; } = EGameState.MainMenu;
     
-    [Tooltip("The start global spawn position and rotation for the player.")]
-    [SerializeField] private Vector3 sceneSpawnWorldPos, sceneSpawnRot;
-
-    public Vector3 SceneSpawnWorldPos => sceneSpawnWorldPos;
+    [SerializeField] public Vector3 stageOnePos;
+    [SerializeField] public Vector3 stageOneRot;
     
-    public Vector3 SceneSpawnRot => sceneSpawnRot;
+    [SerializeField] public Vector3 stageTwoPos;
+    [SerializeField] public Vector3 stageTwoRot;
+    
+    [SerializeField] public Vector3 stageThreePos;
+    [SerializeField] public Vector3 stageThreeRot;
+
+    [field: SerializeField] public float FullGameTime { get; private set; } = 180f;
+    
+    public EStage StartStage { get; private set; } = EStage.One;
+    
+    [field: SerializeField] public EStage CurrentStage { get; set; } = EStage.One;
 }

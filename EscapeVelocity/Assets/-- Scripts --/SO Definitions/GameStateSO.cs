@@ -21,8 +21,15 @@ public class GameStateSO : ScriptableObject
     /// </summary>
     [field: SerializeField] public EGameState GameState { get; private set; } = EGameState.Reset;
     
+    [field: SerializeField] public bool GameWon { get; private set; } = false;
+    
     public void SetGameState(EGameState state, GameStateManager authorizer)
     {
         if (authorizer == GameStateManager.Instance) { GameState = state; }
+    }
+    
+    public void SetGameWon(bool won, GameStateManager authorizer)
+    {
+        if (authorizer == GameStateManager.Instance) { GameWon = won; }
     }
 }
