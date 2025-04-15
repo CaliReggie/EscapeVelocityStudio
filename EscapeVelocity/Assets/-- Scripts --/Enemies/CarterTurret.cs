@@ -259,8 +259,6 @@ void RotateBarrel()
                     inbarrel = true;
                     outOfBarrel = false;
                     In = true;
-                    
-
                 }
         }
 
