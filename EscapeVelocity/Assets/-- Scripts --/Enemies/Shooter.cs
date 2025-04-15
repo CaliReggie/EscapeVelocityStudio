@@ -9,6 +9,7 @@ public class Shooter : MonoBehaviour
     public Quaternion targetRotation;
     public Vector3 currentRotation;
     public GameObject bulletPrefab;
+    public barrel barrelscr;
     
 
 
@@ -36,12 +37,12 @@ public class Shooter : MonoBehaviour
         {
             Debug.Log("Shooter");
             LookAtPlayer();
-            barrel.inRange = true;
+            barrelscr.inRange = true;
 
         }
         else
         {
-            barrel.inRange = false;
+            barrelscr.inRange = false;
         }
 
     }

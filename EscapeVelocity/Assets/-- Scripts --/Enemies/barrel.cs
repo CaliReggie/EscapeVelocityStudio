@@ -9,7 +9,7 @@ public class barrel : MonoBehaviour
     private Vector3 startingRotation;
     public Quaternion targetRotation;
     public Vector3 currentRotation;
-    static public bool inRange = false;
+    public bool inRange = false;
     public bool canShoot = true;
     private bool barrel1shoot = true;
     public GameObject bulletPrefab;
