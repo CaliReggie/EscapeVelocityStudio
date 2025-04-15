@@ -70,7 +70,7 @@ public class CarterTurret : MonoBehaviour
         basePosition = Base.transform.position;
         barrelPosition = Barrel.transform.position;
         turretScale = this.transform.localScale.x;
-        Debug.Log(turretScale);
+        
         
         movedWall = movewall.transform.position - movewall.transform.forward * 1.1f * turretScale;
         movedBase = Base.transform.position + Base.transform.right * 1.3f * turretScale;
