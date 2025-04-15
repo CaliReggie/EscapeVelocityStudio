@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 
@@ -74,8 +75,15 @@ public class Turret : MonoBehaviour
                 currentRotation = barrelBase.transform.rotation.eulerAngles;
             }
         }
-    } 
-    
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        
+        canShoot = true;
+    }
+
     private bool anyAngleClampedThisFrame;
     private void RotateBarrel()
     {

@@ -21,6 +21,8 @@ public class PlayerEquipabbles : MonoBehaviour
     public string teleportInputName = "CustomTeleport";
 
     [Header("Player References")]
+
+    public AudioSource teleportAudioSource;
     
     public Transform spawnPoint;
     
@@ -165,6 +167,8 @@ public class PlayerEquipabbles : MonoBehaviour
         GetComponent<Rigidbody>().linearVelocity = teleportTarget.GetComponent<Rigidbody>().linearVelocity;
         
         Destroy(teleportTarget);
+        
+        teleportAudioSource.Play();
         
         S.activeTeleport = false;
     }

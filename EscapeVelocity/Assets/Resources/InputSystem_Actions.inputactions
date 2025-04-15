@@ -202,6 +202,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CamSwitch",
+                    "type": "Button",
+                    "id": "967493bd-ab27-41ad-8d5b-4bd140766d47",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -686,6 +695,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "CustomSecondaryAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9125f5cd-1315-44c1-b653-dbb513b108b4",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "CamSwitch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

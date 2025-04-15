@@ -17,9 +17,13 @@ public class PlayerUIInput : MonoBehaviour
 
     [SerializeField] private string lookAction = "Look";
     
+    [SerializeField] private string camSwitchAction = "CamSwitch";
+    
     [SerializeField] private string playerActionMap = "Player";
     
     [SerializeField] private string uiActionMap = "UI";
+    
+    [SerializeField] private PlayerCam playerCam;
     
     //Private, or Non-Serialized Below
     
@@ -30,6 +34,8 @@ public class PlayerUIInput : MonoBehaviour
     private InputAction _equippableWheelNavigateAction;
 
     private InputAction _lookAction;
+    
+    private InputAction _camSwitchAction;
     
     private UIManager _uiManager;
     
@@ -48,6 +54,8 @@ public class PlayerUIInput : MonoBehaviour
         _equippableWheelUseAction = _playerInput.actions.FindAction(equipWheelUseAction);
         
         _equippableWheelNavigateAction = _playerInput.actions.FindAction(equipWheelNavigateAction);
+        
+        _camSwitchAction = _playerInput.actions.FindAction(camSwitchAction);
     }
     
     private void OnEnable()
@@ -64,6 +72,8 @@ public class PlayerUIInput : MonoBehaviour
         
         _equippableWheelNavigateAction.Enable();
         
+        _camSwitchAction.Enable();
+        
         _uiManager.UISelectWheel.EquipWheelAction = _equippableWheelNavigateAction;
     }
     
@@ -76,6 +86,8 @@ public class PlayerUIInput : MonoBehaviour
         _equippableWheelUseAction.Disable();
         
         _equippableWheelNavigateAction.Disable();
+        
+        _camSwitchAction.Disable();
     }
     
     private void OnGameStateChanged(EGameState toState, EGameState fromState)
@@ -120,6 +132,11 @@ public class PlayerUIInput : MonoBehaviour
             Time.timeScale = 1f;
 
             _lookAction.Enable();
+        }
+        
+        if (_camSwitchAction.triggered)
+        {
+            playerCam.SwapFirstOrFixed();
         }
     }
     

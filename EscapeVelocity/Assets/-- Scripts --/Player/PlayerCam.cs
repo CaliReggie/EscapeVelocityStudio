@@ -322,6 +322,18 @@ public class PlayerCam : MonoBehaviour
                 break;
         }
     }
+    
+    public void SwapFirstOrFixed()
+    {
+        if (currentCamType == ECamType.FirstPerson)
+        {
+            SwitchCamType(ECamType.ThirdFixed);
+        }
+        else if (currentCamType == ECamType.ThirdFixed)
+        {
+            SwitchCamType(ECamType.FirstPerson);
+        }
+    }
 
     private void UpdateCamera()
     {
