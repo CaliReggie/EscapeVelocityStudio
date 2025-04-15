@@ -21,6 +21,13 @@ public class barrel : MonoBehaviour
 
     void Update()
     {
+        if (GameInputManager.Instance.PlayerInput != null && target == null)
+        {
+            
+            target = GameInputManager.Instance.PlayerInput.transform.GetComponentInChildren<PlayerMovement>().transform;
+
+        }
+        if (target == null) return;
         if (inRange)
         {
             if (canShoot)

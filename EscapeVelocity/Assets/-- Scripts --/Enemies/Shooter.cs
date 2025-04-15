@@ -9,6 +9,7 @@ public class Shooter : MonoBehaviour
     public Quaternion targetRotation;
     public Vector3 currentRotation;
     public GameObject bulletPrefab;
+    
 
 
     public float dist;
@@ -17,12 +18,19 @@ public class Shooter : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        firedist = 10f;
+        firedist = 15f;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (GameInputManager.Instance.PlayerInput != null && target == null)
+        {
+            
+            target = GameInputManager.Instance.PlayerInput.transform.GetComponentInChildren<PlayerMovement>().transform;
+
+        }
+        if (target == null) return;
         dist = Vector3.Distance(transform.position, target.position);
         if (dist < firedist)
         {

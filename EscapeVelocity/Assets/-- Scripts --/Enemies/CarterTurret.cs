@@ -8,7 +8,7 @@ public class CarterTurret : MonoBehaviour
 {
     [Header("References")]
     
-    public static GameObject movewall;
+    public GameObject movewall;
     
     public GameObject Barrel;
     
@@ -65,9 +65,7 @@ public class CarterTurret : MonoBehaviour
         // viewRadius.x = Mathf.Clamp(viewRadius.x, 0, 179);
         // viewRadius.y = Mathf.Clamp(viewRadius.y, 0, 179);
         
-        movewall = GameObject.Find("movewall");
-        Barrel = GameObject.Find("barrel");
-        Base = GameObject.Find("base");
+
         wallPosition = movewall.transform.position;
         basePosition = Base.transform.position;
         barrelPosition = Barrel.transform.position;
